@@ -9,7 +9,6 @@ Experimentelle Standalone-VR-Anpassung von Garry's Mod auf Basis von GDroid 0.1.
 - Korrigierte Zweihandgriffe für SMG und Schrotflinte.
 - Aktualisierte Mündungspunkte für korrekte Zielrichtung und echten Engine-Schaden.
 - Vom Träger bestätigte Brechstangenrichtung; Nahkampfschaden und Regression nach der letzten Installation stehen noch aus.
-- ArcVR-Waffen und Handgelenk-HUD sind auf Nutzerwunsch entfernt.
 
 Die genauen Prüfungen und offenen Punkte stehen in `docs/`. Testbestätigungen gelten für die jeweils dort beschriebene Version.
 
