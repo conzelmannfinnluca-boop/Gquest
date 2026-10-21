@@ -1,0 +1,287 @@
+{
+  "date": "2026-10-21",
+  "native_base": "official GDroid0.1.30",
+  "static_observations": {
+    "SetClip1": "GLua binding0xba7430 writes only base weapon field1696 via0x37c6c8",
+    "magazine_consume": "native0x3f9408 consumes magazine field1780 m_iCurrentAmmoCount",
+    "native_fields": [
+      "m_hLoadedMagazine",
+      "m_iChamberedRounds",
+      "m_eMagazineState",
+      "m_iCurrentAmmoCount",
+      "m_iMaxAmmoCount",
+      "m_hLoadedWeapon"
+    ],
+    "old_log_limit": "offered45 conversion line is not proof every new magazine has zero ammunition",
+    "disassembly": [
+      "work/gdroid130-compat/reload-clipbinding.asm",
+      "work/gdroid130-compat/reload-magazine.asm",
+      "work/gdroid130-compat/reload-pistolfire.asm"
+    ]
+  },
+  "runtime_before_fix": {
+    "class": "hlvr_weapon_pistol",
+    "clip": 0,
+    "reserve": 268,
+    "loaded_magazine": null,
+    "chamber": 0,
+    "magazine_state": 0,
+    "quick_reload": 1,
+    "over_shoulder": 0,
+    "log": "work/gquest-reload-after-eject.log"
+  },
+  "candidate_changes": [
+    "explicit native weapon/eject API and edge polling without duplicate eject",
+    "transfer reserve only into linked native magazine, with rollback/readback",
+    "cancel delayed client refill on weapon switch and assistance disable",
+    "bounded server wait for real native insertion; no fabricated chamber or magazine state"
+  ],
+  "local_checks": "eight Lua harnesses in build including native magazine and manual-mode checks; five Rust tests; C++/Rust ABI; native fingers; explicit native VRLua actions; retirement; signature/CRC/payload identity",
+  "device_result": "manual pistol full cycle wearer confirmed with native magazine/reserve/chamber evidence; SMG and shotgun wearer-confirmed, full native event proof for those two not captured",
+  "apk_sha256": "1dc01404bb546c730c0bffd702d522d3b37a38ad71b10deb4107915e3e6921d2",
+  "installed_on_quest": true,
+  "device_sha_matched": true,
+  "user_preference": "realistic manual magazines; automatic refill disabled by default",
+  "manual_mode": {
+    "gquest_reload_physical": 1,
+    "hlvr_quick_reload": 0,
+    "hlvr_hand_items": 1,
+    "hlvr_ammo_holster_location": 1,
+    "native_insert_and_rack": "engine owned; no fabricated chamber or magazine state",
+    "wearer_verified": true,
+    "magazine_pickup_wearer_confirmation": "Magazin erscheint in der linken Hand",
+    "runtime_readback": {
+      "gquest_reload_physical": 1,
+      "hlvr_quick_reload": 0,
+      "hlvr_hand_items": 1,
+      "hlvr_ammo_holster_location": 1
+    },
+    "verified_weapon": "hlvr_weapon_pistol",
+    "full_cycle_confirmation": "Einsetzen, Durchladen und Schie\u00dfen funktionieren"
+  },
+  "current_pid": 14169,
+  "controller_input": "actual right-hand weapon/eject active; down/up edges observed at22:34:11",
+  "native_pistol_observed": {
+    "loaded_magazine_entity": 184,
+    "capacity": 18,
+    "rounds": 18,
+    "chamber": 0,
+    "reserve": 184,
+    "link_valid": true,
+    "A_eject": "state1->3, then magazine handle clears and base clip0"
+  },
+  "runtime_log": "work/gquest-manual-reload-confirmed.log",
+  "native_reload_sequence": [
+    {
+      "max": 18.0,
+      "magazine": 184.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 18.0,
+      "clip": 18.0,
+      "state": 3.0,
+      "reserve": 184.0,
+      "linked": true,
+      "chamber": 0.0
+    },
+    {
+      "magazine": -1.0,
+      "class": "hlvr_weapon_pistol",
+      "clip": 0.0,
+      "state": 3.0,
+      "reserve": 184.0,
+      "linked": false,
+      "chamber": 0.0
+    },
+    {
+      "magazine": -1.0,
+      "class": "hlvr_weapon_pistol",
+      "clip": 0.0,
+      "state": 0.0,
+      "reserve": 184.0,
+      "linked": false,
+      "chamber": 0.0
+    },
+    {
+      "magazine": -1.0,
+      "class": "hlvr_weapon_pistol",
+      "clip": 0.0,
+      "state": 0.0,
+      "reserve": 166.0,
+      "linked": false,
+      "chamber": 0.0
+    },
+    {
+      "magazine": -1.0,
+      "class": "hlvr_weapon_pistol",
+      "clip": 0.0,
+      "state": 0.0,
+      "reserve": 184.0,
+      "linked": false,
+      "chamber": 0.0
+    },
+    {
+      "magazine": -1.0,
+      "class": "hlvr_weapon_pistol",
+      "clip": 0.0,
+      "state": 0.0,
+      "reserve": 166.0,
+      "linked": false,
+      "chamber": 0.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 201.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 18.0,
+      "clip": 18.0,
+      "state": 2.0,
+      "reserve": 166.0,
+      "linked": true,
+      "chamber": 0.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 201.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 18.0,
+      "clip": 18.0,
+      "state": 1.0,
+      "reserve": 166.0,
+      "linked": true,
+      "chamber": 0.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 201.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 17.0,
+      "clip": 18.0,
+      "state": 1.0,
+      "reserve": 166.0,
+      "linked": true,
+      "chamber": 1.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 201.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 16.0,
+      "clip": 17.0,
+      "state": 1.0,
+      "reserve": 166.0,
+      "linked": true,
+      "chamber": 1.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 201.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 15.0,
+      "clip": 16.0,
+      "state": 1.0,
+      "reserve": 166.0,
+      "linked": true,
+      "chamber": 1.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 201.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 14.0,
+      "clip": 15.0,
+      "state": 1.0,
+      "reserve": 166.0,
+      "linked": true,
+      "chamber": 1.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 201.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 13.0,
+      "clip": 14.0,
+      "state": 1.0,
+      "reserve": 166.0,
+      "linked": true,
+      "chamber": 1.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 201.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 13.0,
+      "clip": 14.0,
+      "state": 3.0,
+      "reserve": 166.0,
+      "linked": true,
+      "chamber": 1.0
+    },
+    {
+      "magazine": -1.0,
+      "class": "hlvr_weapon_pistol",
+      "clip": 1.0,
+      "state": 3.0,
+      "reserve": 166.0,
+      "linked": false,
+      "chamber": 1.0
+    },
+    {
+      "magazine": -1.0,
+      "class": "hlvr_weapon_pistol",
+      "clip": 1.0,
+      "state": 0.0,
+      "reserve": 148.0,
+      "linked": false,
+      "chamber": 1.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 172.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 18.0,
+      "clip": 19.0,
+      "state": 2.0,
+      "reserve": 148.0,
+      "linked": true,
+      "chamber": 1.0
+    },
+    {
+      "max": 18.0,
+      "magazine": 172.0,
+      "class": "hlvr_weapon_pistol",
+      "rounds": 18.0,
+      "clip": 19.0,
+      "state": 1.0,
+      "reserve": 148.0,
+      "linked": true,
+      "chamber": 1.0
+    }
+  ],
+  "native_evidence_summary": {
+    "reserve_before_first_new_mag": 184,
+    "reserve_after_first_new_mag": 166,
+    "first_new_mag_rounds": 18,
+    "after_rack": {
+      "magazine": 17,
+      "chamber": 1
+    },
+    "following_shots": "magazine17 ->16 ->15 ->14 ->13, chamber1 retained by native cycling",
+    "tactical_reload": {
+      "reserve": 148,
+      "new_mag": 18,
+      "chamber_retained": 1,
+      "total_loaded": 19
+    },
+    "automatic_lua_refill": false
+  },
+  "smg": {
+    "wearer_confirmation": "SMG l\u00e4sst sich nachladen und schie\u00dft",
+    "native_limit": "last retained snapshot still shows empty linked magazine208/reserve211; full SMG native reload/fire transition not captured or independently established",
+    "log": "work/gquest-manual-reload-smg.log"
+  },
+  "shotgun": {
+    "wearer_confirmation": "Patronen laden, Durchladen und Schie\u00dfen funktionieren",
+    "native_limit": "full shell insertion/pump/fire transition not yet captured; no independent native all-family verification claimed",
+    "log": "work/gquest-manual-shotgun-confirmed.log"
+  }
+}

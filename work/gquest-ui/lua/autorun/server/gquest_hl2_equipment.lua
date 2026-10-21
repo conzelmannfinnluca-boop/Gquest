@@ -23,10 +23,49 @@ end)
 -- own clip size and by the reserve the player actually has, and it is a no-op
 -- when the native VR path already filled the magazine. Returns a reason string
 -- so the caller can log exactly which boundary stopped it.
+local function integer(value)
+    return type(value)=="number" and value==value and value>=0 and value<=1000000 and value==math.floor(value)
+end
 local function refill(player)
     if not IsValid(player) or not player:Alive() then return "no player" end
     local weapon=player:GetActiveWeapon()
     if not IsValid(weapon) then return "no weapon" end
+    local class=weapon:GetClass()
+    local base=string.sub(class,1,5)=="hlvr_" and string.sub(class,6) or class
+    if not allowed[base] then return "unsupported weapon" end
+    if string.sub(class,1,5)=="hlvr_" then
+        -- Native HLVR fire consumes the linked magazine, not base m_iClip1.
+        -- Never fake a reload by changing the unrelated base clip field.
+        local saved=weapon.GetSaveTable and weapon:GetSaveTable()
+        local mag=saved and saved.m_hLoadedMagazine
+        if not IsValid(mag) then return "waiting for native magazine",true end
+        local data=mag.GetSaveTable and mag:GetSaveTable()
+        if not data or data.m_hLoadedWeapon~=weapon or not mag.SetSaveValue then return "unlinked native magazine" end
+        local current,capacity=data.m_iCurrentAmmoCount,data.m_iMaxAmmoCount
+        local ammoType=weapon:GetPrimaryAmmoType()
+        if not integer(ammoType) then return "invalid native ammo type" end
+        local reserve=player:GetAmmoCount(ammoType)
+        if not integer(current) or not integer(capacity) or capacity<1 or capacity>1024 or
+            current>capacity or not integer(ammoType) or not integer(reserve) then return "invalid native magazine state" end
+        local moved=math.min(capacity-current,reserve)
+        if moved<=0 then return current==capacity and "native magazine already full" or "no reserve" end
+        if not player.SetAmmo then return "reserve rollback unavailable" end
+        player:RemoveAmmo(moved,ammoType)
+        if player:GetAmmoCount(ammoType)~=reserve-moved then
+            player:SetAmmo(reserve,ammoType)
+            return "reserve transfer failed"
+        end
+        local written=mag:SetSaveValue("m_iCurrentAmmoCount",current+moved)
+        local after=mag:GetSaveTable()
+        if written~=true or not after or after.m_iCurrentAmmoCount~=current+moved then
+            mag:SetSaveValue("m_iCurrentAmmoCount",current)
+            player:SetAmmo(reserve,ammoType)
+            return "native magazine write failed"
+        end
+        -- Native insertion/racking owns chamber, slide and magazine-state enums.
+        return string.format("native moved=%d magazine=%d/%d reserve=%d chamber=%s",moved,
+            after.m_iCurrentAmmoCount,capacity,player:GetAmmoCount(ammoType),tostring(saved.m_iChamberedRounds))
+    end
     local maxClip=weapon:GetMaxClip1()
     local clip=weapon:Clip1()
     if not maxClip or maxClip<=0 or not clip or clip<0 then return "no magazine" end
@@ -40,9 +79,23 @@ local function refill(player)
     player:RemoveAmmo(moved,ammoType)
     return string.format("moved=%d clip=%d/%d reserve=%d",moved,weapon:Clip1(),maxClip,player:GetAmmoCount(ammoType))
 end
+local pending=setmetatable({},{__mode="k"})
 concommand.Add("gquest_reload_refill",function(player)
     if not game.SinglePlayer() or not IsValid(player) then return end
-    print("GQUEST_RELOAD_REFILL "..refill(player))
+    local weapon=player:GetActiveWeapon()
+    if pending[player] then return end
+    local token={};pending[player]=token
+    local function attempt(remaining)
+        if pending[player]~=token then return end
+        if not IsValid(player) or not player:Alive() or not IsValid(weapon) or player:GetActiveWeapon()~=weapon then
+            pending[player]=nil;return
+        end
+        local message,waiting=refill(player)
+        if waiting and remaining>0 then timer.Simple(0.2,function() attempt(remaining-1) end) return end
+        pending[player]=nil
+        print("GQUEST_RELOAD_REFILL "..message)
+    end
+    attempt(15)
 end)
 
 -- Read-only state report. The native VR path keeps a magazine in its own
@@ -59,6 +112,14 @@ concommand.Add("gquest_reload_state_sv",function(player)
         clip=weapon:Clip1(),maxClip=weapon:GetMaxClip1(),
         ammoType=ammoType,reserve=player:GetAmmoCount(ammoType),
         quick=quick and quick:GetString() or "absent",magazines={}}
+    local saved=weapon.GetSaveTable and weapon:GetSaveTable()
+    local mag=saved and saved.m_hLoadedMagazine
+    if saved then report.chamber=saved.m_iChamberedRounds;report.magazineState=saved.m_eMagazineState end
+    if IsValid(mag) and mag.GetSaveTable then
+        local data=mag:GetSaveTable()
+        report.loadedMagazine={class=mag:GetClass(),rounds=data.m_iCurrentAmmoCount,max=data.m_iMaxAmmoCount,
+            linked=data.m_hLoadedWeapon==weapon}
+    end
     local base=weapon:GetClass()
     for _,entity in ipairs(ents.GetAll()) do
         if IsValid(entity) and entity~=weapon then

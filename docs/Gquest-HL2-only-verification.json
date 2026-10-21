@@ -32,7 +32,8 @@
     "smg_grip_fire": "nur das mit zeiw handen ist noch kapu aber alles es gut",
     "smg_after_cache_fix": "Zweih\u00e4ndig stabil, einh\u00e4ndig richtig",
     "shotgun_after_final_restart": "Haltung, Zweihandgriff und Sch\u00fcsse funktionieren",
-    "crowbar_direction": "Ja, Richtung passt jetzt"
+    "crowbar_direction": "Ja, Richtung passt jetzt",
+    "crowbar_melee": "Treffer funktionieren"
   },
   "smg_root_cause_evidence": {
     "before_grip": [
@@ -69,16 +70,40 @@
   ],
   "latest_restart": {
     "pid": 4049,
-    "status": "APK installed and hash matched; Android activity starts but Quest sleeping pauses it before game initialization",
-    "log": "work/gquest-crowbar-final-start.log",
-    "weapon_switch_regression": "pending headset wake; test prepared work/gquest_crowbar_switch_regression.lua"
+    "status": "game running on Quest3; fresh-map initialization and three settled weapon switches observed",
+    "log": "work/gquest-crowbar-postinstall-regression.log",
+    "weapon_switch_regression": [
+      {
+        "step": 1.0,
+        "pitch": -90.00076293945312,
+        "pass": true,
+        "class": "hlvr_weapon_crowbar",
+        "expected": -90.00075332040433,
+        "clip": -1.0
+      },
+      {
+        "step": 2.0,
+        "pitch": 9.260637625629897e-07,
+        "pass": true,
+        "class": "hlvr_weapon_smg1",
+        "expected": 1.471405539632542e-06,
+        "clip": 45.0
+      },
+      {
+        "step": 3.0,
+        "pitch": -90.0007553100586,
+        "pass": true,
+        "class": "hlvr_weapon_crowbar",
+        "expected": -90.00075089896563,
+        "clip": -1.0
+      }
+    ]
   },
   "unverified": [
     "individual visual fit of remaining weapon types",
     "HL2 reload gesture regression",
     "full GMod PCVR/addon parity",
-    "Quest3S hardware",
-    "crowbar physical melee damage test"
+    "Quest3S hardware"
   ],
   "next_hardware_checks": [],
   "switch_regression": [
@@ -123,5 +148,39 @@
       "inventory": 13.0
     }
   ],
-  "damage_report": "outputs/Gquest-HL2-damage-verification.json"
+  "damage_report": "outputs/Gquest-HL2-damage-verification.json",
+  "crowbar_switch_regression": [
+    {
+      "step": 1.0,
+      "pitch": -90.00076293945312,
+      "pass": true,
+      "class": "hlvr_weapon_crowbar",
+      "expected": -90.00075332040433,
+      "clip": -1.0
+    },
+    {
+      "step": 2.0,
+      "pitch": 9.260637625629897e-07,
+      "pass": true,
+      "class": "hlvr_weapon_smg1",
+      "expected": 1.471405539632542e-06,
+      "clip": 45.0
+    },
+    {
+      "step": 3.0,
+      "pitch": -90.0007553100586,
+      "pass": true,
+      "class": "hlvr_weapon_crowbar",
+      "expected": -90.00075089896563,
+      "clip": -1.0
+    }
+  ],
+  "crowbar_melee": {
+    "wearer_confirmation": "Treffer funktionieren",
+    "native_damage_events": 38,
+    "target_initial_hp": 5000,
+    "target_last_observed_hp": 4800,
+    "evidence": "work/gquest-crowbar-melee-confirmed.log",
+    "cleanup": "gquest_damage_cleanup command queued; no confirmed removal readback yet"
+  }
 }

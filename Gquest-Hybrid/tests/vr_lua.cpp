@@ -11,6 +11,10 @@ static std::vector<double> values;
 static ptrdiff_t hand=1;
 static int calls=0;
 static double duration=0.1,frequency=160,amplitude=0.5;
+static bool knownSet=true,knownAction=true,actionEnabled=true;
+static int digitalCalls=0;
+static const char* namedSet="weapon";
+static size_t namedSetLength=6;
 static void reset() {triples.clear();values.clear();}
 int main() {
  api.booted=[](){return live;};api.running=[](){return live;};
@@ -50,5 +54,25 @@ int main() {
  hand=1;live=false;reset();Digital(nullptr);assert(values[0]==0 && values[2]==0);
  Haptic(nullptr);assert(calls==0);live=true;amplitude=10;duration=5;frequency=500;Haptic(nullptr);assert(calls==1);
  amplitude=0;Haptic(nullptr);assert(calls==2);
+ api.checkString=[](lua_State*,int index,size_t* n){
+  assert(index==1 || index==2);*n=index==1?namedSetLength:5;return index==1?namedSet:"eject";
+ };
+ api.findSet=[](const char* name){assert(strcmp(name,"weapon")==0);return knownSet?3:-1;};
+ api.findAction=[](int set,const char* name){assert(set==3 && strcmp(name,"eject")==0);return knownAction?7:-1;};
+ api.optInteger=[](lua_State*,int index,ptrdiff_t){assert(index==3);return hand;};
+ api.digital=[](int set,int action,int h,bool* down,bool* changed,bool* valid){
+  assert(set==3 && action==7 && h==hand);++digitalCalls;*down=true;*changed=true;*valid=actionEnabled;return true;
+ };
+ hand=1;reset();assert(ActionDigital(nullptr)==3 && values[0]==1 && values[2]==1 && digitalCalls==1);
+ hand=0;reset();ActionDigital(nullptr);assert(values[0]==1 && digitalCalls==2);
+ hand=-1;reset();ActionDigital(nullptr);assert(values[0]==1 && digitalCalls==3);
+ hand=2;reset();ActionDigital(nullptr);assert(values[0]==0 && values[2]==0 && digitalCalls==3);
+ hand=1;knownSet=false;reset();ActionDigital(nullptr);assert(values[2]==0 && digitalCalls==3);knownSet=true;
+ knownAction=false;reset();ActionDigital(nullptr);assert(values[2]==0 && digitalCalls==3);knownAction=true;
+ actionEnabled=false;reset();ActionDigital(nullptr);assert(values[0]==0 && values[1]==0 && values[2]==0);actionEnabled=true;
+ live=false;reset();ActionDigital(nullptr);assert(values[2]==0);live=true;
+ namedSetLength=0;reset();ActionDigital(nullptr);assert(values[2]==0);
+ namedSet="weapon\0other";namedSetLength=12;reset();ActionDigital(nullptr);assert(values[2]==0);
+ puts("PASS explicit native action sets: weapon/eject, both hands, missing set/action, inactive, invalid hand and embedded-NUL guards");
  puts("PASS VR Lua bridge: both hands/head/aim, quaternion axes, real validity/finite gates, input routing, inactive/invalid input and bounded haptics");
 }

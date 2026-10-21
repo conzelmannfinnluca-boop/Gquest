@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-21",
+  "native_base": "official GDroid0.1.30",
+  "static_observations": {
+    "SetClip1": "GLua binding0xba7430 writes only base weapon field1696 via0x37c6c8",
+    "magazine_consume": "native0x3f9408 consumes magazine field1780 m_iCurrentAmmoCount",
+    "native_fields": [
+      "m_hLoadedMagazine",
+      "m_iChamberedRounds",
+      "m_eMagazineState",
+      "m_iCurrentAmmoCount",
+      "m_iMaxAmmoCount",
+      "m_hLoadedWeapon"
+    ],
+    "old_log_limit": "offered45 conversion line is not proof every new magazine has zero ammunition",
+    "disassembly": [
+      "work/gdroid130-compat/reload-clipbinding.asm",
+      "work/gdroid130-compat/reload-magazine.asm",
+      "work/gdroid130-compat/reload-pistolfire.asm"
+    ]
+  },
+  "runtime_before_fix": {
+    "class": "hlvr_weapon_pistol",
+    "clip": 0,
+    "reserve": 268,
+    "loaded_magazine": null,
+    "chamber": 0,
+    "magazine_state": 0,
+    "quick_reload": 1,
+    "over_shoulder": 0,
+    "log": "work/gquest-reload-after-eject.log"
+  },
+  "candidate_changes": [
+    "explicit native weapon/eject API and edge polling without duplicate eject",
+    "transfer reserve only into linked native magazine, with rollback/readback",
+    "cancel delayed client refill on weapon switch and assistance disable",
+    "bounded server wait for real native insertion; no fabricated chamber or magazine state"
+  ],
+  "local_checks": "client input and actual-magazine boundary harnesses; native VRLua explicit action-set test pass",
+  "device_result": "pending test APK and actual wearer reload"
+}

@@ -8,7 +8,8 @@ Experimentelle Standalone-VR-Anpassung von Garry's Mod auf Basis von GDroid 0.1.
 - Native HL2-Waffen mit passenden VR-Modellen und Fingerprofilen.
 - Korrigierte Zweihandgriffe für SMG und Schrotflinte.
 - Aktualisierte Mündungspunkte für korrekte Zielrichtung und echten Engine-Schaden.
-- Vom Träger bestätigte Brechstangenrichtung; Nahkampfschaden und Regression nach der letzten Installation stehen noch aus.
+- Brechstangenrichtung, Waffenwechsel und echter Nahkampfschaden auf der Quest bestätigt.
+- Manuelles Nachladen als Standard: Magazine an der Hüfte greifen, einsetzen und durchladen. Pistole mit tatsächlichen Magazin-/Reserve-/Patronenlagerwerten geprüft; SMG und Schrotflinte vom Träger bestätigt. Weitere Waffenfamilien bleiben einzeln zu prüfen.
 
 Die genauen Prüfungen und offenen Punkte stehen in `docs/`. Testbestätigungen gelten für die jeweils dort beschriebene Version.
 

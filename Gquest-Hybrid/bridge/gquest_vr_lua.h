@@ -94,6 +94,23 @@ static int action(lua_State* L,bool digital) {
 }
 static int Analog(lua_State* L) {return action(L,false);}
 static int Digital(lua_State* L) {return action(L,true);}
+// GDroid0.1.30 separates weapon/interact/ground actions; the legacy gameplay
+// wrapper above remains compatible. New callers name the real set explicitly.
+static int ActionDigital(lua_State* L) {
+ size_t setLength=0,actionLength=0;
+ const char* setName=api.checkString(L,1,&setLength);
+ const char* actionName=api.checkString(L,2,&actionLength);
+ const auto requested=api.optInteger(L,3,-1);
+ bool enabled=false,down=false,changed=false;
+ if(active() && requested>=-1 && requested<=1 && setLength>0 && setLength<128 &&
+    actionLength>0 && actionLength<128 && !memchr(setName,0,setLength) && !memchr(actionName,0,actionLength)) {
+  const int set=api.findSet(setName);
+  const int index=set>=0?api.findAction(set,actionName):-1;
+  if(index>=0) api.digital(set,index,int(requested),&down,&changed,&enabled);
+ }
+ if(!enabled) {down=false;changed=false;}
+ api.pushBool(L,down);api.pushBool(L,changed);api.pushBool(L,enabled);return 3;
+}
 static int Haptic(lua_State* L) {
  const auto hand=api.optInteger(L,1,1);
  const double seconds=api.optNumber(L,2,0.1),frequency=api.optNumber(L,3,160),amplitude=api.optNumber(L,4,0.5);
@@ -103,10 +120,11 @@ static int Haptic(lua_State* L) {
  return 0;
 }
 static int Open(lua_State* L) {
- api.create(L,0,9);
+ api.create(L,0,10);
  struct Entry {const char* name;Function function;};
  const Entry entries[]={{"IsActive",IsActive},{"GetHeadPose",Head},{"GetHandPose",Hand},{"GetAimPose",Aim},
- {"GetPrimaryHand",Primary},{"SetPrimaryHand",SetPrimary},{"GetAnalog",Analog},{"GetDigital",Digital},{"TriggerHaptic",Haptic}};
+ {"GetPrimaryHand",Primary},{"SetPrimaryHand",SetPrimary},{"GetAnalog",Analog},{"GetDigital",Digital},
+ {"GetActionDigital",ActionDigital},{"TriggerHaptic",Haptic}};
  for(const auto& entry:entries) {api.pushClosure(L,entry.function,0);api.setField(L,-2,entry.name);}
  api.pushValue(L,-1);api.setField(L,-10002,"vr");
  LOG("VRLUA own compatibility module opened; live XR input and actual Vector/Angle userdata");

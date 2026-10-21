@@ -21,26 +21,59 @@
   "raw_log_limit": "Android rolling log no longer contains earlier shots; claims distinguish prior runtime observation from retained raw evidence.",
   "tests": "Model-local muzzle frame repair; all seven partial-write rollback boundaries; invalid muzzle rejected; clip/reserve retained; primary-only grip without foregrip",
   "crowbar": {
-    "status": "wearer-confirmed direction fix permanently installed; device SHA matched",
+    "status": "direction, persistence through weapon switch and actual melee damage confirmed on installed package",
     "wearer_confirmation": "Ja, Richtung passt jetzt",
     "correction": "native crowbar grip attachment pitch minus90; offset untouched",
     "safety": "derived from fresh attachment each refresh; no accumulation or firearm change",
-    "physical_melee_damage": "pending actual controller swing test",
+    "physical_melee_damage": {
+      "wearer_confirmation": "Treffer funktionieren",
+      "native_damage_events": 38,
+      "target_initial_hp": 5000,
+      "target_last_observed_hp": 4800,
+      "evidence": "work/gquest-crowbar-melee-confirmed.log",
+      "cleanup": "gquest_damage_cleanup command queued; no confirmed removal readback yet"
+    },
     "evidence": [
       "work/gquest-crowbar-direction-confirmed.log",
       "work/gquest-crowbar-direction-current.png",
       "work/gquest-crowbar-minus90.png",
       "work/gdroid130-compat/crowbar-native-audit.json"
-    ]
+    ],
+    "post_install_switch_regression": "crowbar -> SMG -> crowbar: all three native attachment-derived pitch readbacks pass"
   },
   "installed": true,
   "apk_sha256": "676e7f6f9723645643e580b2114d911a494748df3bde9a452a0771749d69a40c",
   "installed_sha256_matches": true,
   "final_start": {
     "pid": 4049,
-    "status": "APK installed and hash matched; Android activity starts but Quest sleeping pauses it before game initialization",
-    "log": "work/gquest-crowbar-final-start.log",
-    "weapon_switch_regression": "pending headset wake; test prepared work/gquest_crowbar_switch_regression.lua"
+    "status": "game running on Quest3; fresh-map initialization and three settled weapon switches observed",
+    "log": "work/gquest-crowbar-postinstall-regression.log",
+    "weapon_switch_regression": [
+      {
+        "step": 1.0,
+        "pitch": -90.00076293945312,
+        "pass": true,
+        "class": "hlvr_weapon_crowbar",
+        "expected": -90.00075332040433,
+        "clip": -1.0
+      },
+      {
+        "step": 2.0,
+        "pitch": 9.260637625629897e-07,
+        "pass": true,
+        "class": "hlvr_weapon_smg1",
+        "expected": 1.471405539632542e-06,
+        "clip": 45.0
+      },
+      {
+        "step": 3.0,
+        "pitch": -90.0007553100586,
+        "pass": true,
+        "class": "hlvr_weapon_crowbar",
+        "expected": -90.00075089896563,
+        "clip": -1.0
+      }
+    ]
   },
   "final_apk_wearer_damage_retest": "pending; previous live version of identical canonical helper confirmed"
 }

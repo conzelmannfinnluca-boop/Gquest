@@ -3,7 +3,8 @@ from pathlib import Path
 import hashlib,json,zipfile,shutil
 ROOT=Path(__file__).resolve().parent.parent
 files={}
-for base,pattern in [("Gquest-Hybrid","*"),("work/gquest-ui","*.lua"),("work/harness","test_hl2*.lua")]:
+module="Gquest" if (ROOT/"Gquest").is_dir() else "Gquest-Hybrid"
+for base,pattern in [(module,"*"),("work/gquest-ui","*.lua"),("work/harness","test_hl2*.lua")]:
  for p in (ROOT/base).rglob(pattern):
   if p.is_file() and not p.is_symlink() and not {"target","dist",".git","__pycache__"}.intersection(p.relative_to(ROOT/base).parts):files[str(p.relative_to(ROOT))]=p
 names=["work/prepare_weapon_model_overrides.py","work/gquest-weapon-models/manifest.json","work/build_quest_lab.py","work/verify_gdroid_base.py","work/verify_gquest_package.py","work/generate_native_finger_profiles.py","work/gquest_native_fingers.h","work/gquest_native_finger_profiles.h","work/gquest_retired_content.h","work/gquest_vr_lua.h","work/quest_engine_bridge.cpp","work/gdroid-0.1.30-build-pin.json","work/gquest-hl2-authored-fingers.json","work/gquest-native-finger-profile-manifest.json","work/run_lua_checks.py","work/test_reload_client.lua","work/test_gquest_menu_navigation.lua","work/harness/test_native_pose_class.lua","work/gdroid130-compat/audit.json","work/gdroid130-compat/audit.md","work/gdroid130-compat/lua-vr-and-cmdsock-audit.json","work/gdroid130-compat/lua-vr-and-cmdsock-audit.md","work/package_gdroid_source.py"]
@@ -13,6 +14,8 @@ files["README.md"]=ROOT/"outputs/Gquest-GDroid-Source-README.md"
 files["BUILD.md"]=ROOT/"outputs/Gquest-GDroid-BUILD.md"
 files["docs/Gquest-HL2-only-verification.json"]=ROOT/"outputs/Gquest-HL2-only-verification.json"
 files["docs/Gquest-HL2-damage-verification.json"]=ROOT/"outputs/Gquest-HL2-damage-verification.json"
+files["docs/Gquest-HL2-reload-verification.json"]=ROOT/"outputs/Gquest-HL2-reload-verification.json"
+files["work/gquest-native-reload-evidence.json"]=ROOT/"work/gquest-native-reload-evidence.json"
 files["docs/Gquest-Feature-Referenz.md"]=ROOT/"outputs/Gquest-Feature-Referenz.md"
 stage=ROOT/"Gquest-Source"
 # Preserve stale source copies outside the active source folder.
