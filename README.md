@@ -9,7 +9,7 @@ Experimentelle Standalone-VR-Anpassung von Garry's Mod auf Basis von GDroid 0.1.
 - Korrigierte Zweihandgriffe für SMG und Schrotflinte.
 - Aktualisierte Mündungspunkte für korrekte Zielrichtung und echten Engine-Schaden.
 - Brechstangenrichtung, Waffenwechsel und echter Nahkampfschaden auf der Quest bestätigt.
-- Manuelles Nachladen als Standard: Magazine an der Hüfte greifen, einsetzen und durchladen. Pistole mit tatsächlichen Magazin-/Reserve-/Patronenlagerwerten geprüft; SMG und Schrotflinte vom Träger bestätigt. Weitere Waffenfamilien bleiben einzeln zu prüfen.
+- Manuelles Nachladen als Standard: Magazine an der Hüfte greifen, einsetzen und durchladen. Pistole, SMG, Schrotflinte, AR2, Magnum, Armbrust und RPG vom Träger für manuelles Nachladen und Schießen bestätigt. Für die Pistole sind zusätzlich die tatsächlichen Magazin-/Reserve-/Patronenlagerwerte protokolliert.
 
 Die genauen Prüfungen und offenen Punkte stehen in `docs/`. Testbestätigungen gelten für die jeweils dort beschriebene Version.
 

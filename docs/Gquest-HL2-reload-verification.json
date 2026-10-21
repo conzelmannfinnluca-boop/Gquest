@@ -37,7 +37,7 @@
     "bounded server wait for real native insertion; no fabricated chamber or magazine state"
   ],
   "local_checks": "eight Lua harnesses in build including native magazine and manual-mode checks; five Rust tests; C++/Rust ABI; native fingers; explicit native VRLua actions; retirement; signature/CRC/payload identity",
-  "device_result": "manual pistol full cycle wearer confirmed with native magazine/reserve/chamber evidence; SMG and shotgun wearer-confirmed, full native event proof for those two not captured",
+  "device_result": "manual reload and shooting wearer-confirmed for all seven native HL2 firearm families; full native magazine/reserve/chamber transition evidence retained for pistol only",
   "apk_sha256": "1dc01404bb546c730c0bffd702d522d3b37a38ad71b10deb4107915e3e6921d2",
   "installed_on_quest": true,
   "device_sha_matched": true,
@@ -283,5 +283,15 @@
     "wearer_confirmation": "Patronen laden, Durchladen und Schie\u00dfen funktionieren",
     "native_limit": "full shell insertion/pump/fire transition not yet captured; no independent native all-family verification claimed",
     "log": "work/gquest-manual-shotgun-confirmed.log"
+  },
+  "remaining_weapon_wearer_confirmation": {
+    "weapons": [
+      "hlvr_weapon_ar2",
+      "hlvr_weapon_357",
+      "hlvr_weapon_crossbow",
+      "hlvr_weapon_rpg"
+    ],
+    "answer": "alle vier funktionieren",
+    "scope": "manual ammunition pickup, insertion, chambering where applicable, and shooting; wearer report only"
   }
 }
