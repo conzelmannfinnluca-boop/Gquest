@@ -1,0 +1,55 @@
+{
+  "evidence": "Offline old/new ELF comparison and focused LLVM disassembly; runtime vrnil independently measured by primary, not by this audit",
+  "old_binding_library": "work/gdroid-native/liblua_shared.so",
+  "new_binding_library": "work/gdroid-0.1.30-native/liblua_shared.so",
+  "old_binding_functions": {
+    "IsActive": "0x118744",
+    "GetHeadPose": "0x118760",
+    "GetHandPose": "0x1188e4",
+    "GetAimPose": "0x1189f4",
+    "TriggerHaptic": "0x118b04",
+    "GetPrimaryHand": "0x118ba4",
+    "SetPrimaryHand": "0x118bd4",
+    "GetAnalog": "0x118bf4",
+    "GetDigital": "0x118cc4",
+    "quaternion_to_angles_helper": "0x11b0ac"
+  },
+  "new_official_api_observation": "No GetHandPose/GetPrimaryHand/GetDigital/TriggerHaptic literal registration names and zero VRXR dynamic imports in new lua_shared; old has9. Thus old binding is not present in that binary. Search boundary all supplied new native libraries for these literal names.",
+  "semantics": {
+    "IsActive": "Old wrapper always returns Lua boolean true; no native/session flags tested.",
+    "GetPrimaryHand": "Returns integer result from VRXR_GetPrimaryHand(). Hand wrapper args default1; normalize nonzero->right1, zero->left0.",
+    "GetPoses": "LocateInput(time=0, zeroed4288byte buffer); returns Vector,Angle,boolean. Head valid=LocateInput return; hands/aim valid=LocateInput && ((flags&4)!=0).",
+    "GetAnalog": "GetAnalog(name,hand=-1): FindActionSet(\"gameplay\"), replace negative set with0, FindAction(set,name), if valid GetAnalogAction(set,action,hand,float*x,float*y,bool*active), return x,y,active initialized0/0/false.",
+    "GetDigital": "Identical action lookup; GetDigitalAction(set,action,hand,bool*down,bool*changed,bool*active), return down,changed,active initializedfalse.",
+    "TriggerHaptic": "Defaults(hand=1,durationSeconds=.1,frequencyHz=160,amplitude=.5); hand=hand!=0; if amplitude<=0 HapticStop(hand),else Haptic(hand,floatduration,floatfrequency,floatamplitude); returns0Lua values.",
+    "SetPrimaryHand": "Required integerarg1 passed directly VRXR_SetPrimaryHand(int); returns0Lua values."
+  },
+  "snapshot_offsets": {
+    "head_position": 8,
+    "head_quaternion_xyzw": 20,
+    "grip_position_base": 64,
+    "grip_quaternion_base": 76,
+    "grip_flags_base": 116,
+    "aim_position_base": 176,
+    "aim_quaternion_base": 188,
+    "aim_flags_base": 228,
+    "hand_stride": 56,
+    "hand_valid_mask": 4,
+    "size": 4288
+  },
+  "conversion": {
+    "position": "Source(x*39.37009811401367,-z*39.37009811401367,y*39.37009811401367)",
+    "pitch": "asin(clamp(2*(qw*qy-qz*qx),-1,1))*RAD2DEG",
+    "yaw": "atan2(2*(qw*qz+qx*qy),1-2*(qy*qy+qz*qz))*RAD2DEG",
+    "roll": "atan2(2*(qw*qx+qy*qz),1-2*(qx*qx+qy*qy))*RAD2DEG",
+    "pitch_sign_verification": "Compiled NDKaarch64 C negativefma with -ffp-contract=fast: fnmsub dest,a,b,c = a*b-c. Confirms qw*qy-qz*qx atold0x11b118. Earlier informal opposite-sign message corrected before final report."
+  },
+  "engine_command_socket": {
+    "flag": "-vr_cmdsock_port",
+    "enable_gate": "0x48efd4 checks presence through CommandLine vtable+32; absent goes0x48f038 without socketstart; present and notalreadyenabled calls0x48e72c.",
+    "port": "CommandLine vtable+64 integer lookup default27100,clamped1..65535",
+    "bind": "127.0.0.1 only; sockaddraddress immediate0x0100007f at0x48e7ac/0x48e7b8/0x48e7cc",
+    "listen": "TCP AF_INET SOCK_STREAM; listen backlog1 at0x48e7e8",
+    "semantics_limit": "Only this located init/start path audited; no claim no other socket exists elsewhere in engine."
+  }
+}

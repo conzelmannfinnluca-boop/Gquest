@@ -1,0 +1,240 @@
+{
+  "scope": "Offline GDroid0.1.29 to0.1.30 ARM64 bridge compatibility audit",
+  "evidence_tooling": "ordinary llvm-objdump, llvm-readobj, pyelftools; REA provider unavailable; no REA evidence IDs",
+  "runtime_verified": false,
+  "addresses": {
+    "pose_constructor": {
+      "old": "0x3a1428",
+      "new": "0x46eac4"
+    },
+    "left_palm_branch": {
+      "old": "0x3a164c",
+      "new": "0x46ece8"
+    },
+    "finger_blend_call": {
+      "old": "0x3a167c",
+      "new": "0x46ed18"
+    },
+    "finger_blend_function": {
+      "old": "0x3a1118",
+      "new": "0x46e7b4"
+    },
+    "local_hand_pose": {
+      "old": "0x34b0f8",
+      "new": "0x4163f0"
+    },
+    "layer_allocator": {
+      "old": "0x322490",
+      "new": "0x3ed58c"
+    },
+    "vr_singleton_got": {
+      "old": "0xddce48",
+      "new": "0xf47ae0"
+    },
+    "material_system_got": {
+      "old": "0xddccb0",
+      "new": "0xf47948"
+    },
+    "layer_record_array": {
+      "old": "0xde39d8",
+      "new": "0xf4e818"
+    },
+    "vrplayer_init_patch": {
+      "old": "0x4857b0",
+      "new": "0x552128"
+    },
+    "input_snapshot_false_stub": {
+      "old": "0x174d4",
+      "new": "0x180f4"
+    }
+  },
+  "libraries": {
+    "native": {
+      "client": {
+        "sha256": "00c32647cdeca5726a14236ce7d23a5d6c493703df518f773a25baf70d06eea9"
+      },
+      "inputsystem": {
+        "sha256": "8faa55a61cef3f09529a8461fba9487da04d4964f9a6edc1176a17070677c39e"
+      },
+      "vrxr": {
+        "sha256": "76867b5a2c925b1940f01fa964e9d3e17352975afef75cd4e36ab4c2bb7e2bb1"
+      }
+    },
+    "0.1.30-native": {
+      "client": {
+        "sha256": "5812ed714047662ba73ce4acdc6cafbe34a6097df287a97944e9efd1ec455cc8"
+      },
+      "inputsystem": {
+        "sha256": "d0960fc0e9145ad948baaffd884443de738a4291e1d6709a2d943040d1a326fe"
+      },
+      "vrxr": {
+        "sha256": "691a356d7f31ac5088ea5b6fffc685184190ab22587254bef2f636d49acf2636"
+      }
+    }
+  },
+  "function_comparisons": {
+    "fingers": {
+      "instruction_count_old_new": 196,
+      "changed_disassembly_operands": 36,
+      "same_mnemonic_sequence": true,
+      "differences_file": "fingers-diff.json",
+      "conclusion": "Relocated same instruction/register/control-flow structure; all differences are code/data absolute addressing, page offsets, or branch target relocation. Not byte-identical."
+    },
+    "constructor": {
+      "instruction_count_old_new": 243,
+      "changed_disassembly_operands": 49,
+      "same_mnemonic_sequence": true,
+      "differences_file": "constructor-diff.json",
+      "conclusion": "Relocated same instruction/register/control-flow structure; all differences are code/data absolute addressing, page offsets, or branch target relocation. Not byte-identical."
+    },
+    "localpose": {
+      "instruction_count_old_new": 58,
+      "changed_disassembly_operands": 7,
+      "same_mnemonic_sequence": true,
+      "differences_file": "localpose-diff.json",
+      "conclusion": "Relocated same instruction/register/control-flow structure; all differences are code/data absolute addressing, page offsets, or branch target relocation. Not byte-identical."
+    },
+    "allocator": {
+      "instruction_count_old_new": 380,
+      "changed_disassembly_operands": 116,
+      "same_mnemonic_sequence": false,
+      "differences_file": "allocator-diff.json",
+      "conclusion": "Relocated same instruction/register/control-flow structure; all differences are code/data absolute addressing, page offsets, or branch target relocation. Not byte-identical."
+    },
+    "init": {
+      "instruction_count_old_new": 142,
+      "changed_disassembly_operands": 69,
+      "same_mnemonic_sequence": true,
+      "differences_file": "init-diff.json",
+      "conclusion": "Relocated same instruction/register/control-flow structure; all differences are code/data absolute addressing, page offsets, or branch target relocation. Not byte-identical."
+    }
+  },
+  "warnings": [
+    "No device changes or execution in this audit. Runtime compatibility still needs headset test.",
+    "Equal mnemonic and register structure does not prove unchanged behavior of all transitive callees.",
+    "Global Open/Closed pose templates live in BSS; their initialized values were not observed offline."
+  ],
+  "vrplayer_init": {
+    "function_old": "0x485774",
+    "function_new": "0x5520ec",
+    "patch_new_file_offset": "0x54e128",
+    "expected_hex": "e1031f2a",
+    "replacement_hex": "21008052",
+    "semantic": "Changes first init SetValue(int) argument for hlvr_isvrplayer from0 to1. Newcall0x552134 -> ConVar thunk0xb388dc loading parent+56 then vtable+128. Global GOT0xf47a38 resolves ConVar0xfac808; constructor0x418a58 maps name0x1564be = hlvr_isvrplayer.",
+    "constraint": "Once-at-init patch; preserve original no other engine bytes changed."
+  },
+  "left_hand_fields": {
+    "vr_active": 4888,
+    "skeletal_per_side_base": 977,
+    "cached_per_side_base": 5024,
+    "cached_matrix_base": 4896,
+    "matrix_stride": 64,
+    "evidence_function": "0x4163f0..0x4164d8",
+    "status": "Same exact field operands and branches as old58instruction function."
+  },
+  "layer_layout": {
+    "records": 5,
+    "stride": 48,
+    "texture_offset": 16,
+    "surface_offset": 24,
+    "evidence": "Allocator0x3ed58c: loop adds48, compares240; texture load/store+16; surface store [record+8]+16 =>24. Material system vtable offsets672/712/680 preserved."
+  },
+  "input_snapshot": {
+    "vtable_base_old": "0x35538",
+    "vtable_base_new": "0x36198",
+    "slot_offset": 464,
+    "slot_new": "0x36368",
+    "stub_new": "0x180f4",
+    "stub_hex": "e0031f2ac0035fd6",
+    "size": 4288,
+    "producer": "VRXR_LocateInput0x4df34: zero-time branch0x4e0f8->0x4f440; memcpy4288 at0x4f454 then stamp nonzero bool",
+    "consumer": "libclient0x40c448/0x40c468 and0x41072c/0x410740 allocate4288 and vtable464; memcpy4288 at0x40c52c and0x410770",
+    "pose_start_offset": 8,
+    "pose_evidence": "Fresh producer0x4e110 passes payload+8 tohelper0x4f4a0; stamp remains payload0. Full component semantics not re-derived."
+  },
+  "vrxr_exports": {
+    "native": {
+      "VRXR_LocateInput": {
+        "address": "0x4ce84",
+        "size": 5416
+      },
+      "VRXR_BootstrapSession": {
+        "address": "0x30ca8",
+        "size": 5440
+      },
+      "VRXR_StartPresentationThread": {
+        "address": "0x503a4",
+        "size": 496
+      },
+      "VRXR_Shutdown": {
+        "address": "0x36104",
+        "size": 768
+      },
+      "VRXR_WaitForEngineHandover": {
+        "address": "0x51698",
+        "size": 356
+      },
+      "VRXR_IsBootstrapped": {
+        "address": "0x35544",
+        "size": 84
+      },
+      "VRXR_GetPresentationStartupStatus": {
+        "address": "0x514ac",
+        "size": 24
+      }
+    },
+    "0.1.30-native": {
+      "VRXR_LocateInput": {
+        "address": "0x4df34",
+        "size": 5484
+      },
+      "VRXR_BootstrapSession": {
+        "address": "0x31b98",
+        "size": 5440
+      },
+      "VRXR_StartPresentationThread": {
+        "address": "0x514fc",
+        "size": 496
+      },
+      "VRXR_Shutdown": {
+        "address": "0x370a0",
+        "size": 772
+      },
+      "VRXR_WaitForEngineHandover": {
+        "address": "0x52850",
+        "size": 348
+      },
+      "VRXR_IsBootstrapped": {
+        "address": "0x364b4",
+        "size": 84
+      },
+      "VRXR_GetPresentationStartupStatus": {
+        "address": "0x52664",
+        "size": 24
+      }
+    }
+  },
+  "vrxr_export_conclusion": "All7 exact symbols used by bridge remain exported. Several implementation bodies changed; symbol identity alone does not guarantee complete ABI/behavior stability. Snapshot contract separately verified.",
+  "exact_signature_checks": {
+    "constructor": {
+      "size": 32,
+      "identical": true,
+      "hex": "ff8304d1eb2b0a6de9230b6dfd7b0ca9fc6f0da9fa670ea9f85f0fa9f65710a9"
+    },
+    "blend": {
+      "size": 12,
+      "identical": true,
+      "hex": "ff8303d1e84b00fdfdfb09a9"
+    },
+    "allocator": {
+      "size": 32,
+      "identical": true,
+      "hex": "ff0302d1fd7b02a9fc6f03a9fa6704a9f85f05a9f65706a9f44f07a9fd830091"
+    },
+    "localpose": {
+      "size": 32,
+      "identical": true,
+      "hex": "ff0302d1fd7b06a9f33b00f9fd830191f30308aa08f0a752ffc302f8e82300b9"
+    }
+  }
+}
