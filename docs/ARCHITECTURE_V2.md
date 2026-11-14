@@ -429,6 +429,11 @@ weil die Eye-Resolution beim Start festgeschrieben wird.
 Die Stufensätze beider Geräte sind disjunkt, deshalb genügt die Gültigkeitsprüfung; die
 Gerätezeile der Datei liest nur das Menü.
 
+Im VR-Menü steht direkt unter der Geräteauswahl eine Statuszeile mit drei Zuständen:
+„passt zur Auswahl“ (grün), „Auswahl weicht ab“ (orange) und „kein Gerät erkannt“
+(grau). Damit ist eine fehlgeschlagene Erkennung sichtbar, statt sich nur als
+unerwartete Bildrate zu zeigen.
+
 **Nicht getestet:** das Lesen der Java-Felder selbst (braucht Android). Getestet ist die
 Klassifizierung (`tests/device_model.cpp`) und die Auflösungslogik (Rust- und
 Lua-Harness).

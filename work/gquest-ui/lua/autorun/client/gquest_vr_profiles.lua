@@ -137,6 +137,20 @@ function P.Detected()
     return nil
 end
 
+--- One line for the VR menu: did the automatic detection agree with the selection?
+--- Returns the text plus a severity ("match", "mismatch", "none") for the colour.
+function P.DetectionLabel(state, detectedId)
+    local detected = detectedId or P.Detected()
+    local device = detected and P.DEVICES[detected] or nil
+    if not device then
+        return "Automatisch erkannt: kein Geraet - Auswahl bleibt manuell", "none"
+    end
+    if state and state.device == detected then
+        return "Automatisch erkannt: " .. device.label .. " - passt zur Auswahl", "match"
+    end
+    return "Automatisch erkannt: " .. device.label .. " - Auswahl weicht ab", "mismatch"
+end
+
 function P.Load(detectedId)
     local text = file.Read and file.Read(P.PATH, "DATA") or nil
     local state = P.Parse(text)

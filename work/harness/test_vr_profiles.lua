@@ -178,6 +178,25 @@ assert(explicit.device == "quest3s", "explicit detected id ignored")
 local bogus = P.Load("questpro")
 assert(bogus.device == "quest3", "unknown detected id must not switch the device")
 
+-- 18) The menu status line reports all three detection states.
+writes = {}
+local noneText, noneSeverity = P.DetectionLabel(P.Defaults())
+assert(noneSeverity == "none" and noneText:find("kein Geraet", 1, true),
+    "no detection must say so")
+writes[P.DEVICE_HINT_PATH] = "quest3s\n"
+local matched = P.Defaults()
+matched.device = "quest3s"
+local matchText, matchSeverity = P.DetectionLabel(matched)
+assert(matchSeverity == "match" and matchText:find("Quest 3S", 1, true)
+    and matchText:find("passt", 1, true), "matching device must be reported")
+writes[P.DEVICE_HINT_PATH] = "quest3\n"
+local mismatchText, mismatchSeverity = P.DetectionLabel(matched)
+assert(mismatchSeverity == "mismatch" and mismatchText:find("Quest 3 ", 1, true)
+    and mismatchText:find("weicht ab", 1, true), "mismatch must be reported")
+-- An explicit id wins over the hint file, so the menu can reuse the value it loaded.
+assert(select(2, P.DetectionLabel(matched, "quest3s")) == "match", "explicit id ignored")
+
 print("PASS per-device VR profiles: separate tier sets accepted by the runtime, runtime-matching "
     .. "defaults, legacy and CRLF parsing, foreign-tier snap, invalid value fallbacks, preset "
-    .. "remembering across device switches, setter guards, stable round trip and detection-aware load")
+    .. "remembering across device switches, setter guards, stable round trip, detection-aware "
+    .. "load and the three-state detection status line")

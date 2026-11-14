@@ -94,10 +94,10 @@ end
 local function settingsPanel(parent)
     local panel = vgui.Create("DScrollPanel", parent)
     local y = 12
-    local function text(value, height)
+    local function text(value, height, tint)
         local label = panel:Add("DLabel")
         label:SetText(value); label:SetFont("DermaDefaultBold"); label:SetWrap(true)
-        label:SetTextColor(Color(235,235,235)); label:SetPos(16,y); label:SetSize(580,height)
+        label:SetTextColor(tint or Color(235,235,235)); label:SetPos(16,y); label:SetSize(580,height)
         y = y + height + 12
     end
     local function combo(title, choices, selected, changed)
@@ -128,6 +128,13 @@ local function settingsPanel(parent)
             -- current combo callback has returned.
             timer.Simple(0, function() openRoot(true) end)
         end)
+        -- Show what the bridge detected, so a device mismatch is visible here instead
+        -- of only showing up as unexpected performance in the headset.
+        local statusText, severity = profiles.DetectionLabel(profileState)
+        local severityColors = {
+            match = Color(120,200,140), mismatch = Color(230,160,90), none = Color(170,170,170)
+        }
+        text(statusText, 24, severityColors[severity])
         local tierChoices = {}
         for index, tier in ipairs(device.tiers) do
             tierChoices[#tierChoices+1] = { string.format("%s - %s", device.tier_labels[index], tier), index }
