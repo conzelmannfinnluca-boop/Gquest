@@ -206,6 +206,16 @@ function P.SetDevice(state, deviceId)
     return state
 end
 
+--- Switch to the detected headset and land on its recommendation. The previous device
+--- keeps its tuned values in its own slot, so switching back loses nothing.
+function P.AdoptDetected(state, detectedId)
+    local detected = detectedId or P.Detected()
+    if not (state and detected and P.DEVICES[detected]) then return false end
+    P.SetDevice(state, detected)
+    P.Recommend(state)
+    return true
+end
+
 function P.SetTier(state, index)
     local device = P.DEVICES[state.device]
     if not device then return state end

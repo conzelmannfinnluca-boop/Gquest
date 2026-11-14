@@ -74,7 +74,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Geräteprofile Quest 3 / 3S | DONE | eigene Stufensätze, vom Runtime akzeptiert, im Menü wählbar |
 | Geräteprofile auf Quest 3S | NOT TESTED | Stufen definiert, aber kein Lauf auf 3S-Hardware |
 | Geräteerkennung (Klassifizierung) | DONE | `android.os.Build.MODEL`/`.DEVICE` → Geräte-ID, C++-Test hier ausgeführt |
-| Erkennungs-Statuszeile im Menü | DONE | drei Zustände, Textbudget getestet; Derma-Rendering ungeprüft |
+| Erkennungs-Statuszeile + Umstellen-Knopf | DONE | drei Zustände, Textbudget und Knopf getestet; Derma-Rendering ungeprüft |
 | Geräteerkennung (JNI auf Gerät) | NOT TESTED | `Build`-Felder lesen nur auf Android prüfbar; hier kein Gerät |
 | Lizenz + Herkunftsnachweis | DONE | `LICENSE` (MIT), `THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/` |
 
@@ -143,7 +143,7 @@ Lua-Harnesses (10/10):
 - Pose-Gate und Reload-Client: HLVR-Aliase, linke Hand/Session/Tod-Gates, kein doppeltes Eject
 - Performance-Sampler: konstante Bildrate, Hitch-Erkennung, 1%-Low, Fenster-Klemmen und -Überlauf, Ablehnung von nan/inf/Null, Disable-Gate, CSV-Form und Header-einmalig, Summary- und Overlay-Gates
 - Geräteprofile: getrennte Stufensätze beider Geräte (alle sechs vom Runtime akzeptiert), Defaults deckungsgleich mit dem Runtime-Default, Altformat- und CRLF-Parsing, Fremdstufen-Snap, Rückfall bei ungültigen Werten, gemerkte Presets über Gerätewechsel, Setter-Guards, stabiler Round-Trip
-- Geräteerkennung im Menü: Hinweisdatei lesen, Whitespace/CRLF tolerieren, unbekannte ID ignorieren, frische Installation auf dem erkannten Gerät starten, gespeichertes Profil nie überschreiben, Statuszeile für alle drei Zustände inklusive Textbudget je Gerätename
+- Geräteerkennung im Menü: Hinweisdatei lesen, Whitespace/CRLF tolerieren, unbekannte ID ignorieren, frische Installation auf dem erkannten Gerät starten, gespeichertes Profil nie überschreiben, Statuszeile für alle drei Zustände inklusive Textbudget je Gerätename, Umstellen auf das erkannte Gerät samt Empfehlung, Menü-Klick auf den Knopf
 - Menü-Navigation: Root → Ausrichtung → Zurück → Schließen → Wiederöffnen → Waffen
 
 Zusätzlich geprüft: `--check` meldet alle 9 fehlenden Voraussetzungen mit Zweck und

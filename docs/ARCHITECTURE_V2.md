@@ -440,6 +440,10 @@ abgeleitet, nicht in Derma gemessen. Der Zeilenhöhe wird zusätzlich aus der Te
 berechnet und das Label bekommt `SetAutoStretchVertical(true)`, damit ein längerer
 Gerätename umbricht statt abgeschnitten zu werden.
 
+Bei `Auswahl weicht ab` steht darunter ein Knopf `Auf <Gerät> umstellen (Empfehlung)`.
+Er wechselt auf das erkannte Gerät und wendet dessen Empfehlung an; das vorherige Gerät
+behält seine Werte in seinem eigenen Slot, ein Rückwechsel verliert also nichts.
+
 **Nicht geprüft:** das tatsächliche Derma-Rendering. Hier läuft kein GMod, also sind
 Umbruchpunkt, Farben und Zeilenhöhe im Headset unbestätigt.
 

@@ -212,7 +212,24 @@ end
 assert(statusLength(P.DetectionLabel(P.Defaults(), "questpro")) <= P.STATUS_LINE_BUDGET,
     "no-detection text too long")
 
+-- 20) Adopting the detected device lands on its recommendation and keeps the other
+-- device's tuning in its own slot.
+writes = {}
+writes[P.PATH] = "1680x1760\n2\n90\nquest3\n"
+writes[P.DEVICE_HINT_PATH] = "quest3s\n"
+local adopted = P.Load()
+assert(adopted.device == "quest3" and adopted.tier == "1680x1760", "adopt precondition")
+assert(P.AdoptDetected(adopted) == true, "adopt must succeed")
+assert(adopted.device == "quest3s" and adopted.tier == "1374x1440"
+    and adopted.foveation == 2 and adopted.rate == 72,
+    "adopt must apply the detected device recommendation")
+assert(adopted.saved.quest3 and adopted.saved.quest3.tier == 3,
+    "the previous device must keep its tuning")
+assert(P.AdoptDetected(adopted, "questpro") == false, "unknown device must not be adopted")
+assert(P.AdoptDetected(nil, "quest3s") == false, "missing state must not be adopted")
+
 print("PASS per-device VR profiles: separate tier sets accepted by the runtime, runtime-matching "
     .. "defaults, legacy and CRLF parsing, foreign-tier snap, invalid value fallbacks, preset "
     .. "remembering across device switches, setter guards, stable round trip, detection-aware "
-    .. "load and the three-state detection status line")
+    .. "load, the three-state detection status line, its character budget and adopting the "
+    .. "detected device")

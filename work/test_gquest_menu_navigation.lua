@@ -12,7 +12,8 @@ local function create(kind,parent)
  panels[#panels+1]=panel;return panel
 end
 vgui={Create=create}
-file={Read=function() end,Write=function() end}
+local files={}
+file={Read=function(path) return files[path] end,Write=function(path,_,text) files[path]=text end}
 concommand={Add=function(name,fn) commands[name]=fn end}
 hook={Add=function() end}
 timer={Simple=function(_,fn) fn() end}
@@ -22,7 +23,8 @@ function RealTime() return 0 end
 function ScrW() return 1032 end
 function ScrH() return 1104 end
 function Color() return {} end
-function RunConsoleCommand() end
+local console={}
+function RunConsoleCommand(name,...) console[#console+1]={name,...} end
 notification={AddLegacy=function() end}
 GQUEST_WEAPON_ALIGN={BuildPanel=function(parent) return create("DPanel",parent) end}
 -- The menu reads its profiles from the shared module, as it does in game.
@@ -39,4 +41,14 @@ click("Zurueck");assert(GquestUI.IsMenuVisible())
 click("Zurueck zum Spiel");assert(not GquestUI.IsMenuVisible())
 commands.gquest_menu();assert(GquestUI.IsMenuVisible())
 click("Waffen");assert(not GquestUI.IsMenuVisible())
-print("PASS menu callbacks: root -> alignment -> back -> close -> reopen -> weapons; exact former global-openRoot regression and visibility gate")
+-- A detection mismatch must offer a one-click way onto the detected device. The mock
+-- reports a Quest 3S while the profile is still a Quest 3 one.
+files["gquest_device.txt"]="quest3s\n"
+commands.gquest_menu();assert(GquestUI.IsMenuVisible())
+click("Auf Quest 3S umstellen (Empfehlung)")
+local applied
+for _,entry in ipairs(console) do
+ if entry[1]=="vr_eye_resolution" then applied=entry[2] end
+end
+assert(applied=="1374x1440","adopt button must apply the 3S recommendation, got "..tostring(applied))
+print("PASS menu callbacks: root -> alignment -> back -> close -> reopen -> weapons; exact former global-openRoot regression, visibility gate and detection-mismatch adopt button")

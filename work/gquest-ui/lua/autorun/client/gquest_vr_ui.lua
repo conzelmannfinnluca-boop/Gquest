@@ -142,11 +142,28 @@ local function settingsPanel(parent)
         end)
         -- Show what the bridge detected, so a device mismatch is visible here instead
         -- of only showing up as unexpected performance in the headset.
-        local statusText, severity = profiles.DetectionLabel(profileState)
+        local detected = profiles.Detected()
+        local statusText, severity = profiles.DetectionLabel(profileState, detected)
         local severityColors = {
             match = Color(120,200,140), mismatch = Color(230,160,90), none = Color(170,170,170)
         }
         statusLine(statusText, severityColors[severity])
+        if severity == "mismatch" and detected then
+            local detectedDevice = profiles.DEVICES[detected]
+            local adopt = panel:Add("DButton")
+            adopt:SetText("Auf "..detectedDevice.label.." umstellen (Empfehlung)")
+            adopt:SetPos(16,y); adopt:SetSize(560,46)
+            adopt.DoClick = function()
+                if not profiles.AdoptDetected(profileState, detected) then return end
+                saveProfile(); applyProfile()
+                print("GQUEST_PROFILE adopted="..profileState.device.." tier="..profileState.tier)
+                notification.AddLegacy(detectedDevice.label.." uebernommen: "..profileState.tier
+                    ..", FFR "..profileState.foveation..", "..profileState.rate
+                    .." Hz. Bildprofil gilt nach Neustart.", NOTIFY_GENERIC, 5)
+                timer.Simple(0, function() openRoot(true) end)
+            end
+            y = y + 58
+        end
         local tierChoices = {}
         for index, tier in ipairs(device.tiers) do
             tierChoices[#tierChoices+1] = { string.format("%s - %s", device.tier_labels[index], tier), index }
