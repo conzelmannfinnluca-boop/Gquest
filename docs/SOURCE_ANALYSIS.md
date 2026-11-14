@@ -347,8 +347,9 @@ bleibt an den privaten Dateien hängen — eine bewusste Rechteentscheidung
 
 - **Quest 3: PARTIALLY IMPLEMENTED + hardwarebestätigt** für Kopf/Controller/Hände,
   Menü, Pistole, SMG, Schrotflinte, AR2, Magnum, Armbrust, RPG, Brechstange.
-- **Quest 3S: NOT TESTED.** Es existiert kein eigener Lauf. Zielauflösung 1548×1656 ist
-  im Rust-Profil bereits vorgesehen, aber nie auf Hardware verifiziert.
+- **Quest 3S: NOT TESTED.** Es existiert kein eigener Lauf. Inzwischen hat das Gerät
+  eigene Auflösungsstufen (916×960 / 1374×1440 / 1558×1632), die der Rust-Parser
+  akzeptiert; auf 3S-Hardware verifiziert ist davon nichts.
 - Native Munitions-/Kammer-Übergänge sind **nur für die Pistole** vollständig
   protokolliert (`docs/Gquest-HL2-reload-verification.json`); für die anderen sechs
   Waffen existiert nur die Trägerbestätigung.

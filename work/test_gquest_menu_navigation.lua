@@ -25,6 +25,8 @@ function Color() return {} end
 function RunConsoleCommand() end
 notification={AddLegacy=function() end}
 GQUEST_WEAPON_ALIGN={BuildPanel=function(parent) return create("DPanel",parent) end}
+-- The menu reads its profiles from the shared module, as it does in game.
+dofile("work/gquest-ui/lua/autorun/client/gquest_vr_profiles.lua")
 dofile("work/gquest-ui/lua/autorun/client/gquest_vr_ui.lua")
 local function click(text)
  for i=#panels,1,-1 do local p=panels[i];if p.text==text and p.valid then assert(type(p.DoClick)=="function");p.DoClick();return end end

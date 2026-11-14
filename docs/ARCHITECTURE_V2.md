@@ -390,15 +390,24 @@ wäre eine GMod-API-Emulation ein eigenes Großprojekt und ist **nicht** eingepl
 
 ## 10. Quest-Performance
 
-| Profil | Eye-Resolution | FFR | Rate | Schatten | Partikel | NPC-Budget |
-|---|---|---|---|---|---|---|
-| Performance | 1032×1104 | aggressiv | 72 | aus/1 Casc. | niedrig | 12 |
-| Balanced | 1548×1656 | mittel | 72/90 | 1 Cascade | mittel | 20 |
-| Quality | 1680×1760 | aus | 90 | 2 Cascades | hoch | 30 |
+Quest 3 und Quest 3S haben unterschiedliche native Panels (2064×2208 bzw. 1832×1920
+pro Auge). Deshalb hat **jedes Gerät eigene Stufen**; dieselbe Zahl bedeutet auf dem
+anderen Gerät eine andere Last.
 
-Quest 3S erhält standardmäßig **Balanced**, Quest 3 **Quality**, PCVR **Quality+**.
-Die drei Eye-Resolution-Stufen sind bereits im Rust-Profil des alten GQuest vorhanden
-und werden als Profil-IDs wiederverwendet.
+| Gerät | Stufe | Eye-Resolution | Anteil nativ | Empfehlung |
+|---|---|---|---|---|
+| Quest 3 | Leistung | 1032×1104 | 50 % | – |
+| Quest 3 | Ausgewogen | 1548×1656 | 75 % | – |
+| Quest 3 | Schärfer | 1680×1760 | ~81 % | **Standard** (FFR 2, 90 Hz) |
+| Quest 3S | Leistung | 916×960 | 50 % | – |
+| Quest 3S | Ausgewogen | 1374×1440 | 75 % | **Standard** (FFR 2, 72 Hz) |
+| Quest 3S | Schärfer | 1558×1632 | 85 % | – |
+
+Die sechs Stufen sind die Allowlist des Rust-Profilparsers; jede andere Zeichenkette
+fällt auf 1032×1104 zurück. Das VR-Menü wählt das Gerät und merkt sich pro Gerät die
+letzte Wahl. FFR-Stufen 0–3 und Raten 72/90 Hz gelten für beide Geräte gleich.
+
+PCVR nutzt dieselben Mechanismen mit eigener Skalierung („Quality+“).
 
 Techniken, die im Core verankert werden (nicht dem Host überlassen):
 LOD-Stufen pro Objekt, Distanz-Culling, Instancing-Gruppierung, Occlusion-Abfragen als

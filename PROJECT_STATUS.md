@@ -71,6 +71,8 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Automatisierte Gerätetests | NOT STARTED | nur manuelle Trägerbestätigung |
 | Performance-Sampler + CSV | DONE | `gquest_perf_hud.lua`, 9. Lua-Harness deckt Statistik und Ausgabe ab |
 | Performance-Messung auf Quest 3 | NOT TESTED | Instrumentierung fertig, Hardware-Lauf steht aus |
+| Geräteprofile Quest 3 / 3S | DONE | eigene Stufensätze, vom Runtime akzeptiert, im Menü wählbar |
+| Geräteprofile auf Quest 3S | NOT TESTED | Stufen definiert, aber kein Lauf auf 3S-Hardware |
 | Lizenz + Herkunftsnachweis | DONE | `LICENSE` (MIT), `THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/` |
 
 ---
@@ -80,12 +82,12 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Voraussetzungen + Spiegel-Drift, ohne Traceback |
-| `build.py --tests` | **DONE** | 3 C++-Grenztests + 8 Lua-Harnesses, ohne private Daten |
+| `build.py --tests` | **DONE** | 3 C++-Grenztests + 6 Rust-Tests + 10 Lua-Harnesses |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
-| Rust `cargo test` | **BLOCKED** | kein `cargo` in dieser Umgebung |
+| Rust `cargo test` | **DONE** (6 von 6) | Toolchain lokal in `work/toolchains` installiert |
 | C++-Grenztests | **DONE** (3 von 3) | siehe Abschnitt 4 |
-| Lua-Harnesses (9) | **DONE** (9 von 9) | lokale Lua-5.4-Toolchain gebaut |
-| C++/Rust-ABI-Smoke | **BLOCKED** | braucht `libgquest_runtime.a` (Rust-Build) |
+| Lua-Harnesses (10) | **DONE** (10 von 10) | lokale Lua-5.4-Toolchain gebaut |
+| C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle
 | APK-Verifikation | **BLOCKED** | kein Basis-APK |
 
 Fehlende, bewusst nicht versionierte Voraussetzungen: `outputs/GDroid-0.1.30.apk`,
@@ -98,9 +100,9 @@ diese Dateien jetzt einzeln mit Zweck und Beschaffungsweg auf.
 
 ## 4. Teststatus (in dieser Sitzung tatsächlich ausgeführt)
 
-Umgebung: Linux, `g++ 13.3.0`, `python3 3.12.3`, kein `cargo`, keine private APK.
-Lua 5.4.7 wurde für die Harnesses lokal gebaut (`work/toolchains/lua/`, per `.gitignore`
-ausgeschlossen).
+Umgebung: Linux, `g++ 13.3.0`, `python3 3.12.3`, keine private APK. Lua 5.4.7 und eine
+Rust-stable-Toolchain wurden lokal nach `work/toolchains/` installiert (per `.gitignore`
+ausgeschlossen, Reinstallationsanleitung in BUILD.md).
 
 Ein Befehl, reproduzierbar:
 
@@ -108,7 +110,16 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **3 C++-Grenztests bestanden, 9 Lua-Harnesses bestanden**, Exit-Code 0.
+Ergebnis: **3 C++-Grenztests, 6 Rust-Tests, C++/Rust-ABI-Smoke und 10 Lua-Harnesses
+bestanden**, Exit-Code 0.
+
+Rust-Tests:
+- Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
+- Alle sechs Gerätestufen parsen; Geräte- und Preset-Zeilen werden vom Runtime ignoriert
+- Ungültige Profilwerte können keine Engine-Kommandos einschleusen (Injection-Test)
+- CRLF und alle Auflösungsstufen bleiben erhalten
+- Explizite Level-Kommandos (`+connect`, `+load`, `+changelevel`) werden nicht überschrieben
+- FFI behandelt Nullzeiger, hält `argv` eigentümerrichtig und nullterminiert
 
 C++-Grenztests:
 - `PASS native finger wrapper: all profiles, left/root/flags untouched, original input interpolation, invalid/off passthrough`
@@ -116,7 +127,7 @@ C++-Grenztests:
 - `PASS VR Lua bridge: both hands/head/aim, quaternion axes, real validity/finite gates, input routing, inactive/invalid input and bounded haptics`
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 
-Lua-Harnesses (9/9):
+Lua-Harnesses (10/10):
 - Griff-Cache: echte modelllokale Anker, Null-Baseline-Regression, vier Teil-Schreib-Rollbacks, finite/range/schema-Guards
 - Mündung und Einhand-Frames: umgekehrte Retail-Achsen ersetzt, Munition erhalten, sieben Rollback-Grenzen, Crowbar ohne Vordergriff
 - Brechstangen-Richtung: exakter bestätigter Pitch, wiederholtes Deploy idempotent, Schusswaffen isoliert
@@ -125,13 +136,14 @@ Lua-Harnesses (9/9):
 - Waffenkatalog: elf echte Auswahlen, keine ArcVR-Bedienung
 - Pose-Gate und Reload-Client: HLVR-Aliase, linke Hand/Session/Tod-Gates, kein doppeltes Eject
 - Performance-Sampler: konstante Bildrate, Hitch-Erkennung, 1%-Low, Fenster-Klemmen und -Überlauf, Ablehnung von nan/inf/Null, Disable-Gate, CSV-Form und Header-einmalig, Summary- und Overlay-Gates
+- Geräteprofile: getrennte Stufensätze beider Geräte (alle sechs vom Runtime akzeptiert), Defaults deckungsgleich mit dem Runtime-Default, Altformat- und CRLF-Parsing, Fremdstufen-Snap, Rückfall bei ungültigen Werten, gemerkte Presets über Gerätewechsel, Setter-Guards, stabiler Round-Trip
 - Menü-Navigation: Root → Ausrichtung → Zurück → Schließen → Wiederöffnen → Waffen
 
 Zusätzlich geprüft: `--check` meldet alle 9 fehlenden Voraussetzungen mit Zweck und
 Beschaffungsweg; ohne `liblua5.4` meldet der Test-Modus `SKIPPED` statt `FAIL`.
 
-**Nicht ausgeführt:** Rust-Tests (kein cargo), ABI-Smoke, APK-Verifikation, jeder
-Hardware-Test, jede Frametime-Messung. Diese Liste ist absichtlich vollständig — nichts
+**Nicht ausgeführt:** APK-Verifikation, Android-Cross-Build, jeder Hardware-Test, jede
+Frametime-Messung auf einem Headset. Diese Liste ist absichtlich vollständig — nichts
 davon wird als bestanden behauptet.
 
 ---
@@ -158,9 +170,10 @@ Einschränkungen, die im Status bleiben:
 
 **NOT TESTED.**
 
-Es existiert kein Lauf auf Quest 3S. Die Zielauflösung 1548×1656 ist im Rust-Profil
-vorgesehen, aber nie auf Hardware verifiziert. Das ist ein Release-Blocker, kein
-Schönheitsfehler.
+Es existiert kein Lauf auf Quest 3S. Seit der Profiltrennung hat das Gerät eigene
+Stufen (916×960 / 1374×1440 / 1558×1632, Empfehlung Ausgewogen bei 72 Hz), die der
+Rust-Parser akzeptiert — aber keine davon wurde auf 3S-Hardware verifiziert. Das ist
+ein Release-Blocker, kein Schönheitsfehler.
 
 ---
 

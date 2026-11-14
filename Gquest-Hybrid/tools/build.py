@@ -87,6 +87,7 @@ LUA_HARNESSES = [
     "work/test_reload_client.lua",
     "work/harness/test_hl2_reload_refill.lua",
     "work/harness/test_perf_hud.lua",
+    "work/harness/test_vr_profiles.lua",
     "work/test_gquest_menu_navigation.lua",
 ]
 
@@ -172,6 +173,60 @@ def report_check() -> int:
     return 0
 
 
+def run_rust_tests() -> str:
+    """Run the Rust unit tests. Returns 'passed', 'skipped' or 'failed'."""
+    log("\n=== Rust-Unit-Tests ===")
+    if cargo_binary() is None:
+        log("SKIPPED: kein cargo gefunden (work/toolchains/cargo oder PATH)")
+        log("  rustup installieren, dann laufen diese Tests mit.")
+        return "skipped"
+    command = [sys.executable, str(PROJECT / "tools/cargo.py"), "test", "--offline"]
+    log("+ " + " ".join(command))
+    result = subprocess.run(command, cwd=BASE, capture_output=True, text=True)
+    output = (result.stdout + result.stderr).strip()
+    interesting = [line for line in output.splitlines()
+                   if line.startswith("test result:") or line.endswith(" ok")
+                   or "FAILED" in line or "panicked" in line]
+    log("\n".join(interesting[-9:]) or output.splitlines()[-1] if output else "keine Ausgabe")
+    return "passed" if result.returncode == 0 else "failed"
+
+
+def run_abi_smoke() -> str:
+    """Build the Rust release library and run the C++/Rust ABI boundary test."""
+    log("\n=== C++/Rust-ABI-Smoke ===")
+    if cargo_binary() is None:
+        log("SKIPPED: braucht den Rust-Release-Build")
+        return "skipped"
+    build = subprocess.run(
+        [sys.executable, str(PROJECT / "tools/cargo.py"), "build", "--release", "--offline"],
+        cwd=BASE, capture_output=True, text=True)
+    if build.returncode != 0:
+        log("FAILED: cargo build --release")
+        log((build.stdout + build.stderr).strip()[-1500:])
+        return "failed"
+    OUT.mkdir(exist_ok=True)
+    library = PROJECT / "target/release/libgquest_runtime.a"
+    binary = OUT / "ffi-smoke"
+    command = ["c++", "-std=c++17", f"-I{PROJECT / 'include'}",
+               str(PROJECT / "tests/ffi_smoke.cpp"), str(library),
+               "-ldl", "-lpthread", "-lm", "-o", str(binary)]
+    log("+ " + " ".join(command))
+    compiled = subprocess.run(command, cwd=BASE, capture_output=True, text=True)
+    if compiled.returncode != 0:
+        log("BUILD FAILED")
+        log(compiled.stderr.strip()[-1500:])
+        return "failed"
+    executed = subprocess.run([str(binary)], cwd=BASE, capture_output=True, text=True)
+    if executed.stdout.strip():
+        log(executed.stdout.strip())
+    if executed.returncode != 0:
+        log(f"FAILED (exit {executed.returncode})")
+        if executed.stderr.strip():
+            log(executed.stderr.strip()[-1500:])
+        return "failed"
+    return "passed"
+
+
 def run_lua_harnesses() -> str:
     """Run the Lua harnesses. Returns 'passed', 'skipped' or 'failed'."""
     log("\n=== Lua-Harnesses ===")
@@ -221,22 +276,29 @@ def run_host_cpp_tests() -> int:
         else:
             log("PASS")
 
+    rust_state = run_rust_tests()
+    if rust_state == "failed":
+        failures += 1
+
+    abi_state = run_abi_smoke()
+    if abi_state == "failed":
+        failures += 1
+
     lua_state = run_lua_harnesses()
     if lua_state == "failed":
         failures += 1
 
     log("\nNicht in diesem Modus enthalten (private Voraussetzungen nötig):")
-    log("  - Rust-Unit-Tests (cargo)" if cargo_binary() is None else
-        "  - Rust-Unit-Tests: verfügbar, aber nicht Teil von --tests")
-    log("  - C++/Rust-ABI-Smoke (braucht target/release/libgquest_runtime.a)")
-    log("  - APK-Verifikation (braucht Basis-APK)")
+    log("  - APK-Verifikation und Android-Cross-Build (brauchen Basis-APK und NDK)")
 
     if failures:
         log(f"\n{failures} Prüfgruppe(n) fehlgeschlagen.")
         return 1
+    rust_summary = "Rust-Unit-Tests" if rust_state == "passed" else "Rust übersprungen"
+    abi_summary = "ABI-Smoke" if abi_state == "passed" else "ABI-Smoke übersprungen"
     lua_summary = (f"{len(LUA_HARNESSES)} Lua-Harnesses" if lua_state == "passed"
                    else "Lua-Harnesses übersprungen")
-    log(f"\n{len(HOST_CPP_TESTS)} C++-Grenztests bestanden, {lua_summary}.")
+    log(f"\n{len(HOST_CPP_TESTS)} C++-Grenztests, {rust_summary}, {abi_summary}, {lua_summary}.")
     return 0
 
 

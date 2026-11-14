@@ -28,11 +28,27 @@ brauchen:
 | `native_fingers` | alle 12 Fingerprofile, linke Hand/Wurzel/Flags unverändert, Passthrough bei ungültigem Profil |
 | `vr_lua` | beide Hände, Kopf, Zielpose, Quaternion-Achsen, NaN-Gates, Action-Routing, Haptik-Clamping |
 | `retired_content` | 63 ArcVR-Dateien gesichert, fremdes Addon bleibt, Wiederholung, Namenskollision, Symlink-Schutz |
-| 9 Lua-Harnesses | Griff-/Mündungs-Caches, Modellpolitik, Ausrüstung, Waffenkatalog, Pose-Gate, Reload-Client, Reserve-Transfer, Performance-Sampler, Menü-Navigation |
+| 10 Lua-Harnesses | Griff-/Mündungs-Caches, Modellpolitik, Ausrüstung, Waffenkatalog, Pose-Gate, Reload-Client, Reserve-Transfer, Performance-Sampler, Geräteprofile, Menü-Navigation |
+| Rust-Unit-Tests | Startargumente, Profilparser beider Geräte, ABI-Grenzen — laufen mit, sobald `cargo` vorhanden ist |
+| C++/Rust-ABI-Smoke | sechs Startfälle gegen die Release-Bibliothek, `GquestProfile`-Größe, `argv`-Eigentum |
 
 Die Lua-Harnesses laufen, sobald eine `liblua5.4` auffindbar ist; sonst meldet der
 Modus `SKIPPED` (kein Fehlschlag) und bleibt bei Exit-Code 0. Der Modus meldet
 ausdrücklich, welche Prüfungen **nicht** gelaufen sind und warum.
+
+### Rust-Toolchain bereitstellen
+
+Die Rust-Tests laufen automatisch mit, wenn `work/toolchains/cargo/bin/cargo` oder ein
+System-`cargo` vorhanden ist; sonst meldet der Modus `SKIPPED`.
+
+```sh
+export RUSTUP_HOME="$PWD/work/toolchains/rustup" CARGO_HOME="$PWD/work/toolchains/cargo"
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+  | sh -s -- -y --profile minimal --default-toolchain stable --no-modify-path
+```
+
+`work/toolchains/` ist in `.gitignore`; die Toolchain wird pro Umgebung neu installiert.
+Für den Android-Cross-Build wird zusätzlich das Target `aarch64-linux-android` gebraucht.
 
 ### Lua 5.4 bereitstellen
 
@@ -81,7 +97,7 @@ Spielinhalte, Signaturschlüssel. `.gitignore` schließt ihre Endungen aus.
 
 1. Basis-APK gegen Pin prüfen (`verify_gdroid_base.py`): Digest, 34 native Bibliotheken,
    vier Signaturblöcke, Finger-Blend-Aufruf, VR-Init-Patch.
-2. Neun Lua-Harnesses (Lua 5.4, siehe oben).
+2. Zehn Lua-Harnesses (Lua 5.4, siehe oben).
 3. `cargo test`, drei C++-Grenztests, `cargo build --release`, C++/Rust-ABI-Smoke.
 4. Cross-Build `liblauncheq.so` gegen NDK und `liblauncher.so` des Basispakets.
 5. Overlay-APK bauen (`build_quest_lab.py`), `zipalign`, signieren, verifizieren.

@@ -6,19 +6,18 @@ function GquestUI.IsMenuVisible()
     return (IsValid(rootFrame) and rootFrame:IsVisible()) or (IsValid(alignFrame) and alignFrame:IsVisible()) or false
 end
 local menuBlockedUntil=0
-local profilePath = "gquest_vr_profile.txt"
-local tiers = { "1032x1104", "1548x1656", "1680x1760" }
-local labels = { "Leistung", "Ausgewogen", "Schaerfer" }
-local eyeTier, foveation, refresh = tiers[1], 2, 72
-local saved = file.Read(profilePath, "DATA")
-if saved then
-    local parts = string.Explode("\n", saved)
-    for _, tier in ipairs(tiers) do if parts[1] == tier then eyeTier = tier end end
-    foveation = math.Clamp(tonumber(parts[2]) or 2, 0, 3)
-    refresh = tonumber(parts[3]) == 90 and 90 or 72
-end
+-- Profiles live in gquest_vr_profiles.lua so the menu and the boundary test share
+-- one implementation. See that file for the file format and the device tier sets.
+local profiles = GQUEST_PROFILES
+local profileState = profiles and profiles.Load() or nil
 local function saveProfile()
-    file.Write(profilePath, eyeTier .. "\n" .. foveation .. "\n" .. refresh .. "\n")
+    if profiles and profileState then profiles.Save(profileState) end
+end
+local function applyProfile()
+    if not profileState then return end
+    RunConsoleCommand("vr_eye_resolution", profileState.tier)
+    RunConsoleCommand("vr_ffr_level", tostring(profileState.foveation))
+    RunConsoleCommand("vr_refresh_rate", tostring(profileState.rate))
 end
 local function closeRoot()
     menuBlockedUntil=RealTime()+1.25
@@ -110,15 +109,41 @@ local function settingsPanel(parent)
         y = y + 58
     end
     text("VR-Einstellungen",32)
-    combo("Bildprofil (nach Neustart)", {
-        {labels[1].." - 1032 x 1104",tiers[1]}, {labels[2].." - 1548 x 1656",tiers[2]}, {labels[3].." - 1680 x 1760",tiers[3]}
-    },eyeTier,function(value) eyeTier=value; saveProfile(); RunConsoleCommand("vr_eye_resolution",value) end)
-    combo("Randaufloesung: mehr Reduktion spart Grafikleistung", {
-        {"Keine Reduktion",0},{"Wenig",1},{"Mittel",2},{"Stark",3}
-    },foveation,function(value) foveation=value; saveProfile(); RunConsoleCommand("vr_ffr_level",tostring(value)) end)
-    combo("Bildwiederholrate", {{"72 Hz",72},{"90 Hz",90}},refresh,function(value)
-        refresh=value; saveProfile(); RunConsoleCommand("vr_refresh_rate",tostring(value))
-    end)
+    if not (profiles and profileState) then
+        text("Profilmodul gquest_vr_profiles.lua fehlt; nur die Bildprofile sind gesperrt. Die uebrigen Funktionen bleiben nutzbar.",60)
+    else
+        local device = profiles.DEVICES[profileState.device]
+        local deviceChoices = {}
+        for _, id in ipairs(profiles.ORDER) do
+            deviceChoices[#deviceChoices+1] = { profiles.DEVICES[id].label, id }
+        end
+        combo("Geraet", deviceChoices, profileState.device, function(value)
+            if value == profileState.device then return end
+            profiles.SetDevice(profileState, value)
+            saveProfile(); applyProfile()
+            print("GQUEST_PROFILE device="..value.." tier="..profileState.tier)
+            notification.AddLegacy(profiles.DEVICES[value].label..": "..profileState.tier
+                ..", FFR "..profileState.foveation..", "..profileState.rate.." Hz", NOTIFY_GENERIC, 5)
+            -- The tier list belongs to the device, so the panel is rebuilt once the
+            -- current combo callback has returned.
+            timer.Simple(0, function() openRoot(true) end)
+        end)
+        local tierChoices = {}
+        for index, tier in ipairs(device.tiers) do
+            tierChoices[#tierChoices+1] = { string.format("%s - %s", device.tier_labels[index], tier), index }
+        end
+        combo("Bildprofil "..device.label.." (nach Neustart)", tierChoices, profileState.tierIndex, function(index)
+            profiles.SetTier(profileState, index); saveProfile(); applyProfile()
+        end)
+        combo("Randaufloesung: mehr Reduktion spart Grafikleistung", {
+            {"Keine Reduktion",0},{"Wenig",1},{"Mittel",2},{"Stark",3}
+        },profileState.foveation,function(value)
+            profiles.SetFoveation(profileState,value); saveProfile(); applyProfile()
+        end)
+        combo("Bildwiederholrate", {{"72 Hz",72},{"90 Hz",90}},profileState.rate,function(value)
+            profiles.SetRate(profileState,value); saveProfile(); applyProfile()
+        end)
+    end
     text("Waffenmodelle",28)
     text("Prueft im laufenden Spiel, welches Handmodell jede Waffe tatsaechlich benutzt und ob alle Modelle geladen werden. Das Ergebnis steht im Log und in data/gquest/weapon_models.json.",76)
     local modelCheck=panel:Add("DButton"); modelCheck:SetText("Waffenmodelle pruefen")
@@ -131,13 +156,16 @@ local function settingsPanel(parent)
     alignButton:SetPos(16,y); alignButton:SetSize(560,46)
     alignButton.DoClick=openAlign
     y = y + 58
-    text("Leistung liefert ein weicheres Bild. Ausgewogen und Schaerfer kosten mehr GPU-Zeit. Das Bildprofil wird beim naechsten Start angewendet.",76)
-    local reset=panel:Add("DButton"); reset:SetText("Empfohlene Einstellungen wiederherstellen")
-    reset:SetPos(16,y); reset:SetSize(560,46)
-    reset.DoClick=function()
-        eyeTier=tiers[1]; foveation=2; refresh=72; saveProfile()
-        RunConsoleCommand("vr_ffr_level","2"); RunConsoleCommand("vr_refresh_rate","72")
-        notification.AddLegacy("Gespeichert. Bildprofil gilt nach Neustart.",NOTIFY_GENERIC,4)
+    text("Leistung liefert ein weicheres Bild. Ausgewogen und Schaerfer kosten mehr GPU-Zeit. Jedes Geraet hat eigene Stufen und merkt sich seine letzte Wahl. Das Bildprofil wird beim naechsten Start angewendet.",80)
+    if profiles and profileState then
+        local resetLabel = profiles.DEVICES[profileState.device].label
+        local reset=panel:Add("DButton"); reset:SetText("Empfohlen fuer "..resetLabel.." wiederherstellen")
+        reset:SetPos(16,y); reset:SetSize(560,46)
+        reset.DoClick=function()
+            profiles.Recommend(profileState); saveProfile(); applyProfile()
+            notification.AddLegacy("Empfohlen fuer "..resetLabel.." gespeichert. Bildprofil gilt nach Neustart.",NOTIFY_GENERIC,4)
+        end
+        y = y + 58
     end
     return panel
 end
@@ -183,7 +211,7 @@ hook.Add("PopulateToolMenu","GquestSettings",function()
         panel:Button("Waffenmodelle pruefen","gquest_wmodel")
         panel:Button("Waffe ausrichten","gquest_align")
         panel:Help("Ausrichtung: gespeicherte Werte in data/gquest/weapon_align.json.")
-        panel:Help("Bildprofil, Randaufloesung und Bildwiederholrate fuer Quest.")
+        panel:Help("Bildprofil, Randaufloesung und Bildwiederholrate, je Geraet getrennt.")
         panel:Help("Waffenmodell-Bericht: gquest_wmodel oder gquest_wmodel_verbose.")
     end)
 end)

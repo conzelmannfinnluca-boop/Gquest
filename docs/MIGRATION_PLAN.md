@@ -86,8 +86,9 @@ Erledigt:
 1. `rtk proxy` ist aus Build, README und BUILD.md entfernt; `python3` genügt.
 2. `build.py --check` meldet jede fehlende Voraussetzung mit Pfad, Zweck und
    Beschaffungsweg; Exit-Code 1, kein Traceback.
-3. Lua 5.4 wird für die Harnesses lokal gebaut; alle **9 Lua-Harnesses bestehen**.
-4. `build.py --tests` fasst 3 C++-Grenztests + 9 Lua-Harnesses in ein Testziel,
+3. Lua 5.4 wird für die Harnesses lokal gebaut; alle **10 Lua-Harnesses bestehen**.
+   Eine lokale Rust-Toolchain bringt zusätzlich die **6 Rust-Unit-Tests** zum Laufen.
+4. `build.py --tests` fasst 3 C++-Grenztests + 6 Rust-Tests + 10 Lua-Harnesses in ein Testziel,
    Exit-Code 0, ohne private Daten.
 5. `cargo.py` fällt auf ein System-`cargo` zurück und nennt sonst beide Suchpfade.
 6. Spiegel-Drift `work/` ↔ `Gquest-Hybrid/bridge/` wird bei jedem Build geprüft
@@ -95,8 +96,7 @@ Erledigt:
    vorhandenen Build- und Prüfskripte unverändert funktionieren.
 
 Offen (nicht blockierend):
-- Rust-Unit-Tests brauchen ein `cargo` in der Umgebung; hier nicht vorhanden.
-- C++/Rust-ABI-Smoke hängt am Rust-Build.
+- C++/Rust-ABI-Smoke hängt am `--release`-Build; der läuft nur im Gesamtbuild.
 - Der volle APK-Build bleibt an Basis-APK, NDK, JDK und Signaturschlüssel gebunden
   (bewusst, siehe Lizenzlage).
 
@@ -271,7 +271,9 @@ PCVR-Builds erst nach Phase 21.
 | Bekannte offene Punkte | Frametime-Messung fehlt systematisch | kompletter Ersteindruck fehlt |
 
 **Quest-3S-Anpassungen, die sicher nötig sind:**
-1. Eigenes Default-Profil (kleinere Eye-Resolution, FFR aggressiver).
+1. ~~Eigenes Default-Profil~~ — **erledigt**: eigene Stufen 916×960 / 1374×1440 /
+   1558×1632, Empfehlung Ausgewogen bei 72 Hz, im Menü je Gerät gemerkt. Offen bleibt
+der Hardware-Nachweis auf einem 3S.
 2. Höhenkalibrierung erneut prüfen (anderes Gehäuse, anderes Sichtfeld).
 3. Controller-Offset-Profile getrennt halten (nicht hartkodiert auf ein Gerät).
 4. Frametime-Budget: 72 Hz ⇒ 13,9 ms; Ziel ≤ 12 ms für Reserve.

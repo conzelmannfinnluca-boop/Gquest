@@ -18,16 +18,30 @@ impl Default for GquestProfile {
         Self { abi_version: ABI, eye_width: 1032, eye_height: 1104, foveation: 2, refresh_rate: 72, profile_loaded: 0 }
     }
 }
+/// Eye resolution tiers per device. Quest 3 and Quest 3S have different native
+/// panels, so a tier that is fine on one is not the same on the other. Anything
+/// outside this list keeps the built-in default instead of being trusted.
+const TIERS: [(&[u8], u32, u32); 6] = [
+    // Quest 3 (native 2064x2208 per eye)
+    (b"1032x1104", 1032, 1104),
+    (b"1548x1656", 1548, 1656),
+    (b"1680x1760", 1680, 1760),
+    // Quest 3S (native 1832x1920 per eye)
+    (b"916x960", 916, 960),
+    (b"1374x1440", 1374, 1440),
+    (b"1558x1632", 1558, 1632),
+];
 pub fn parse_profile(bytes: &[u8]) -> GquestProfile {
     let mut profile = GquestProfile::default();
     if bytes.len() > 4096 { return profile; }
     profile.profile_loaded = 1;
     let mut lines = bytes.split(|c| *c == b'\n').map(|line| line.split(|c| *c == b'\r').next().unwrap_or_default());
-    match lines.next() {
-        Some(b"1032x1104") => {},
-        Some(b"1548x1656") => { profile.eye_width = 1548; profile.eye_height = 1656; },
-        Some(b"1680x1760") => { profile.eye_width = 1680; profile.eye_height = 1760; },
-        _ => {},
+    // Only the first three lines are runtime settings. The menu appends the chosen
+    // device and per-device presets after them, which must not affect the runtime.
+    if let Some(first) = lines.next() {
+        for (name, width, height) in TIERS {
+            if first == name { profile.eye_width = width; profile.eye_height = height; }
+        }
     }
     match lines.next() {
         Some([value @ b'0'..=b'3']) => profile.foveation = (value - b'0') as u32,
@@ -161,6 +175,26 @@ mod tests {
         assert_eq!(parse_profile(&vec![b'x';4097]), GquestProfile::default());
         let p = parse_profile(b"invalid\n0\n90");
         assert_eq!((p.foveation,p.refresh_rate),(0,90));
+    }
+    #[test]
+    fn every_device_tier_parses_and_menu_bookkeeping_is_ignored() {
+        for (tier, width, height) in [
+            ("1032x1104", 1032, 1104), ("1548x1656", 1548, 1656), ("1680x1760", 1680, 1760),
+            ("916x960", 916, 960), ("1374x1440", 1374, 1440), ("1558x1632", 1558, 1632),
+        ] {
+            // Device and preset lines are written by the VR menu for its own use;
+            // the runtime must read the first three lines and ignore the rest.
+            let text = format!("{tier}\r\n1\r\n90\r\nquest3s\r\nquest3s=2,2,72\r\nquest3=3,2,90\r\n");
+            let profile = parse_profile(text.as_bytes());
+            assert_eq!(
+                (profile.eye_width, profile.eye_height, profile.foveation, profile.refresh_rate),
+                (width, height, 1, 90),
+                "{tier}"
+            );
+        }
+        // A tier belonging to no device falls back to the built-in default.
+        assert_eq!(parse_profile(b"2000x2000\n2\n72").eye_width, 1032);
+        assert_eq!(parse_profile(b"2000x2000\n2\n72").eye_height, 1104);
     }
     #[test]
     fn settings_and_vr_player_precede_map_and_default_level_exists() {
