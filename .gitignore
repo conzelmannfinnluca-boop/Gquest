@@ -22,6 +22,8 @@ __pycache__/
 *.mp4
 *.ppm
 *.log
+# Reference clones used only for analysis (see docs/SOURCE_ANALYSIS.md)
+.refs/
 work/android-sdk/
 work/quest-vr-content/
 work/gquest-weapon-models/content/
