@@ -69,6 +69,8 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Map-System / Map-Editor | NOT STARTED | – |
 | Performance-HUD | NOT STARTED | – |
 | Automatisierte Gerätetests | NOT STARTED | nur manuelle Trägerbestätigung |
+| Performance-Sampler + CSV | DONE | `gquest_perf_hud.lua`, 9. Lua-Harness deckt Statistik und Ausgabe ab |
+| Performance-Messung auf Quest 3 | NOT TESTED | Instrumentierung fertig, Hardware-Lauf steht aus |
 | Lizenz + Herkunftsnachweis | DONE | `LICENSE` (MIT), `THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/` |
 
 ---
@@ -82,7 +84,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **BLOCKED** | kein `cargo` in dieser Umgebung |
 | C++-Grenztests | **DONE** (3 von 3) | siehe Abschnitt 4 |
-| Lua-Harnesses (8) | **DONE** (8 von 8) | lokale Lua-5.4-Toolchain gebaut |
+| Lua-Harnesses (9) | **DONE** (9 von 9) | lokale Lua-5.4-Toolchain gebaut |
 | C++/Rust-ABI-Smoke | **BLOCKED** | braucht `libgquest_runtime.a` (Rust-Build) |
 | APK-Verifikation | **BLOCKED** | kein Basis-APK |
 
@@ -106,7 +108,7 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **3 C++-Grenztests bestanden, 8 Lua-Harnesses bestanden**, Exit-Code 0.
+Ergebnis: **3 C++-Grenztests bestanden, 9 Lua-Harnesses bestanden**, Exit-Code 0.
 
 C++-Grenztests:
 - `PASS native finger wrapper: all profiles, left/root/flags untouched, original input interpolation, invalid/off passthrough`
@@ -114,7 +116,7 @@ C++-Grenztests:
 - `PASS VR Lua bridge: both hands/head/aim, quaternion axes, real validity/finite gates, input routing, inactive/invalid input and bounded haptics`
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 
-Lua-Harnesses (8/8):
+Lua-Harnesses (9/9):
 - Griff-Cache: echte modelllokale Anker, Null-Baseline-Regression, vier Teil-Schreib-Rollbacks, finite/range/schema-Guards
 - Mündung und Einhand-Frames: umgekehrte Retail-Achsen ersetzt, Munition erhalten, sieben Rollback-Grenzen, Crowbar ohne Vordergriff
 - Brechstangen-Richtung: exakter bestätigter Pitch, wiederholtes Deploy idempotent, Schusswaffen isoliert
@@ -122,6 +124,7 @@ Lua-Harnesses (8/8):
 - HL2-Ausrüstung: elf Klassen, persistente Munition, Allowlist, SP-/Alive-Guards
 - Waffenkatalog: elf echte Auswahlen, keine ArcVR-Bedienung
 - Pose-Gate und Reload-Client: HLVR-Aliase, linke Hand/Session/Tod-Gates, kein doppeltes Eject
+- Performance-Sampler: konstante Bildrate, Hitch-Erkennung, 1%-Low, Fenster-Klemmen und -Überlauf, Ablehnung von nan/inf/Null, Disable-Gate, CSV-Form und Header-einmalig, Summary- und Overlay-Gates
 - Menü-Navigation: Root → Ausrichtung → Zurück → Schließen → Wiederöffnen → Waffen
 
 Zusätzlich geprüft: `--check` meldet alle 9 fehlenden Voraussetzungen mit Zweck und
@@ -145,9 +148,9 @@ Waffenwechsel Brechstange→SMG→Brechstange.
 
 Einschränkungen, die im Status bleiben:
 - Vollständige native Munitionsfolge ist **nur für die Pistole** protokolliert.
-- Bildrate ist nicht systematisch gemessen (72-Hz-Profil gesetzt, frühere Läufe teils
-  darunter — keine Zahl belegbar).
-- Kein Performance-HUD, keine Frametime-Reihe.
+- Bildrate ist **noch nicht auf Hardware gemessen**. Die Instrumentierung ist fertig
+  (`gquest_perf`), aber es liegt keine Frametime-Reihe von einem Quest-3-Lauf vor.
+  Frühere Läufe lagen teils unter 72 Hz — das ist eine Beobachtung, keine Messung.
 
 ---
 
@@ -193,7 +196,7 @@ bestanden ist, wird Crossplay als nicht verfügbar dokumentiert.
 | K6 | Lizenz am eigenen Code | mittel | **erledigt** — MIT, siehe `LICENSE` |
 | K7 | Quest 3S ungetestet | hoch | offen |
 | K8 | Nur Pistole hat native Munitions-Protokoll | mittel | offen |
-| K9 | Keine Frametime-Messung | mittel | offen |
+| K9 | Keine Frametime-Messung | mittel | **Instrumentierung erledigt**, Hardware-Lauf offen |
 | K10 | Linke Hand nutzt Original-Fingerpfad | niedrig | bewusst |
 
 ---

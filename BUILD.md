@@ -28,7 +28,7 @@ brauchen:
 | `native_fingers` | alle 12 Fingerprofile, linke Hand/Wurzel/Flags unverändert, Passthrough bei ungültigem Profil |
 | `vr_lua` | beide Hände, Kopf, Zielpose, Quaternion-Achsen, NaN-Gates, Action-Routing, Haptik-Clamping |
 | `retired_content` | 63 ArcVR-Dateien gesichert, fremdes Addon bleibt, Wiederholung, Namenskollision, Symlink-Schutz |
-| 8 Lua-Harnesses | Griff-/Mündungs-Caches, Modellpolitik, Ausrüstung, Waffenkatalog, Pose-Gate, Reload-Client, Reserve-Transfer, Menü-Navigation |
+| 9 Lua-Harnesses | Griff-/Mündungs-Caches, Modellpolitik, Ausrüstung, Waffenkatalog, Pose-Gate, Reload-Client, Reserve-Transfer, Performance-Sampler, Menü-Navigation |
 
 Die Lua-Harnesses laufen, sobald eine `liblua5.4` auffindbar ist; sonst meldet der
 Modus `SKIPPED` (kein Fehlschlag) und bleibt bei Exit-Code 0. Der Modus meldet
@@ -81,7 +81,7 @@ Spielinhalte, Signaturschlüssel. `.gitignore` schließt ihre Endungen aus.
 
 1. Basis-APK gegen Pin prüfen (`verify_gdroid_base.py`): Digest, 34 native Bibliotheken,
    vier Signaturblöcke, Finger-Blend-Aufruf, VR-Init-Patch.
-2. Acht Lua-Harnesses (Lua 5.4, siehe oben).
+2. Neun Lua-Harnesses (Lua 5.4, siehe oben).
 3. `cargo test`, drei C++-Grenztests, `cargo build --release`, C++/Rust-ABI-Smoke.
 4. Cross-Build `liblauncheq.so` gegen NDK und `liblauncher.so` des Basispakets.
 5. Overlay-APK bauen (`build_quest_lab.py`), `zipalign`, signieren, verifizieren.

@@ -86,6 +86,7 @@ LUA_HARNESSES = [
     "work/harness/test_native_pose_class.lua",
     "work/test_reload_client.lua",
     "work/harness/test_hl2_reload_refill.lua",
+    "work/harness/test_perf_hud.lua",
     "work/test_gquest_menu_navigation.lua",
 ]
 

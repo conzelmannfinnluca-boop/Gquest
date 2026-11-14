@@ -86,8 +86,8 @@ Erledigt:
 1. `rtk proxy` ist aus Build, README und BUILD.md entfernt; `python3` genügt.
 2. `build.py --check` meldet jede fehlende Voraussetzung mit Pfad, Zweck und
    Beschaffungsweg; Exit-Code 1, kein Traceback.
-3. Lua 5.4 wird für die Harnesses lokal gebaut; alle **8 Lua-Harnesses bestehen**.
-4. `build.py --tests` fasst 3 C++-Grenztests + 8 Lua-Harnesses in ein Testziel,
+3. Lua 5.4 wird für die Harnesses lokal gebaut; alle **9 Lua-Harnesses bestehen**.
+4. `build.py --tests` fasst 3 C++-Grenztests + 9 Lua-Harnesses in ein Testziel,
    Exit-Code 0, ohne private Daten.
 5. `cargo.py` fällt auf ein System-`cargo` zurück und nennt sonst beide Suchpfade.
 6. Spiegel-Drift `work/` ↔ `Gquest-Hybrid/bridge/` wird bei jedem Build geprüft
