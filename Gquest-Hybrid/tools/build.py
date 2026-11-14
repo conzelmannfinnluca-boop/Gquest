@@ -72,6 +72,7 @@ PREREQUISITES: list[tuple[Path, str, str]] = [
 # every path in build/verify scripts keep working.
 BRIDGE_MIRRORS: list[str] = [
     "quest_engine_bridge.cpp",
+    "gquest_device_profile.h",
     "gquest_native_finger_profiles.h",
     "gquest_native_fingers.h",
     "gquest_retired_content.h",

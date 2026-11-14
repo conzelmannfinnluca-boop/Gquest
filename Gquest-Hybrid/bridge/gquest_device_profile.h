@@ -8,6 +8,7 @@
 // Both are checked because either can be unavailable on a given build.
 #pragma once
 #include <cctype>
+#include <cstddef>
 #include <cstring>
 
 enum class GquestDevice { Unknown, Quest2, Quest3, Quest3S, QuestPro };
@@ -76,4 +77,52 @@ static const char* GquestDeviceId(GquestDevice device) {
         case GquestDevice::QuestPro: return "questpro";
         default: return nullptr;
     }
+}
+
+// What the reported model and the manifest disagree about. Pure diagnosis: nothing here
+// changes which profile is used, it only decides whether the discrepancy is worth a
+// warning line.
+enum class GquestDeviceWarning { None, NotDeclared, AmbiguousCompat };
+
+// Is this device one of the entries in a com.oculus.supportedDevices value?
+//
+// Compared as whole tokens: "quest3" must not match inside "quest3s", or every 3S-only
+// package would look like it supports the Quest 3.
+static bool GquestDeviceDeclared(GquestDevice device, const char* supportedDevices) {
+    const char* id = GquestDeviceId(device);
+    if (!id || !supportedDevices) return false;
+    const std::size_t idLength = std::strlen(id);
+    const char* cursor = supportedDevices;
+    while (*cursor) {
+        while (*cursor == '|' || *cursor == ' ' || *cursor == '\t') ++cursor;
+        const char* start = cursor;
+        while (*cursor && *cursor != '|') ++cursor;
+        const char* end = cursor;
+        while (end > start && (end[-1] == ' ' || end[-1] == '\t' || end[-1] == '\r' ||
+                               end[-1] == '\n')) --end;
+        if (static_cast<std::size_t>(end - start) == idLength) {
+            bool same = true;
+            for (std::size_t i = 0; i < idLength && same; ++i)
+                same = std::tolower(static_cast<unsigned char>(start[i])) == id[i];
+            if (same) return true;
+        }
+    }
+    return false;
+}
+
+// Compatibility mode is chosen from the manifest, not from the hardware. So:
+// - a model the manifest does not declare means the reported headset and the declared
+//   support disagree, and the app may be running in compatibility mode;
+// - a manifest that lists quest3 but not quest3s cannot tell a Quest 3S in compatibility
+//   mode apart from a real Quest 3, which is exactly the case that misreads a 3S.
+// An unknown device or unreadable manifest is not a contradiction: nothing to compare.
+static GquestDeviceWarning GquestDeviceConsistency(GquestDevice device,
+                                                   const char* supportedDevices) {
+    if (device == GquestDevice::Unknown) return GquestDeviceWarning::None;
+    if (!supportedDevices || !*supportedDevices) return GquestDeviceWarning::None;
+    if (!GquestDeviceDeclared(device, supportedDevices)) return GquestDeviceWarning::NotDeclared;
+    if (device == GquestDevice::Quest3 &&
+        !GquestDeviceDeclared(GquestDevice::Quest3S, supportedDevices))
+        return GquestDeviceWarning::AmbiguousCompat;
+    return GquestDeviceWarning::None;
 }

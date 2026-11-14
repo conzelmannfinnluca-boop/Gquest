@@ -100,6 +100,18 @@ Manifest-Prüfung im Packaging ist das aber kein stilles Risiko mehr:
 - Die Lese-/Zusammenführungslogik ist in `overlay_manifest.py` ohne Android-SDK getestet;
   gegen die echte Basis-APK ist sie nie gelaufen.
 
+Zur Laufzeit liest die Bridge denselben Wert aus dem eigenen Manifest zurück
+(`DEVICE detected=… supported='…'`) und vergleicht ihn mit dem klassifizierten Modell. Zwei
+Fälle werden als Warnung geloggt, beide **ohne** das Profil zu ändern:
+
+| Logzeile | Bedeutung |
+|---|---|
+| `DEVICE WARN model <id> is not declared …` | Das erkannte Gerät steht nicht in der Liste — die App läuft womöglich im Compatibility Mode und meldet ein anderes Headset. |
+| `DEVICE WARN manifest declares quest3 but not quest3s …` | Ein echtes Quest 3 und eine 3S im Compatibility Mode melden beide `Quest 3`; das Profil kann zum falschen Gerät gehören. |
+
+`supported='(unreadable)'` heißt: Manifest nicht lesbar — dann schweigt der Vergleich
+absichtlich, weil es nichts zu vergleichen gibt.
+
 Bis das geklärt ist, ist die Geräteerkennung eine Heuristik mit Sicherheitsnetz, keine
 Zusage:
 

@@ -45,6 +45,43 @@ int main() {
     assert(std::strcmp(GquestDeviceId(GquestDevice::QuestPro), "questpro") == 0);
     assert(GquestDeviceId(GquestDevice::Unknown) == nullptr);
 
+    // Manifest tokens are matched whole: "quest3" must not match inside "quest3s",
+    // otherwise a 3S-only package would look like it declares the Quest 3.
+    assert(GquestDeviceDeclared(GquestDevice::Quest3S, "quest3|quest3s|questpro"));
+    assert(!GquestDeviceDeclared(GquestDevice::Quest3S, "quest3|questpro"));
+    assert(!GquestDeviceDeclared(GquestDevice::Quest3, "quest3s"));
+    assert(GquestDeviceDeclared(GquestDevice::Quest3, "quest3"));
+    assert(GquestDeviceDeclared(GquestDevice::Quest2, "quest3| quest2 "));
+    assert(GquestDeviceDeclared(GquestDevice::QuestPro, "QUESTPRO|quest3"));
+    assert(GquestDeviceDeclared(GquestDevice::Quest3, "quest2||quest3\n"));
+    assert(!GquestDeviceDeclared(GquestDevice::Quest3, "quest30|quest3x"));
+    assert(!GquestDeviceDeclared(GquestDevice::Quest3, ""));
+    assert(!GquestDeviceDeclared(GquestDevice::Quest3, nullptr));
+    assert(!GquestDeviceDeclared(GquestDevice::Unknown, "quest3"));
+
+    // A model the manifest does not declare is the contradiction worth logging.
+    assert(GquestDeviceConsistency(GquestDevice::Quest2, "quest3|quest3s") ==
+           GquestDeviceWarning::NotDeclared);
+    assert(GquestDeviceConsistency(GquestDevice::Quest3S, "quest3|questpro") ==
+           GquestDeviceWarning::NotDeclared);
+    assert(GquestDeviceConsistency(GquestDevice::Quest3, "quest3|quest3s") ==
+           GquestDeviceWarning::None);
+    assert(GquestDeviceConsistency(GquestDevice::Quest3S, "quest3|quest3s") ==
+           GquestDeviceWarning::None);
+
+    // Without quest3s a real Quest 3 and a 3S in compatibility mode look identical.
+    assert(GquestDeviceConsistency(GquestDevice::Quest3, "quest3|questpro") ==
+           GquestDeviceWarning::AmbiguousCompat);
+    assert(GquestDeviceConsistency(GquestDevice::Quest3S, "quest3s") ==
+           GquestDeviceWarning::None);
+
+    // Nothing to compare: unknown hardware and an unreadable manifest stay silent.
+    assert(GquestDeviceConsistency(GquestDevice::Unknown, "quest3") ==
+           GquestDeviceWarning::None);
+    assert(GquestDeviceConsistency(GquestDevice::Quest3, "") == GquestDeviceWarning::None);
+    assert(GquestDeviceConsistency(GquestDevice::Quest3, nullptr) == GquestDeviceWarning::None);
+
     std::puts("PASS device model classification: 3S beats 3, case/whitespace/near-miss guards, "
-              "codename fallback, nulls and stable ids");
+              "codename fallback, nulls and stable ids; manifest tokens matched whole and "
+              "model/manifest contradictions reported");
 }
