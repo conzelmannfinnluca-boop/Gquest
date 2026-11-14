@@ -35,6 +35,7 @@ brauchen:
 | Android-Bridge-Cross-Compile | `aarch64-linux-android29` mit `-Wall -Wextra -Werror`; prüft die JNI-Aufrufe gegen die echten Header |
 | Performance-Auswertung | `perf_report.py --test`: Urteile, Rauschgrenze, Abbruch bei gemischten Raten — synthetische Daten, keine Hardware |
 | Geräteerfassung | `capture_device.py --test`: Klassifizierung, getprop-Pfad, Logcat-Zeile, Widerspruchs-Urteil — mit Stub-adb, kein Headset |
+| Überlagerungs-Manifest | `overlay_manifest.py --test`: Wert zurücklesen, zusammenführen, Duplikate und unbekannte IDs ablehnen — synthetische Manifeste, keine APK |
 
 ### NDK für den Bridge-Check
 

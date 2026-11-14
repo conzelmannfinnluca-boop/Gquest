@@ -77,6 +77,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Erkennungs-Statuszeile + Umstellen-Knopf | DONE | drei Zustände, Textbudget und Knopf getestet; Derma-Rendering ungeprüft |
 | Geräteerkennung (JNI auf Gerät) | NOT TESTED | `Build`-Felder lesen nur auf Android prüfbar; hier kein Gerät |
 | Reale `Build.MODEL`-Werte Quest 3/3S | NOT TESTED | Erfassungswerkzeug + Protokoll fertig, kein Gerät (`docs/measurements/device-identity.md`) |
+| `com.oculus.supportedDevices` im Overlay | PARTIALLY IMPLEMENTED | Wert wird zusammengeführt statt verdoppelt und zurückgelesen; nie gegen die echte Basis-APK gelaufen |
 | Lizenz + Herkunftsnachweis | DONE | `LICENSE` (MIT), `THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/` |
 
 ---
@@ -86,7 +87,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Voraussetzungen + Spiegel-Drift, ohne Traceback |
-| `build.py --tests` | **DONE** | 5 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 2 Werkzeug-Selbsttests + 10 Lua |
+| `build.py --tests` | **DONE** | 5 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 3 Werkzeug-Selbsttests + 10 Lua |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
 | C++-Grenztests | **DONE** (5 von 5) | siehe Abschnitt 4 |
@@ -118,8 +119,8 @@ python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
 Ergebnis: **5 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
-Auswertungs- und Erfassungs-Selbsttest sowie 10 Lua-Harnesses bestanden**, Exit-Code 0 —
-28 Prüfungen.
+Auswertungs-, Erfassungs- und Manifest-Selbsttest sowie 10 Lua-Harnesses bestanden**,
+Exit-Code 0 — 29 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -155,6 +156,12 @@ Geräteerfassung (`capture_device.py --test`, Stub-adb statt Headset):
 - `getprop`-Pfad und `DEVICE`-Logzeile werden gelesen, fehlender In-App-Wert wird benannt
 - Urteil `konsistent` gegen `WIDERSPRUCH` bei abweichendem App-Wert
 - Protokollzeile wird ersetzt statt angehängt (zweimal erfassen ⇒ eine Zeile)
+
+Überlagerungs-Manifest (`overlay_manifest.py --test`, synthetische Manifeste):
+- `com.oculus.supportedDevices` wird zurückgelesen statt angenommen
+- Zusammenführen behält Reihenfolge, entfernt Duplikate, ergänzt fehlende IDs
+- zwei Elemente werden als Fehler erkannt (Android behielte eines davon)
+- unbekannte Geräte-IDs und Nicht-XML werden abgelehnt
 
 Lua-Harnesses (10/10):
 - Griff-Cache: echte modelllokale Anker, Null-Baseline-Regression, vier Teil-Schreib-Rollbacks, finite/range/schema-Guards

@@ -1,9 +1,12 @@
 """Create a private experimental APK copy; never overwrite the original APK."""
 import struct as S
+import sys
 import zipfile
 import hashlib
 import zlib
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'Gquest-Hybrid' / 'tools'))
+import overlay_manifest as om
 
 U32 = lambda b, o: S.unpack_from('<I', b, o)[0]
 NS = 'http://schemas.android.com/apk/res/android'
@@ -41,6 +44,8 @@ with zipfile.ZipFile(source) as z:
     vrfilter += end('intent-filter')
     metadata = leaf('meta-data', [attr('name', 'com.oculus.supportedDevices'), attr('value', 'quest3|quest3s|questpro|quest2')])
     chunks, stack = [], []
+    # Whether the base manifest already declares the supported devices itself.
+    declared_supported = [False]
     pos = pool_at + poolsize
     while pos < len(xml):
         typ, hs, size = S.unpack_from('<HHI', xml, pos)
@@ -64,6 +69,25 @@ with zipfile.ZipFile(source) as z:
                     S.pack_into('<I', b, p+8, v)
                     b[p+15] = 3
                     S.pack_into('<I', b, p+16, v)
+            if name == 'meta-data':
+                # Two elements with the same name are a packaging bug: Android keeps one of
+                # them, so the value is merged into the existing element instead of adding
+                # a second one. Without quest3s the 3S runs in compatibility mode and
+                # reports itself as an older headset.
+                declared_name = None
+                for i in range(n):
+                    p = 16 + attrsstart + i*attrsize
+                    if strings[U32(b, p+4)] == 'name' and b[p+15] == 3:
+                        declared_name = strings[U32(b, p+16)]
+                if declared_name == 'com.oculus.supportedDevices':
+                    declared_supported[0] = True
+                    for i in range(n):
+                        p = 16 + attrsstart + i*attrsize
+                        if strings[U32(b, p+4)] == 'value' and b[p+15] == 3:
+                            merged = idx(om.ensure_devices(strings[U32(b, p+16)]))
+                            S.pack_into('<I', b, p+8, merged)
+                            b[p+15] = 3
+                            S.pack_into('<I', b, p+16, merged)
             if name == 'activity' and identity == 'com.gmodvr.flat.GameActivity':
                 for i in range(n):
                     p = 16 + attrsstart + i*attrsize
@@ -87,7 +111,7 @@ with zipfile.ZipFile(source) as z:
         elif typ == 0x103:
             name, identity = stack.pop()
             if name == 'activity' and identity == 'com.gmodvr.flat.GameActivity': chunks.append(vrfilter)
-            if name == 'application': chunks.append(metadata)
+            if name == 'application' and not declared_supported[0]: chunks.append(metadata)
         chunks.append(bytes(b))
         pos += size
     data, offsets = bytearray(), []
@@ -129,6 +153,13 @@ with zipfile.ZipFile(source) as z:
         ordered.append(bytes(b))
     payload = pool + b''.join(ordered)
     manifest = S.pack('<HHI',3,8,8+len(payload)) + payload
+    # Read the finished file back instead of trusting the edit: exactly one element and
+    # every required identifier present, otherwise the packaged app would ship a
+    # manifest that silently drops the 3S into compatibility mode.
+    devices = om.declared_devices(manifest)
+    missing_devices, elements = om.missing_devices(devices)
+    assert elements == 1, f'com.oculus.supportedDevices must appear once, found {elements}: {devices}'
+    assert not missing_devices, f'supportedDevices lacks {missing_devices}: {devices}'
     dex = bytearray(z.read('classes.dex'))
     # Preserve DEX string_ids lexical ordering without changing any indices.
     # The original neighbours are launch_args < launcher < launcher saved session.

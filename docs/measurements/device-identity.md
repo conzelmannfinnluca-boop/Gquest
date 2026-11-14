@@ -90,8 +90,18 @@ lehnt Fast-Treffer wie `Quest 30` weiterhin ab — geprüft in `tests/device_mod
 ## Offener Punkt: das Manifest der GDroid-Basis
 
 Ob `com.oculus.supportedDevices` im Basispaket `quest3s` enthält, ist **ungeprüft** — die
-APK liegt hier nicht vor (siehe `PROJECT_STATUS.md`, Voraussetzungen). Bis das geklärt
-ist, ist die Geräteerkennung eine Heuristik mit Sicherheitsnetz, keine Zusage:
+APK liegt hier nicht vor (siehe `PROJECT_STATUS.md`, Voraussetzungen). Seit der
+Manifest-Prüfung im Packaging ist das aber kein stilles Risiko mehr:
+
+- `work/build_quest_lab.py` liest den fertigen Eintrag **zurück** und bricht ab, wenn er
+  fehlt, `quest3s` nicht enthält oder doppelt vorhanden ist.
+- Steht der Eintrag bereits im Basispaket, wird sein Wert **zusammengeführt** statt ein
+  zweiter Eintrag angehängt (bei zwei Einträgen behält Android einen beliebigen).
+- Die Lese-/Zusammenführungslogik ist in `overlay_manifest.py` ohne Android-SDK getestet;
+  gegen die echte Basis-APK ist sie nie gelaufen.
+
+Bis das geklärt ist, ist die Geräteerkennung eine Heuristik mit Sicherheitsnetz, keine
+Zusage:
 
 - unbekanntes Modell → gespeichertes Profil bleibt unangetastet
 - erkannter Widerspruch zur Auswahl → Statuszeile im Menü zeigt ihn an

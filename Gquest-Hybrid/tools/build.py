@@ -306,6 +306,19 @@ def run_capture_selftest() -> str:
     return "passed" if result.returncode == 0 else "failed"
 
 
+def run_manifest_selftest() -> str:
+    """Check the supportedDevices reader/merger on synthetic manifests."""
+    log("\n=== Ueberlagerungs-Manifest (Selbsttest) ===")
+    result = subprocess.run(
+        [sys.executable, str(PROJECT / "tools/overlay_manifest.py"), "--test"],
+        cwd=BASE, capture_output=True, text=True)
+    output = (result.stdout + result.stderr).strip()
+    if output:
+        log("\n".join(line for line in output.splitlines()
+                      if line.startswith(("PASS", "FAIL"))))
+    return "passed" if result.returncode == 0 else "failed"
+
+
 def run_lua_harnesses() -> str:
     """Run the Lua harnesses. Returns 'passed', 'skipped' or 'failed'."""
     log("\n=== Lua-Harnesses ===")
@@ -375,6 +388,10 @@ def run_host_cpp_tests() -> int:
     if capture_state == "failed":
         failures += 1
 
+    manifest_state = run_manifest_selftest()
+    if manifest_state == "failed":
+        failures += 1
+
     lua_state = run_lua_harnesses()
     if lua_state == "failed":
         failures += 1
@@ -392,10 +409,13 @@ def run_host_cpp_tests() -> int:
     perf_summary = "Auswertungs-Selbsttest" if perf_state == "passed" else "Auswertung fehlgeschlagen"
     capture_summary = ("Erfassungs-Selbsttest" if capture_state == "passed"
                        else "Erfassung fehlgeschlagen")
+    manifest_summary = ("Manifest-Selbsttest" if manifest_state == "passed"
+                        else "Manifest-Selbsttest fehlgeschlagen")
     lua_summary = (f"{len(LUA_HARNESSES)} Lua-Harnesses" if lua_state == "passed"
                    else "Lua-Harnesses übersprungen")
     log(f"\n{len(HOST_CPP_TESTS)} C++-Grenztests, {rust_summary}, {abi_summary}, "
-        f"{bridge_summary}, {perf_summary}, {capture_summary}, {lua_summary}.")
+        f"{bridge_summary}, {perf_summary}, {capture_summary}, {manifest_summary}, "
+        f"{lua_summary}.")
     return 0
 
 
