@@ -22,6 +22,7 @@
 #include "gquest_runtime.h"
 #include "gquest_device_profile.h"
 #include "gquest_device_jni.h"
+#include "gquest_content_install.h"
 #include "gquest_signature.h"
 
 static void BridgeLog(const char* format, ...) {
@@ -382,16 +383,7 @@ static bool InstallInputSnapshotBridge(void* xr) {
     return true;
 }
 
-static bool EnsureContentDirectory(const std::string& path) {
-    for (size_t i = 1; i <= path.size(); ++i) {
-        if (i != path.size() && path[i] != '/') continue;
-        const std::string dir = path.substr(0, i);
-        if (mkdir(dir.c_str(), 0700) != 0 && errno != EEXIST) return false;
-        struct stat st{};
-        if (stat(dir.c_str(), &st) != 0 || !S_ISDIR(st.st_mode)) return false;
-    }
-    return true;
-}
+#include "gquest_content_install.h"
 #include "gquest_retired_content.h"
 static bool InstallVRContent(JNIEnv* env, jobject activity) {
     jclass cls = env->GetObjectClass(activity);
@@ -408,24 +400,26 @@ static bool InstallVRContent(JNIEnv* env, jobject activity) {
     std::string listing = data && length > 0 ? std::string(data, length) : std::string();
     AAsset_close(manifest);
     const std::string root = "/storage/emulated/0/Android/data/com.gmodvr.qvrx/files/user/vr_content/";
-    bool ok = !listing.empty() && EnsureContentDirectory(root);
+    // The listing decides what gets written below root, so one bad line aborts the whole
+    // installation instead of being skipped. GquestParseContentManifest rejects absolute
+    // paths, "..", empty paths and sizes that are not plain digits.
+    std::vector<GquestContentEntry> entries;
+    GquestManifestError manifestError = GquestManifestError::None;
+    bool ok = !listing.empty() && GquestEnsureDirectory(root) &&
+              GquestParseContentManifest(listing, entries, manifestError);
+    if (manifestError != GquestManifestError::None)
+        LOG("CONTENT manifest rejected: %s", GquestManifestErrorText(manifestError));
     if (ok) ok=RetireGquestArcVR(root,"/storage/emulated/0/Android/data/com.gmodvr.qvrx/files/retired_content/arcvr-20261021/");
     unsigned installed = 0, existing = 0;
     std::vector<char> buffer(256 * 1024);
-    for (size_t pos = 0; ok && pos < listing.size();) {
-        size_t end = listing.find('\n', pos);
-        if (end == std::string::npos) { ok = false; break; }
-        const std::string line = listing.substr(pos, end-pos); pos = end+1;
-        const auto tab = line.find('\t');
-        if (tab == std::string::npos) { ok = false; break; }
-        char* numberEnd = nullptr;
-        const unsigned long long expected = strtoull(line.c_str(), &numberEnd, 10);
-        const std::string relative = line.substr(tab+1);
-        if (numberEnd != line.c_str()+tab || relative.empty() || relative[0]=='/' || relative.find("..")!=std::string::npos) { ok = false; break; }
+    for (const GquestContentEntry& entry : entries) {
+        if (!ok) break;
+        const std::string& relative = entry.relative;
+        const unsigned long long expected = entry.bytes;
         const std::string target = root + relative;
         struct stat st{};
         if (relative.compare(0,4,"lua/") != 0 && stat(target.c_str(), &st)==0 && S_ISREG(st.st_mode) && static_cast<unsigned long long>(st.st_size)==expected) { ++existing; continue; }
-        if (!EnsureContentDirectory(target.substr(0,target.find_last_of('/')))) { ok=false; break; }
+        if (!GquestEnsureDirectory(target.substr(0,target.find_last_of('/')))) { ok=false; break; }
         AAsset* asset = AAssetManager_open(assets, ("quest_lab_vr_content/"+relative).c_str(), AASSET_MODE_STREAMING);
         if (!asset || static_cast<unsigned long long>(AAsset_getLength64(asset))!=expected) { if(asset) AAsset_close(asset); ok=false; break; }
         const std::string temporary = target+".quest-lab-part";
@@ -471,7 +465,7 @@ static void ConfigureDetectedDevice(JNIEnv* env, jobject activity) {
     setenv("GQUEST_DEVICE", id, 1);
     const std::string root =
         "/storage/emulated/0/Android/data/com.gmodvr.qvrx/files/user/garrysmod/data/";
-    if (EnsureContentDirectory(root)) {
+    if (GquestEnsureDirectory(root)) {
         const std::string hint = root + "gquest_device.txt";
         if (FILE* file = fopen(hint.c_str(), "w")) {
             fprintf(file, "%s\n", id);

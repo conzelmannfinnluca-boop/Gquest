@@ -1,6 +1,7 @@
 // Retire only the 63 files previously installed by the private ArcVR overlay.
 // Rename into an unmounted backup; never traverse/delete user addon trees.
 #pragma once
+#include "gquest_content_install.h"
 static const char* const GquestRetiredArcVRPaths[]={
     "lua/autorun/client/gquest_arcvr_pose.lua",
     "lua/autorun/server/gquest_arcvr_collection.lua",
@@ -74,7 +75,7 @@ static bool RetireGquestArcVR(const std::string& root,const std::string& backup)
         if (lstat(source.c_str(),&st)!=0) { if(errno==ENOENT) continue; return false; }
         if (!S_ISREG(st.st_mode)) {LOG("RETIRE ArcVR unexpected non-file: %s",relative);return false;}
         const std::string target=backup+relative;
-        if (!EnsureContentDirectory(target.substr(0,target.find_last_of('/')))) return false;
+        if (!GquestEnsureDirectory(target.substr(0,target.find_last_of('/')))) return false;
         std::string destination=target;
         // Preserve a previous backup if the old APK installed its content again.
         unsigned suffix=0;

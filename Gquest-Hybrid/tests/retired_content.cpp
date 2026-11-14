@@ -7,18 +7,16 @@
 #include <filesystem>
 #include <fstream>
 #define LOG(...) do {} while(0)
-static bool EnsureContentDirectory(const std::string& path) {
-    std::error_code error;
-    std::filesystem::create_directories(path,error);
-    return !error && std::filesystem::is_directory(path);
-}
+// GquestEnsureDirectory comes from gquest_content_install.h, which the retirement header
+// includes. It used to be a local std::filesystem copy here, so the tested helper and the
+// shipped helper were two different implementations.
 #include "gquest_retired_content.h"
 int main() {
     char temporary[]="/tmp/gquest-retire-test-XXXXXX";
     assert(mkdtemp(temporary));
     const std::string base=std::string(temporary)+"/", root=base+"mounted/", backup=base+"retired/";
     auto write=[](const std::string& path,const char* text) {
-        assert(EnsureContentDirectory(path.substr(0,path.find_last_of('/'))));
+        assert(GquestEnsureDirectory(path.substr(0,path.find_last_of('/'))));
         std::ofstream file(path);file<<text;assert(file.good());
     };
     for (auto path:GquestRetiredArcVRPaths) write(root+path,"old private overlay");
