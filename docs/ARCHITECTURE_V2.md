@@ -433,6 +433,14 @@ weil die Eye-Resolution beim Start festgeschrieben wird.
 Die Stufensätze beider Geräte sind disjunkt, deshalb genügt die Gültigkeitsprüfung; die
 Gerätezeile der Datei liest nur das Menü.
 
+**Compatibility Mode.** Horizon OS meldet Geräte-APIs ein älteres Modell, wenn
+`com.oculus.supportedDevices` im Manifest das physische Headset nicht nennt; Meta warnt
+explizit davor, `Build.MODEL` als Capability-Aussage zu benutzen. Ein in der App
+gemeldeter Wert ist deshalb kein Hardware-Beweis. Die Erkennung bleibt nutzbar, weil
+jeder Fehlerfall auf „gespeichertes Profil behalten" fällt und die Statuszeile einen
+Widerspruch zur Auswahl anzeigt — belegt ist sie aber erst, wenn
+`docs/measurements/device-identity.md` für beide Geräte „konsistent" zeigt.
+
 Im VR-Menü steht direkt unter der Geräteauswahl eine Statuszeile mit drei Zuständen:
 `Erkannt: <Gerät> - passt zur Auswahl` (grün), `Erkannt: <Gerät> - Auswahl weicht ab`
 (orange) und `Erkannt: kein Geraet - Auswahl manuell` (grau). Damit ist eine

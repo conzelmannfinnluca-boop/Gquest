@@ -33,11 +33,19 @@ static bool GquestModelEquals(const char* value, const char* expected) {
 
 // Order matters: "Quest 3S" begins with "Quest 3", so the more specific model has
 // to be tested first or every 3S is misread as a Quest 3.
+//
+// The Oculus_* spellings are what Meta documents as a possible reported value
+// ("reported as Oculus_Quest_2"), so both spellings are accepted. Anything else stays
+// unknown on purpose: guessing a headset is worse than keeping the saved profile.
 static GquestDevice GquestDeviceFromModel(const char* model) {
-    if (GquestModelEquals(model, "Quest 3S")) return GquestDevice::Quest3S;
-    if (GquestModelEquals(model, "Quest 3")) return GquestDevice::Quest3;
-    if (GquestModelEquals(model, "Quest 2")) return GquestDevice::Quest2;
-    if (GquestModelEquals(model, "Quest Pro")) return GquestDevice::QuestPro;
+    if (GquestModelEquals(model, "Quest 3S") || GquestModelEquals(model, "Oculus_Quest_3S"))
+        return GquestDevice::Quest3S;
+    if (GquestModelEquals(model, "Quest 3") || GquestModelEquals(model, "Oculus_Quest_3"))
+        return GquestDevice::Quest3;
+    if (GquestModelEquals(model, "Quest 2") || GquestModelEquals(model, "Oculus_Quest_2"))
+        return GquestDevice::Quest2;
+    if (GquestModelEquals(model, "Quest Pro") || GquestModelEquals(model, "Oculus_Quest_Pro"))
+        return GquestDevice::QuestPro;
     return GquestDevice::Unknown;
 }
 

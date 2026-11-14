@@ -76,6 +76,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Geräteerkennung (Klassifizierung) | DONE | `android.os.Build.MODEL`/`.DEVICE` → Geräte-ID, C++-Test hier ausgeführt |
 | Erkennungs-Statuszeile + Umstellen-Knopf | DONE | drei Zustände, Textbudget und Knopf getestet; Derma-Rendering ungeprüft |
 | Geräteerkennung (JNI auf Gerät) | NOT TESTED | `Build`-Felder lesen nur auf Android prüfbar; hier kein Gerät |
+| Reale `Build.MODEL`-Werte Quest 3/3S | NOT TESTED | Erfassungswerkzeug + Protokoll fertig, kein Gerät (`docs/measurements/device-identity.md`) |
 | Lizenz + Herkunftsnachweis | DONE | `LICENSE` (MIT), `THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/` |
 
 ---
@@ -85,7 +86,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Voraussetzungen + Spiegel-Drift, ohne Traceback |
-| `build.py --tests` | **DONE** | 4 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + Auswertungs-Selbsttest + 10 Lua |
+| `build.py --tests` | **DONE** | 4 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 2 Werkzeug-Selbsttests + 10 Lua |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
 | C++-Grenztests | **DONE** (4 von 4) | siehe Abschnitt 4 |
@@ -117,7 +118,8 @@ python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
 Ergebnis: **4 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
-Auswertungs-Selbsttest und 10 Lua-Harnesses bestanden**, Exit-Code 0 — 26 Prüfungen.
+Auswertungs- und Erfassungs-Selbsttest sowie 10 Lua-Harnesses bestanden**, Exit-Code 0 —
+27 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -146,6 +148,12 @@ Performance-Auswertung (`perf_report.py --test`, synthetische Daten):
 - Abbruch bei gemischten Bildwiederholraten in einer Gruppe statt stiller Mittelung
 - Gegenprobe: eine absichtlich kaputte Rauschgrenze oder ein entferntes Grenzband
   lassen den Selbsttest scheitern — er prüft die Regel, nicht nur den Aufruf
+
+Geräteerfassung (`capture_device.py --test`, Stub-adb statt Headset):
+- Klassifizierung inklusive `Oculus_*`-Schreibweise, Fast-Treffer bleiben unbekannt
+- `getprop`-Pfad und `DEVICE`-Logzeile werden gelesen, fehlender In-App-Wert wird benannt
+- Urteil `konsistent` gegen `WIDERSPRUCH` bei abweichendem App-Wert
+- Protokollzeile wird ersetzt statt angehängt (zweimal erfassen ⇒ eine Zeile)
 
 Lua-Harnesses (10/10):
 - Griff-Cache: echte modelllokale Anker, Null-Baseline-Regression, vier Teil-Schreib-Rollbacks, finite/range/schema-Guards

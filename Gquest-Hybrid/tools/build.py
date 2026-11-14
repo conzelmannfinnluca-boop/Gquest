@@ -291,6 +291,19 @@ def run_perf_report_selftest() -> str:
     return "passed" if result.returncode == 0 else "failed"
 
 
+def run_capture_selftest() -> str:
+    """Check the device capture tool with a stub adb (no headset needed)."""
+    log("\n=== Geraeteerfassung (Selbsttest) ===")
+    result = subprocess.run(
+        [sys.executable, str(PROJECT / "tools/capture_device.py"), "--test"],
+        cwd=BASE, capture_output=True, text=True)
+    output = (result.stdout + result.stderr).strip()
+    if output:
+        log("\n".join(line for line in output.splitlines()
+                      if line.startswith(("PASS", "FAIL"))))
+    return "passed" if result.returncode == 0 else "failed"
+
+
 def run_lua_harnesses() -> str:
     """Run the Lua harnesses. Returns 'passed', 'skipped' or 'failed'."""
     log("\n=== Lua-Harnesses ===")
@@ -356,6 +369,10 @@ def run_host_cpp_tests() -> int:
     if perf_state == "failed":
         failures += 1
 
+    capture_state = run_capture_selftest()
+    if capture_state == "failed":
+        failures += 1
+
     lua_state = run_lua_harnesses()
     if lua_state == "failed":
         failures += 1
@@ -371,10 +388,12 @@ def run_host_cpp_tests() -> int:
     bridge_summary = ("Bridge-Cross-Compile" if bridge_state == "passed"
                       else "Bridge-Cross-Compile übersprungen")
     perf_summary = "Auswertungs-Selbsttest" if perf_state == "passed" else "Auswertung fehlgeschlagen"
+    capture_summary = ("Erfassungs-Selbsttest" if capture_state == "passed"
+                       else "Erfassung fehlgeschlagen")
     lua_summary = (f"{len(LUA_HARNESSES)} Lua-Harnesses" if lua_state == "passed"
                    else "Lua-Harnesses übersprungen")
     log(f"\n{len(HOST_CPP_TESTS)} C++-Grenztests, {rust_summary}, {abi_summary}, "
-        f"{bridge_summary}, {perf_summary}, {lua_summary}.")
+        f"{bridge_summary}, {perf_summary}, {capture_summary}, {lua_summary}.")
     return 0
 
 

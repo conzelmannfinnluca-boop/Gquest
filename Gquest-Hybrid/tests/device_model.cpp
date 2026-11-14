@@ -20,6 +20,13 @@ int main() {
     assert(GquestClassifyDevice(" Quest 3 \n", nullptr) == GquestDevice::Quest3);
     assert(GquestClassifyDevice("\tQUEST PRO\t", "") == GquestDevice::QuestPro);
 
+    // Meta documents the Oculus_* spelling as a possible reported value.
+    assert(GquestClassifyDevice("Oculus_Quest_3S", "") == GquestDevice::Quest3S);
+    assert(GquestClassifyDevice("Oculus_Quest_3", "") == GquestDevice::Quest3);
+    assert(GquestClassifyDevice("Oculus_Quest_2", "") == GquestDevice::Quest2);
+    assert(GquestClassifyDevice("Oculus_Quest_Pro", "") == GquestDevice::QuestPro);
+    assert(GquestClassifyDevice("Oculus_Quest_30", "") == GquestDevice::Unknown);
+
     // A known model is not overridden by an unrelated codename.
     assert(GquestClassifyDevice("Quest 2", "eureka") == GquestDevice::Quest2);
 
