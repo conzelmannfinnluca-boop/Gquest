@@ -74,6 +74,7 @@ PREREQUISITES: list[tuple[Path, str, str]] = [
 # every path in build/verify scripts keep working.
 BRIDGE_MIRRORS: list[str] = [
     "quest_engine_bridge.cpp",
+    "gquest_device_jni.h",
     "gquest_device_profile.h",
     "gquest_native_finger_profiles.h",
     "gquest_native_fingers.h",
@@ -84,7 +85,7 @@ BRIDGE_MIRRORS: list[str] = [
 
 # Boundary tests that only need a host C++ compiler and the headers.
 HOST_CPP_TESTS = ["native_fingers", "vr_lua", "retired_content", "device_model",
-                  "signature_scan"]
+                  "device_jni", "signature_scan"]
 
 # Lua boundary harnesses. They need a Lua 5.4 shared library but no private data;
 # run_lua_checks.py resolves a locally built one or a system install.
@@ -414,6 +415,13 @@ def run_cpp_boundary_tests() -> list[str]:
         if name == "retired_content":
             compile_command = [
                 "c++", "-std=c++17", "-O2", f"-I{bridge}", str(source), "-o", str(binary)
+            ]
+        if name == "device_jni":
+            # tests/host_jni comes first so the bridge header picks up the minimal host
+            # stand-in instead of the Android jni.h, which does not compile against glibc.
+            compile_command = [
+                "c++", "-std=c++17", "-O2", f"-I{PROJECT / 'tests/host_jni'}",
+                f"-I{bridge}", str(source), "-o", str(binary)
             ]
         log("+ " + " ".join(compile_command))
         compiled = subprocess.run(compile_command, cwd=BASE, capture_output=True, text=True)

@@ -75,7 +75,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Geräteprofile auf Quest 3S | NOT TESTED | Stufen definiert, aber kein Lauf auf 3S-Hardware |
 | Geräteerkennung (Klassifizierung) | DONE | `android.os.Build.MODEL`/`.DEVICE` → Geräte-ID, C++-Test hier ausgeführt |
 | Erkennungs-Statuszeile + Umstellen-Knopf | DONE | drei Zustände, Textbudget und Knopf getestet; Derma-Rendering ungeprüft |
-| Geräteerkennung (JNI auf Gerät) | NOT TESTED | `Build`-Felder lesen nur auf Android prüfbar; hier kein Gerät |
+| Geräteerkennung (JNI auf Gerät) | PARTIALLY IMPLEMENTED | Aufrufpfad, Fehlerpfade und Referenzzählung gegen Mock-JNI geprüft (`tests/device_jni.cpp`); echtes `PackageManager`-Verhalten NOT TESTED |
 | Reale `Build.MODEL`-Werte Quest 3/3S | NOT TESTED | Erfassungswerkzeug + Protokoll fertig, kein Gerät (`docs/measurements/device-identity.md`) |
 | `com.oculus.supportedDevices` im Overlay | PARTIALLY IMPLEMENTED | Wert wird zusammengeführt statt verdoppelt und zurückgelesen; nie gegen die echte Basis-APK gelaufen |
 | Widerspruch MODEL ↔ supportedDevices | DONE | Warnzeile im Log, reine Diagnose ohne Einfluss auf das Profil; auf Gerät NOT TESTED |
@@ -88,11 +88,11 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Build- und 4 Test-Voraussetzungen + Spiegel-Drift, ohne Traceback; Fallbacks wie in den Läufen |
-| `build.py --tests` | **DONE** | 5 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 3 Werkzeug-Selbsttests + 10 Lua |
-| `build.py --units` | **DONE** | 5 C++ + 3 Werkzeug-Selbsttests in 4 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
+| `build.py --tests` | **DONE** | 6 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 3 Werkzeug-Selbsttests + 10 Lua |
+| `build.py --units` | **DONE** | 6 C++ + 3 Werkzeug-Selbsttests in 4 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
-| C++-Grenztests | **DONE** (5 von 5) | siehe Abschnitt 4 |
+| C++-Grenztests | **DONE** (6 von 6) | siehe Abschnitt 4 |
 | Lua-Harnesses (10) | **DONE** (10 von 10) | lokale Lua-5.4-Toolchain gebaut |
 | C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle |
 | Android-Bridge-Cross-Compile | **DONE** | `aarch64-linux-android29`, `-Wall -Wextra -Werror`, keine Warnung |
@@ -120,9 +120,9 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **5 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
+Ergebnis: **6 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
 Auswertungs-, Erfassungs- und Manifest-Selbsttest sowie 10 Lua-Harnesses bestanden**,
-Exit-Code 0 — 29 Prüfungen.
+Exit-Code 0 — 30 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -139,6 +139,7 @@ C++-Grenztests:
 - `PASS VR Lua bridge: both hands/head/aim, quaternion axes, real validity/finite gates, input routing, inactive/invalid input and bounded haptics`
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 - `PASS device model classification: 3S beats 3, case/whitespace/near-miss guards, codename fallback, nulls and stable ids`
+- `PASS device JNI readers: meta-data requested with GET_META_DATA, absent key and null bundle stay empty, throwing calls clear the exception, every local reference released`
 - `PASS signature scan: unique hit at first byte, ambiguous duplicates and overlapping hits rejected, short prefix stops being decisive once it repeats, bad ranges not found, resolver fails closed with a reason`
 
 Android-Bridge (Cross-Compile für aarch64-linux-android29):

@@ -112,6 +112,14 @@ Fälle werden als Warnung geloggt, beide **ohne** das Profil zu ändern:
 `supported='(unreadable)'` heißt: Manifest nicht lesbar — dann schweigt der Vergleich
 absichtlich, weil es nichts zu vergleichen gibt.
 
+Der Aufrufpfad dorthin (Activity → Paketname → `PackageManager` → `ApplicationInfo.metaData`
+→ `Bundle.getString`) ist host-seitig gegen ein Mock-JNI geprüft
+(`Gquest-Hybrid/tests/device_jni.cpp`): dass `GET_META_DATA` (128) übergeben wird, dass
+ein fehlender Schlüssel und ein leeres Bundle leer bleiben statt zu raten, dass eine
+werfende JNI-Methode die Ausnahme räumt statt sie dem Engine zu hinterlassen, und dass
+jede lokale Referenz wieder freigegeben wird. **Was das nicht ist:** ein Nachweis, dass
+Android diese Werte liefert — Mock, Signaturstrings und Ersatz-`jni.h` sind Annahmen.
+
 Bis das geklärt ist, ist die Geräteerkennung eine Heuristik mit Sicherheitsnetz, keine
 Zusage:
 
