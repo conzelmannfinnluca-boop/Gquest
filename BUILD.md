@@ -14,6 +14,18 @@ Fehlt etwas, endet der Befehl mit Exit-Code 1 — ohne Traceback. Zusätzlich pr
 dass die gespiegelten Bridge-Dateien in `work/` und `Gquest-Hybrid/bridge/` byte-identisch
 sind. Weichen sie ab, ist die getestete nicht mehr die ausgelieferte Fassung.
 
+Zwei getrennte Abschnitte, weil sie unterschiedlich viel bedeuten:
+
+| Abschnitt | Fehlt etwas |
+|---|---|
+| **Build-Voraussetzungen** (9) | Der volle Build ist nicht möglich; Exit-Code 1. |
+| **Test-Voraussetzungen** (4: `c++`, `cargo`, Bridge-Cross-Compiler, Lua 5.4) | Nur die betroffene Gruppe erscheint als `UEBERSPRUNGEN`; der Build bleibt möglich, der Exit-Code ändert sich nicht. |
+
+Beide werden mit derselben Auflösung geprüft, die auch die Läufe verwenden: `cargo`
+zählt auch aus dem `PATH`, der Cross-Compiler auch als gestagter `clang`
+(`stage_ndk.py`), Lua auch aus dem System. Sonst meldet `--check` Dinge als fehlend, die
+der Build sehr wohl findet.
+
 ## 2. Grenztests (ohne private Daten)
 
 ```sh

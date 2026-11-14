@@ -13,6 +13,7 @@ failing with a traceback.
 from __future__ import annotations
 
 import argparse
+import ctypes
 import hashlib
 import json
 import shutil
@@ -48,7 +49,8 @@ PREREQUISITES: list[tuple[Path, str, str]] = [
      "source: upstream publishes binaries only."),
     (WORK / "gdroid-0.1.30-native", "Native libraries of that exact APK, unpacked",
      "Extract lib/arm64-v8a/*.so from the pinned APK into this folder."),
-    (NDK, "Android NDK 23.2.8568313 (aarch64-linux-android29-clang++)",
+    (NDK, "Android NDK 23.2.8568313, needed to link liblauncheq.so (the cross-compile "
+          "check also runs with the staged clang)",
      "sdkmanager --install 'ndk;23.2.8568313', target <repo>/work/android-sdk"),
     (TOOLS, "Android build-tools 34.0.0 (zipalign, apksigner)",
      "sdkmanager --install 'build-tools;34.0.0', target <repo>/work/android-sdk"),
@@ -128,8 +130,57 @@ def cargo(*args) -> None:
     run(binary, *args)
 
 
+# A prerequisite whose path may be absent while the code still works, because the runner
+# falls back to a system install. Resolved the same way the runner resolves it, so --check
+# never reports missing something the build would find.
+PREREQUISITE_FALLBACKS = {CARGO: lambda: cargo_binary() is not None}
+
+
 def check_prerequisites() -> list[tuple[bool, Path, str, str]]:
-    return [(path.exists(), path, purpose, obtain) for path, purpose, obtain in PREREQUISITES]
+    def present(path: Path) -> bool:
+        fallback = PREREQUISITE_FALLBACKS.get(path)
+        return path.exists() or bool(fallback and fallback())
+
+    return [(present(path), path, purpose, obtain)
+            for path, purpose, obtain in PREREQUISITES]
+
+
+def lua_library() -> str | None:
+    """Resolve Lua 5.4 by loading it, exactly like work/run_lua_checks.py does."""
+    for candidate in (os.environ.get("GQUEST_LUA_LIB"),
+                      str(WORK / "toolchains/lua/lib/liblua5.4.so.0"),
+                      "liblua5.4.so.0", "liblua5.4.so"):
+        if not candidate:
+            continue
+        try:
+            ctypes.CDLL(candidate)
+        except OSError:
+            continue
+        return candidate
+    return None
+
+
+def check_test_prerequisites() -> list[tuple[bool, str, str, str]]:
+    """What the test groups need: (present, label, purpose, how to obtain).
+
+    Resolved the way the runners resolve it, so this never disagrees with the run that
+    follows. A missing entry does not stop the build; that group then reports
+    UEBERSPRUNGEN and is absent from the coverage.
+    """
+    return [
+        (shutil.which("c++") is not None, "Host-C++-Compiler (c++)",
+         f"{len(HOST_CPP_TESTS)} C++-Grenztests und C++/Rust-ABI-Smoke",
+         "g++ oder clang++ installieren (build-essential); ein Host-Compiler genuegt"),
+        (cargo_binary() is not None, "cargo",
+         "Rust-Unit-Tests und C++/Rust-ABI-Smoke",
+         "rustup installieren oder eine Toolchain unter work/toolchains/cargo ablegen"),
+        (bridge_compiler() is not None, "Cross-Compiler fuer die Bridge",
+         "Bridge-Cross-Compile (aarch64-linux-android29, -Werror)",
+         "vollen NDK installieren oder: python3 Gquest-Hybrid/tools/stage_ndk.py"),
+        (lua_library() is not None, "Lua-5.4-Bibliothek",
+         f"{len(LUA_HARNESSES)} Lua-Harnesses",
+         "liblua5.4 installieren, GQUEST_LUA_LIB setzen oder work/toolchains/lua bauen"),
+    ]
 
 
 def check_mirrors() -> list[str]:
@@ -170,9 +221,20 @@ def report_check() -> int:
     for problem in mirror_problems:
         log(f"  [FAIL] {problem}")
 
+    test_results = check_test_prerequisites()
+    test_missing = [r for r in test_results if not r[0]]
+    log(f"\nTest-Voraussetzungen ({len(test_results) - len(test_missing)}"
+        f"/{len(test_results)} vorhanden):")
+    log("  Fehlt eine, laeuft die betroffene Gruppe nicht und erscheint als "
+        "UEBERSPRUNGEN; der Build bleibt moeglich.")
+    for present, label, purpose, obtain in test_results:
+        log(f"  [{'ok' if present else 'MISSING'}] {label}: {purpose}")
+        if not present:
+            log(f"     Quelle: {obtain}")
+
     if missing:
         log(f"\n{len(missing)} Voraussetzung(en) fehlen. Der volle Build ist damit nicht möglich.")
-        log("Die C++-Grenztests laufen trotzdem: python3 Gquest-Hybrid/tools/build.py --tests")
+        log("Ohne private Daten pruefbar: python3 Gquest-Hybrid/tools/build.py --units")
         return 1
     if mirror_problems:
         log("\nVoraussetzungen vollständig, aber die Spiegelprüfung ist fehlgeschlagen.")
