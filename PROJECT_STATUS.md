@@ -77,41 +77,59 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 
 | Build | Status | Grund |
 |---|---|---|
-| `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen |
-| Rust `cargo test` | **BLOCKED** | kein `cargo` im Export/Container |
-| C++-Grenztests | **DONE** (3 von 3 ausführbaren) | siehe Abschnitt 4 |
-| C++/Rust-ABI-Smoke | **BLOCKED** | braucht `libgquest_runtime.a` |
-| Lua-Harnesses (8) | **BLOCKED** | kein Lua 5.4 im Container |
+| `build.py --check` | **DONE** | meldet 9 Voraussetzungen + Spiegel-Drift, ohne Traceback |
+| `build.py --tests` | **DONE** | 3 C++-Grenztests + 8 Lua-Harnesses, ohne private Daten |
+| `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
+| Rust `cargo test` | **BLOCKED** | kein `cargo` in dieser Umgebung |
+| C++-Grenztests | **DONE** (3 von 3) | siehe Abschnitt 4 |
+| Lua-Harnesses (8) | **DONE** (8 von 8) | lokale Lua-5.4-Toolchain gebaut |
+| C++/Rust-ABI-Smoke | **BLOCKED** | braucht `libgquest_runtime.a` (Rust-Build) |
 | APK-Verifikation | **BLOCKED** | kein Basis-APK |
 
 Fehlende, bewusst nicht versionierte Voraussetzungen: `outputs/GDroid-0.1.30.apk`,
 `work/gdroid-0.1.30-native/`, `work/android-sdk/`, `work/toolchains/`,
 `work/quest-vr-content/`, `work/quest-vr-content-manifest.json`, Debug-Keystore,
-Spielinhalte. Zusätzlich ruft der Build `rtk proxy` auf, das außerhalb der privaten
-Umgebung nicht existiert.
+Spielinhalte. Der frühere `rtk proxy`-Wrapper ist entfernt; `build.py --check` listet
+diese Dateien jetzt einzeln mit Zweck und Beschaffungsweg auf.
 
 ---
 
 ## 4. Teststatus (in dieser Sitzung tatsächlich ausgeführt)
 
-Umgebung: Linux, `g++ 13.3.0`, `python3 3.12.3`, **kein** cargo, **kein** Lua,
-**keine** private APK.
+Umgebung: Linux, `g++ 13.3.0`, `python3 3.12.3`, kein `cargo`, keine private APK.
+Lua 5.4.7 wurde für die Harnesses lokal gebaut (`work/toolchains/lua/`, per `.gitignore`
+ausgeschlossen).
 
-```
-c++ -std=c++17 -O2 -I Gquest-Hybrid/bridge tests/native_fingers.cpp  -ldl  → PASS
-c++ -std=c++17 -O2 -I Gquest-Hybrid/bridge tests/vr_lua.cpp          -ldl  → PASS
-c++ -std=c++17 -O2 -I Gquest-Hybrid/bridge tests/retired_content.cpp       → PASS
+Ein Befehl, reproduzierbar:
+
+```sh
+python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ausgaben:
+Ergebnis: **3 C++-Grenztests bestanden, 8 Lua-Harnesses bestanden**, Exit-Code 0.
+
+C++-Grenztests:
 - `PASS native finger wrapper: all profiles, left/root/flags untouched, original input interpolation, invalid/off passthrough`
 - `PASS explicit native action sets: weapon/eject, both hands, missing set/action, inactive, invalid hand and embedded-NUL guards`
 - `PASS VR Lua bridge: both hands/head/aim, quaternion axes, real validity/finite gates, input routing, inactive/invalid input and bounded haptics`
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 
-**Nicht ausgeführt:** Rust-Tests, alle 8 Lua-Harnesses, ABI-Smoke, APK-Verifikation,
-jeder Hardware-Test, jede Frametime-Messung. Diese Liste ist absichtlich vollständig —
-nichts davon wird als bestanden behauptet.
+Lua-Harnesses (8/8):
+- Griff-Cache: echte modelllokale Anker, Null-Baseline-Regression, vier Teil-Schreib-Rollbacks, finite/range/schema-Guards
+- Mündung und Einhand-Frames: umgekehrte Retail-Achsen ersetzt, Munition erhalten, sieben Rollback-Grenzen, Crowbar ohne Vordergriff
+- Brechstangen-Richtung: exakter bestätigter Pitch, wiederholtes Deploy idempotent, Schusswaffen isoliert
+- Native Modellpolitik: elf Klassen, Zuweisung nach Deploy, Desktop/Mod/NPC/MP/Tod/fehlendes Modell ausgeschlossen
+- HL2-Ausrüstung: elf Klassen, persistente Munition, Allowlist, SP-/Alive-Guards
+- Waffenkatalog: elf echte Auswahlen, keine ArcVR-Bedienung
+- Pose-Gate und Reload-Client: HLVR-Aliase, linke Hand/Session/Tod-Gates, kein doppeltes Eject
+- Menü-Navigation: Root → Ausrichtung → Zurück → Schließen → Wiederöffnen → Waffen
+
+Zusätzlich geprüft: `--check` meldet alle 9 fehlenden Voraussetzungen mit Zweck und
+Beschaffungsweg; ohne `liblua5.4` meldet der Test-Modus `SKIPPED` statt `FAIL`.
+
+**Nicht ausgeführt:** Rust-Tests (kein cargo), ABI-Smoke, APK-Verifikation, jeder
+Hardware-Test, jede Frametime-Messung. Diese Liste ist absichtlich vollständig — nichts
+davon wird als bestanden behauptet.
 
 ---
 
@@ -170,7 +188,7 @@ bestanden ist, wird Crossplay als nicht verfügbar dokumentiert.
 | K1 | 10+ hartkodierte VAs in `libclient.so` | kritisch | offen — bricht bei GDroid-Update |
 | K2 | GOT-Patching von `liblauncher.so` | hoch | offen |
 | K3 | 4-Byte-Patch in `libclient.so` | hoch | offen |
-| K4 | `rtk proxy`-Build | mittel | offen (Phase 3) |
+| K4 | `rtk proxy`-Build | mittel | **erledigt** — `--check`/`--tests`/Vollbuild ohne Wrapper |
 | K5 | Duplikate `work/*` ↔ `Gquest-Hybrid/bridge/*` | mittel | offen |
 | K6 | Lizenz am eigenen Code | mittel | **erledigt** — MIT, siehe `LICENSE` |
 | K7 | Quest 3S ungetestet | hoch | offen |
@@ -182,16 +200,20 @@ bestanden ist, wird Crossplay als nicht verfügbar dokumentiert.
 
 ## 10. Nächste Aufgabe
 
-**Phase 3 — Build-Reproduzierbarkeit herstellen.** Konkret:
+**Phase 4 — Core-Skelett und Plattformabstraktion.** Voraussetzung: Entscheidung E1
+(geteilter Core / nur Overlay / nur Neubau), weil sie den Schnitt festlegt.
 
-1. `Gquest-Hybrid/tools/build.py` ohne `rtk proxy` aufrufbar machen.
-2. Fehlende Voraussetzungen als geprüfte Vorbedingung mit verständlicher Meldung
-   abfangen (Pfad, Zweck, Beschaffung).
-3. Lua 5.4 in den Test-Pfad bringen, damit die 8 vorhandenen Harnesses laufen.
-4. C++-Grenztests in ein einzelnes Testziel fassen.
+Konkret als erstes Paket:
 
-Warum diese und nicht eine „spannendere“: ohne lauffähige Core-Tests ist keine weitere
-Phase überprüfbar, und der Master-Prompt verlangt ausdrücklich echte, ausgeführte Tests.
+1. `core/platform/` mit `IPlatformHost`, `IVRBackend`, `IAssetSource`, `IClock`, `ILog`.
+2. `core/vr/tracking` mit `PoseSnapshot` + `valid_mask` + `isfinite`-Gates — die
+   Verhaltensvorgabe liefert der bereits laufende Test `vr_lua.cpp`.
+3. `core/vr/playspace` mit Snap-/Smooth-Turn, Recenter, Seated/Standing.
+4. Ein Fake-Host, der 60 Frames Posen liefert, ohne OpenXR, Android oder Engine.
+
+Warum nicht „Build fertig“: Phase 3 ist bis auf die optionale Zusammenführung der
+Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (11 Tests grün),
+damit ist der nächste sinnvolle Schritt der Core-Schnitt.
 
 ---
 

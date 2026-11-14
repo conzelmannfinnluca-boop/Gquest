@@ -4,7 +4,7 @@ Aktive Version: standalone GDroid-App com.gmodvr.qvrx, Ziel Quest3/3S. ArcVR ist
 
 Die nativen HL2-Waffen bekommen ihre passenden VR-Modelle nach Deploy zugewiesen. Ihre zuvor praktisch deckungsgleichen nativen Griff-Caches werden aus tatsächlichen Modell-Attachments erneuert. Reale Hand-/Kopfdaten, Magazin- und Schusszustände bleiben bei der Engine. Benutzer bestätigt: HL2-Pistole korrekt ausgerichtet; SMG-Haltung und Schießen gut; SMG zweihändig stabil und einhändig richtig nach Cache-Korrektur. Weitere Waffen und Nachladegesten sind nicht pauschal als fertig bestätigt.
 
-Build: `rtk proxy python3 Gquest-Hybrid/tools/build.py`. Der bestehende private Arbeitsordner mit offizieller0.1.30-Basis, eigenen Spiel-/VR-Dateien, SDK/JDK/NDK und Signierschlüssel ist Voraussetzung. Diese privaten Abhängigkeiten sind nicht Teil des Archivs. Eigene C++-/Rust-/Lua-Quellen, Konverter, Daten-Metadaten und sinnvolle Grenztests sind enthalten. Keine Engine-Bibliotheken, SDKs, Modelle, Texturen oder Schlüssel werden exportiert.
+Build: `python3 Gquest-Hybrid/tools/build.py`. Voraussetzungen und die Modi `--check` / `--tests` stehen in BUILD.md. Der bestehende private Arbeitsordner mit offizieller0.1.30-Basis, eigenen Spiel-/VR-Dateien, SDK/JDK/NDK und Signierschlüssel ist Voraussetzung. Diese privaten Abhängigkeiten sind nicht Teil des Archivs. Eigene C++-/Rust-/Lua-Quellen, Konverter, Daten-Metadaten und sinnvolle Grenztests sind enthalten. Keine Engine-Bibliotheken, SDKs, Modelle, Texturen oder Schlüssel werden exportiert.
 
 APK-SHA256: `676e7f6f9723645643e580b2114d911a494748df3bde9a452a0771749d69a40c`. Installations-/Neustartnachweis: docs/Gquest-HL2-only-verification.json. Vollständige1:1-PCVR-/Addon-Parität und Quest3S-Hardwaretest bleiben offen.
 

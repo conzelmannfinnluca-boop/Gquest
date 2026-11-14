@@ -452,7 +452,8 @@ Ziel: **ein** Befehl pro Ziel, klare Fehlermeldung pro fehlender Abhängigkeit.
 ```
 
 Jede fehlende Voraussetzung erzeugt eine Meldung mit Pfad, Zweck und Beschaffungshinweis
-— nicht einen Python-Traceback. Der aktuelle `rtk proxy`-Wrapper entfällt.
+— nicht einen Python-Traceback. Der frühere `rtk proxy`-Wrapper ist bereits entfallen,
+und `build.py --check` / `--tests` setzen diesen Punkt um.
 
 ---
 

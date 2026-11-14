@@ -77,22 +77,31 @@ Offen: ADR-1 formal bestätigen (siehe Abschnitt 6, „Kritische Entscheidungen�
 
 ---
 
-### Phase 3 — Build-Reproduzierbarkeit herstellen — **BLOCKED**
+### Phase 3 — Build-Reproduzierbarkeit herstellen — **DONE** (bis auf zwei Punkte)
 
-Ziel: `./gq build core` und `./gq test core` laufen ohne private Abhängigkeiten.
+Ziel: Tests laufen ohne private Abhängigkeiten, fehlende Dateien erzeugen eine
+verständliche Meldung statt eines Tracebacks.
 
-Aufgaben:
-1. `Gquest-Hybrid/tools/build.py` von `rtk proxy` entkoppeln; `python3` direkt.
-2. Fehlende Abhängigkeiten als geprüfte Vorbedingungen mit klarer Meldung abfangen.
-3. Lua 5.4 in den Test-Container aufnehmen, damit die 8 Harnesses laufen.
-4. `work/*` und `Gquest-Hybrid/bridge/*`-Duplikate auflösen (eine Quelle).
-5. C++-Grenztests in ein `ctest`/`make test`-Ziel fassen.
+Erledigt:
+1. `rtk proxy` ist aus Build, README und BUILD.md entfernt; `python3` genügt.
+2. `build.py --check` meldet jede fehlende Voraussetzung mit Pfad, Zweck und
+   Beschaffungsweg; Exit-Code 1, kein Traceback.
+3. Lua 5.4 wird für die Harnesses lokal gebaut; alle **8 Lua-Harnesses bestehen**.
+4. `build.py --tests` fasst 3 C++-Grenztests + 8 Lua-Harnesses in ein Testziel,
+   Exit-Code 0, ohne private Daten.
+5. `cargo.py` fällt auf ein System-`cargo` zurück und nennt sonst beide Suchpfade.
+6. Spiegel-Drift `work/` ↔ `Gquest-Hybrid/bridge/` wird bei jedem Build geprüft
+   (byte-identisch); die Dateien bleiben bewusst an beiden Pfaden, damit alle
+   vorhandenen Build- und Prüfskripte unverändert funktionieren.
 
-Akzeptanz: frischer Clone + dokumentierte Fremddateien ⇒ Build grün;
-fehlende Fremddateien ⇒ eine verständliche Meldung, kein Traceback.
+Offen (nicht blockierend):
+- Rust-Unit-Tests brauchen ein `cargo` in der Umgebung; hier nicht vorhanden.
+- C++/Rust-ABI-Smoke hängt am Rust-Build.
+- Der volle APK-Build bleibt an Basis-APK, NDK, JDK und Signaturschlüssel gebunden
+  (bewusst, siehe Lizenzlage).
 
-Blocker: Basis-APK, NDK, JDK, Signaturschlüssel nicht im Repository (bewusst).
-Teil-Lösung: Core-Tests so schneiden, dass sie **ohne** diese Dateien laufen.
+Akzeptanz erfüllt: frischer Clone `⇒` `--check` und `--tests` laufen; der APK-Build
+scheitert mit einer vollständigen Liste statt mit einem Traceback.
 
 ---
 

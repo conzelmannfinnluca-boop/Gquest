@@ -24,6 +24,8 @@ __pycache__/
 *.log
 # Reference clones used only for analysis (see docs/SOURCE_ANALYSIS.md)
 .refs/
+# Locally built toolchains (Lua for the test harnesses); rebuild per BUILD.md
+work/toolchains/
 work/android-sdk/
 work/quest-vr-content/
 work/gquest-weapon-models/content/

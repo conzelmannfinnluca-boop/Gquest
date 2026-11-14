@@ -335,10 +335,13 @@ zurück. Kammer und Slide bleiben Engine-Eigentum.
 6. `~/.android/debug.keystore`
 7. Spielinhalte (`GQUEST_GAME_DIR`) für den Modell-Konverter
 
-Zusätzlich: der Build ruft `rtk proxy python3` auf — ein Wrapper, der außerhalb der
-privaten Umgebung nicht existiert. **Ergebnis: ein frischer Clone ist nicht baubar.**
-Das ist kein Bug, sondern eine bewusste Entscheidung (keine Fremdinhalte im Repo) —
-muss aber in GQuest V2 durch einen reproduzierbaren Pfad ersetzt werden.
+Der frühere Build rief zusätzlich `rtk proxy python3` auf — ein Wrapper, der außerhalb
+der privaten Umgebung nicht existiert. **Das ist inzwischen behoben:** der Wrapper ist
+entfernt, `build.py --check` listet alle fehlenden Dateien mit Zweck und Beschaffungsweg,
+und `build.py --tests` führt 3 C++-Grenztests sowie 8 Lua-Harnesses ohne private Daten
+aus. **Ergebnis: ein frischer Clone kann prüfen, aber kein APK bauen.** Der APK-Build
+bleibt an den privaten Dateien hängen — eine bewusste Rechteentscheidung
+(keine Fremdinhalte im Repo), kein Defekt.
 
 ### 3.5 Quest-3- und Quest-3S-Lage
 
@@ -357,10 +360,10 @@ muss aber in GQuest V2 durch einen reproduzierbaren Pfad ersetzt werden.
 | T1 | 10+ hartcodierte VAs in `libclient.so` | kritisch — bricht bei jedem GDroid-Update | Offsets aus Signatur-Scan ableiten statt konstant |
 | T2 | GOT-Patching von `liblauncher.so` | hoch | durch dokumentierte Launcher-Argumente ersetzen, wo möglich |
 | T3 | 4-Byte-Patch in `libclient.so` im APK | hoch | Alternative: Cvar nach Init per eigenem Code setzen |
-| T4 | `rtk proxy`-Build-Wrapper | mittel | durch portable Python-Aufrufe ersetzen |
+| T4 | `rtk proxy`-Build-Wrapper | mittel | **behoben** — direkte `python3`-Aufrufe, `--check`/`--tests` |
 | T5 | Keine Lizenz für eigenen Code | mittel | Lizenz wählen, bevor Inhalte Dritter aufgenommen werden |
 | T6 | Duplizierte Dateien `work/*` ↔ `Gquest-Hybrid/bridge/*` | mittel | eine Quelle, Symlink oder Generierung |
-| T7 | Lua-Harnesses brauchen System-Lua 5.4 | niedrig | Lua in den Build-Container aufnehmen |
+| T7 | Lua-Harnesses brauchen Lua 5.4 | niedrig | **behoben** — lokaler Lua-Build dokumentiert, alle 8 laufen |
 | T8 | Zustand in globalem `GquestXR`-Table | mittel | Lifecycle + explizite Objekte |
 | T9 | `gquest_weapon_align.lua` mit 392 Zeilen in einer Datei | niedrig | bei V2 aufteilen |
 | T10 | Keine Quest-3S-Messung | hoch für Release | eigener Hardware-Lauf + Frametime-Protokoll |
