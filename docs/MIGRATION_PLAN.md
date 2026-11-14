@@ -301,9 +301,11 @@ spielbares Ergebnis)?
 Asset-Paket (eigene Maps, Props, Waffenmodelle) parallel entstehen, damit das Spiel
 irgendwann ohne Fremdinhalte installierbar ist?
 
-**E3 — Lizenz.** Der eigene Code hat **keine** Lizenz. Vor jeder Veröffentlichung oder
-fremden Beiträgen muss eine gewählt werden. (VRMod-Adoption verlangt zusätzlich
-Kennzeichnung + Credits + zlib-Lizenztext.)
+**E3 — Lizenz.** ~~Der eigene Code hat keine Lizenz.~~ **Erledigt:** MIT für den eigenen
+Code (`LICENSE`), Herkunftsaufstellung und zlib-Kennzeichnungspflicht in
+`THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/VRMod-zlib-LICENSE.txt`.
+Damit ist die Übernahme von VRMod-Code rechtlich vorbereitet — die Kopfkommentar-Vorlage
+und die Eintragstabelle stehen bereit, ausgelöst wird sie erst bei tatsächlicher Übernahme.
 
 **E4 — GDroid-Abhängigkeit.** Bleibt GDroid 0.1.30 dauerhaft die Basis (eingefroren),
 oder wird aktiv mit neuen GDroid-Versionen mitgezogen (jede = neue Offset-Jagd)?

@@ -69,6 +69,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Map-System / Map-Editor | NOT STARTED | – |
 | Performance-HUD | NOT STARTED | – |
 | Automatisierte Gerätetests | NOT STARTED | nur manuelle Trägerbestätigung |
+| Lizenz + Herkunftsnachweis | DONE | `LICENSE` (MIT), `THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/` |
 
 ---
 
@@ -171,7 +172,7 @@ bestanden ist, wird Crossplay als nicht verfügbar dokumentiert.
 | K3 | 4-Byte-Patch in `libclient.so` | hoch | offen |
 | K4 | `rtk proxy`-Build | mittel | offen (Phase 3) |
 | K5 | Duplikate `work/*` ↔ `Gquest-Hybrid/bridge/*` | mittel | offen |
-| K6 | Keine Lizenz am eigenen Code | mittel | offen — Entscheidung E3 |
+| K6 | Lizenz am eigenen Code | mittel | **erledigt** — MIT, siehe `LICENSE` |
 | K7 | Quest 3S ungetestet | hoch | offen |
 | K8 | Nur Pistole hat native Munitions-Protokoll | mittel | offen |
 | K9 | Keine Frametime-Messung | mittel | offen |
@@ -228,7 +229,9 @@ Phase 24 Release-Builds ...................... NOT STARTED
 **E1** Grundstrategie: geteilter Core mit zwei Hosts / nur Overlay / nur Neubau.
 **E2** Eigene Assets parallel aufbauen, damit das Spiel irgendwann ohne Retail-Inhalte
 installierbar ist?
-**E3** Lizenz für den eigenen Code wählen (Voraussetzung für Veröffentlichung/Beiträge).
+**E3** ~~Lizenz für den eigenen Code wählen~~ — **erledigt**: MIT (`LICENSE`), Herkunft und
+zlib-Kennzeichnungspflicht in `THIRD_PARTY_NOTICES.md`. Offen bleibt nur die Bestätigung,
+dass „shiftmann“ als Rechteinhaber-Name im Copyright-Header gewünscht ist.
 **E4** GDroid 0.1.30 einfrieren oder neuen Versionen aktiv folgen?
 
 Ohne E1 ist Phase 4 nicht sinnvoll beginnbar, weil sie den Schnitt festlegt.

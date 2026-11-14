@@ -28,4 +28,8 @@ Für den Modell-Metadaten-Konverter muss `GQUEST_GAME_DIR` auf die eigene Garry'
 - Spiel und HL2-Inhalte: Garry's Mod / Facepunch und Valve; separat erforderlich.
 - Entwicklung mit Unterstützung des KI-Coding-Agenten OpenAI Codex.
 
-Die Rechte externer Projekte bleiben bei deren Urhebern. Für den eigenen Integrationscode wurde noch keine Veröffentlichungs-/Weiterverwendungslizenz festgelegt; es wird hier keine Lizenz fremder Komponenten ersetzt.
+Der eigene Integrationscode in diesem Repository steht unter der [MIT-Lizenz](LICENSE).
+Die Rechte externer Projekte bleiben bei deren Urhebern: GDroid ist eine geschlossene
+Binary-Abhängigkeit, Garry's-Mod-/HL2-Inhalte sind separat erforderlich, und für
+übernommene VRMod-Konzepte gilt die zlib-Lizenz mit Kennzeichnungspflicht. Die
+vollständige Aufstellung steht in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
