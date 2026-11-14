@@ -85,7 +85,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Voraussetzungen + Spiegel-Drift, ohne Traceback |
-| `build.py --tests` | **DONE** | 4 C++-Grenztests + 9 Rust-Tests + ABI-Smoke + 10 Lua-Harnesses |
+| `build.py --tests` | **DONE** | 4 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + Auswertungs-Selbsttest + 10 Lua |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
 | C++-Grenztests | **DONE** (4 von 4) | siehe Abschnitt 4 |
@@ -116,8 +116,8 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **4 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile
-und 10 Lua-Harnesses bestanden**, Exit-Code 0 — 25 Prüfungen.
+Ergebnis: **4 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
+Auswertungs-Selbsttest und 10 Lua-Harnesses bestanden**, Exit-Code 0 — 26 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -139,6 +139,13 @@ Android-Bridge (Cross-Compile für aarch64-linux-android29):
 - `PASS bridge cross-compiles for aarch64-linux-android29 (keine Warnung, -Werror)`
 - Gegenprobe: ein absichtlich falscher JNI-Parameter bricht den Lauf mit der echten
   `jni.h`-Signatur ab — der Check prüft wirklich und ist nicht nur ein Compiler-Aufruf
+
+Performance-Auswertung (`perf_report.py --test`, synthetische Daten):
+- Urteile geeignet / grenzwertig / ungeeignet aus `ms_p95` gegen das Budget der Rate
+- überlappende p95-Bereiche gelten als „nicht gezeigt", nie als „ungefähr gleich"
+- Abbruch bei gemischten Bildwiederholraten in einer Gruppe statt stiller Mittelung
+- Gegenprobe: eine absichtlich kaputte Rauschgrenze oder ein entferntes Grenzband
+  lassen den Selbsttest scheitern — er prüft die Regel, nicht nur den Aufruf
 
 Lua-Harnesses (10/10):
 - Griff-Cache: echte modelllokale Anker, Null-Baseline-Regression, vier Teil-Schreib-Rollbacks, finite/range/schema-Guards
@@ -229,7 +236,7 @@ bestanden ist, wird Crossplay als nicht verfügbar dokumentiert.
 | K6 | Lizenz am eigenen Code | mittel | **erledigt** — MIT, siehe `LICENSE` |
 | K7 | Quest 3S ungetestet | hoch | offen — Profile und Erkennung vorhanden, Hardware fehlt |
 | K8 | Nur Pistole hat native Munitions-Protokoll | mittel | offen |
-| K9 | Keine Frametime-Messung | mittel | **Instrumentierung + Protokoll erledigt**, Hardware-Lauf offen (`docs/PERF_PROTOCOL.md`) |
+| K9 | Keine Frametime-Messung | mittel | **Instrumentierung, Protokoll und Auswertung erledigt**, Hardware-Lauf offen (`docs/PERF_PROTOCOL.md`) |
 | K10 | Linke Hand nutzt Original-Fingerpfad | niedrig | bewusst |
 
 ---

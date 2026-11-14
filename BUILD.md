@@ -33,6 +33,7 @@ brauchen:
 | Geräteklassifizierung | `Quest 3S` vor `Quest 3`, Groß-/Kleinschreibung, Codename-Rückfall, Fast-Treffer, Nullzeiger |
 | C++/Rust-ABI-Smoke | sechs Startfälle gegen die Release-Bibliothek, `GquestProfile`-Größe, `argv`-Eigentum |
 | Android-Bridge-Cross-Compile | `aarch64-linux-android29` mit `-Wall -Wextra -Werror`; prüft die JNI-Aufrufe gegen die echten Header |
+| Performance-Auswertung | `perf_report.py --test`: Urteile, Rauschgrenze, Abbruch bei gemischten Raten — synthetische Daten, keine Hardware |
 
 ### NDK für den Bridge-Check
 

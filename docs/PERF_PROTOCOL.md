@@ -134,15 +134,20 @@ Instrumentierung trennt beides, also tut die Auswertung es auch.
 
 Auswertung reproduzierbar, ohne Handarbeit:
 
-```python
-import glob, pandas as pd
-df = pd.concat([pd.read_csv(f).assign(run=f) for f in glob.glob("runs/*.csv")])
-per_run = df.groupby("run").agg(p95=("ms_p95", "median"), worst=("ms_p95", "max"),
-                                low=("fps_1pct_low", "median"), hitches=("hitches", "median"),
-                                budget=("under_budget_pct", "median"))
-print(per_run)
-print("p95 Median", per_run.p95.median(), "Spannweite", per_run.p95.min(), "-", per_run.p95.max())
+```sh
+python3 Gquest-Hybrid/tools/perf_report.py runs/*.csv --window 512
 ```
+
+Das Skript setzt genau die Regeln aus 7.1–7.4 um (Median je Lauf, Median und
+Spannweite je Stufe, Rauschgrenze, Urteil) und gibt eine Tabelle aus, die direkt nach
+`docs/measurements/<geraet>.md` passt. `--window` muss zu `gquest_perf_window` passen,
+weil daraus die Hitches pro Minute berechnet werden. Es warnt, wenn eine Stufe weniger
+als `--min-runs` (Standard 3) Läufe hat, und bricht ab, wenn in einer Gruppe gemischte
+Bildwiederholraten liegen.
+
+Die Urteile sind nur so gut wie die Eingabe: das Skript prüft keine Thermik und keine
+Reprojektion, weil beides nicht im CSV steht. Sein eigener Selbsttest (`--test`) läuft
+mit synthetischen Daten und belegt die Regelumsetzung, nicht die Hardware.
 
 ## 8. Aufnahmeblatt
 
