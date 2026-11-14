@@ -3,6 +3,7 @@
 // always follow the original path. Removing the gate restores the call site.
 #include <atomic>
 #include "gquest_native_finger_profiles.h"
+#include "gquest_signature.h"
 using GquestBlendFingers = void(*)(void*,bool,const void*,const void*,bool);
 static GquestBlendFingers GquestOriginalBlendFingers=nullptr;
 static std::atomic<int> GquestFingerProfile{-1};
@@ -57,12 +58,17 @@ static void ConfigureGquestNativeFingers(bool shutdown=false) {
         if (!factory || !dladdr(factory,&info) || !info.dli_fbase) {dlclose(library);return;}
         auto base=static_cast<unsigned char*>(info.dli_fbase);
         const unsigned char signature[]={0xff,0x83,0x3,0xd1,0xe8,0x4b,0x0,0xfd,0xfd,0xfb,0x9,0xa9};
-        if (memcmp(base+0x46e7b4,signature,sizeof(signature))!=0) {
-            blocked=true;LOG("NATIVE_FINGERS original signature mismatch; unchanged");dlclose(library);return;
+        // Scan for the recorded prologue instead of trusting a virtual address, so a
+        // shifted GDroid build is recognised rather than patched at the wrong place.
+        unsigned char* blendEntry=GquestResolveSite(base,"NATIVE_FINGERS blend",signature,sizeof(signature),0x46e7b4);
+        if (!blendEntry) {
+            blocked=true;LOG("NATIVE_FINGERS blend site unresolved; unchanged");dlclose(library);return;
         }
-        auto candidate=reinterpret_cast<uint32_t*>(base+0x46ed18);
+        // The patched call sits 0x564 bytes into the blend routine. Its branch target is
+        // verified against the entry below, so a wrong inner offset cannot be patched.
+        auto candidate=reinterpret_cast<uint32_t*>(blendEntry+0x564);
         memcpy(&before,candidate,4);
-        const int64_t originalDiff=0x46e7b4-0x46ed18;
+        const int64_t originalDiff=reinterpret_cast<int64_t>(blendEntry)-reinterpret_cast<int64_t>(candidate);
         if (before!=(0x94000000u|(static_cast<uint32_t>(originalDiff/4)&0x03ffffffu))) {
             blocked=true;LOG("NATIVE_FINGERS call signature mismatch; unchanged");dlclose(library);return;
         }
@@ -90,7 +96,7 @@ static void ConfigureGquestNativeFingers(bool shutdown=false) {
         const int64_t diff=reinterpret_cast<int64_t>(stub)-static_cast<int64_t>(address);
         if (diff%4 || diff<-(1ll<<27) || diff>=(1ll<<27)) {munmap(stub,size);blocked=true;dlclose(library);return;}
         after=0x94000000u|(static_cast<uint32_t>(diff/4)&0x03ffffffu);
-        GquestOriginalBlendFingers=reinterpret_cast<GquestBlendFingers>(base+0x46e7b4);
+        GquestOriginalBlendFingers=reinterpret_cast<GquestBlendFingers>(blendEntry);
         site=candidate;pinned=library;
     }
     if (!site || installed==requested) return;

@@ -86,10 +86,10 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Voraussetzungen + Spiegel-Drift, ohne Traceback |
-| `build.py --tests` | **DONE** | 4 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 2 Werkzeug-Selbsttests + 10 Lua |
+| `build.py --tests` | **DONE** | 5 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 2 Werkzeug-Selbsttests + 10 Lua |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
-| C++-Grenztests | **DONE** (4 von 4) | siehe Abschnitt 4 |
+| C++-Grenztests | **DONE** (5 von 5) | siehe Abschnitt 4 |
 | Lua-Harnesses (10) | **DONE** (10 von 10) | lokale Lua-5.4-Toolchain gebaut |
 | C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle |
 | Android-Bridge-Cross-Compile | **DONE** | `aarch64-linux-android29`, `-Wall -Wextra -Werror`, keine Warnung |
@@ -117,9 +117,9 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **4 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
+Ergebnis: **5 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
 Auswertungs- und Erfassungs-Selbsttest sowie 10 Lua-Harnesses bestanden**, Exit-Code 0 —
-27 Prüfungen.
+28 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -136,6 +136,7 @@ C++-Grenztests:
 - `PASS VR Lua bridge: both hands/head/aim, quaternion axes, real validity/finite gates, input routing, inactive/invalid input and bounded haptics`
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 - `PASS device model classification: 3S beats 3, case/whitespace/near-miss guards, codename fallback, nulls and stable ids`
+- `PASS signature scan: unique hit at first byte, ambiguous duplicates and overlapping hits rejected, short prefix stops being decisive once it repeats, bad ranges not found, resolver fails closed with a reason`
 
 Android-Bridge (Cross-Compile für aarch64-linux-android29):
 - `PASS bridge cross-compiles for aarch64-linux-android29 (keine Warnung, -Werror)`
@@ -236,7 +237,7 @@ bestanden ist, wird Crossplay als nicht verfügbar dokumentiert.
 
 | # | Punkt | Schwere | Status |
 |---|---|---|---|
-| K1 | 10+ hartkodierte VAs in `libclient.so` | kritisch | offen — bricht bei GDroid-Update |
+| K1 | Hartkodierte VAs in `libclient.so` | kritisch | **teilweise erledigt** — 4 Code-Stellen per Signatur-Scan (fail-closed), Daten-Globals weiter gepinnt |
 | K2 | GOT-Patching von `liblauncher.so` | hoch | offen |
 | K3 | 4-Byte-Patch in `libclient.so` | hoch | offen |
 | K4 | `rtk proxy`-Build | mittel | **erledigt** — `--check`/`--tests`/Vollbuild ohne Wrapper |

@@ -21,6 +21,7 @@
 #include <memory>
 #include "gquest_runtime.h"
 #include "gquest_device_profile.h"
+#include "gquest_signature.h"
 
 static void BridgeLog(const char* format, ...) {
     char text[1024];
@@ -58,6 +59,10 @@ static bool ReadableMemory(const void* address, size_t length) {
     }
     fclose(maps);return readable;
 }
+// The scan engine is header-only and must not depend on this logger, so it takes a hook.
+// Whatever it reports is a version drift or an unresolved patch site, and both belong in
+// the log next to the other native diagnostics.
+static void GquestScanLogToBridge(const char* message) { LOG("%s", message); }
 #include "gquest_native_fingers.h"
 #include "gquest_vr_lua.h"
 // Private, opt-in A/B for the audited GDroid0.1.30 client: its measured left local controller
@@ -70,6 +75,7 @@ static void ConfigureQuestLeftPalm(bool shuttingDown=false) {
     static void** instanceGlobal=nullptr;
     static void* pinnedLibrary=nullptr;
     static bool requested=false,modified=false,blocked=false,shutdownSeen=false;
+    static uint32_t* patchInstruction=nullptr;
     static auto nextFileCheck=std::chrono::steady_clock::now();
     static auto nextPatchAttempt=nextFileCheck;
     if (gettid()!=EngineContextOwner) return;
@@ -93,11 +99,15 @@ static void ConfigureQuestLeftPalm(bool shuttingDown=false) {
         auto candidate=static_cast<unsigned char*>(info.dli_fbase);
         const unsigned char signature[]={0xff,0x83,0x04,0xd1,0xeb,0x2b,0x0a,0x6d,0xe9,0x23,0x0b,0x6d,0xfd,0x7b,0x0c,0xa9,0xfc,0x6f,0x0d,0xa9,0xfa,0x67,0x0e,0xa9,0xf8,0x5f,0x0f,0xa9,0xf6,0x57,0x10,0xa9};
         const uint32_t expected[]={0x370000b3,0x1e214000,0x1e214021,0xbd000ea0,0xbd0016a1};
-        if (memcmp(candidate+0x46eac4,signature,sizeof(signature)) || memcmp(candidate+0x46ece8,expected,sizeof(expected))) {
-            blocked=true;LOG("LEFT_PALM signature mismatch; no change");dlclose(library);return;
+        // Constructor found by its recorded bytes; the branch to patch is 0x224 bytes in
+        // and is verified against the expected instructions before anything is written.
+        unsigned char* constructor=GquestResolveSite(candidate,"LEFT_PALM constructor",signature,sizeof(signature),0x46eac4);
+        if (!constructor || memcmp(constructor+0x224,expected,sizeof(expected))) {
+            blocked=true;LOG("LEFT_PALM constructor/branch unresolved; no change");dlclose(library);return;
         }
         instanceGlobal=*reinterpret_cast<void***>(candidate+0xf47ae0);
         if (!ReadableMemory(instanceGlobal,sizeof(void*))) {dlclose(library);return;}
+        patchInstruction=reinterpret_cast<uint32_t*>(constructor+0x224);
         base=candidate;pinnedLibrary=library;
         LOG("LEFT_PALM exact constructor/branch verified; opt-in candidate ready");
     }
@@ -113,7 +123,8 @@ static void ConfigureQuestLeftPalm(bool shuttingDown=false) {
     }
     const bool enable=requested && cachedController;
     if (enable==modified || now<nextPatchAttempt) return;
-    auto instruction=reinterpret_cast<uint32_t*>(base+0x46ece8);
+    auto instruction=patchInstruction;
+    if (!instruction) return;
     const uint32_t before=modified?0x14000005:0x370000b3;
     const uint32_t after=enable?0x14000005:0x370000b3;
     if (*instruction!=before) {blocked=true;LOG("LEFT_PALM unexpected instruction; no write");return;}
@@ -152,7 +163,8 @@ static void ProbeQuestHandOffsets() {
     if (!factory || !dladdr(factory,&info) || !info.dli_fbase) {dlclose(library);return;}
     auto base=static_cast<unsigned char*>(info.dli_fbase);
     const unsigned char signature[]={0xff,0x03,0x02,0xd1,0xfd,0x7b,0x06,0xa9,0xf3,0x3b,0x00,0xf9,0xfd,0x83,0x01,0x91,0xf3,0x03,0x08,0xaa,0x08,0xf0,0xa7,0x52,0xff,0xc3,0x02,0xf8,0xe8,0x23,0x00,0xb9};
-    if (memcmp(base+0x4163f0,signature,sizeof(signature))!=0) {enabled=false;LOG("HAND_LOCAL signature mismatch; no observation");dlclose(library);return;}
+    unsigned char* localPose=GquestResolveSite(base,"HAND_LOCAL localpose",signature,sizeof(signature),0x4163f0);
+    if (!localPose) {enabled=false;LOG("HAND_LOCAL localpose unresolved; no observation");dlclose(library);return;}
     auto instanceGlobal=*reinterpret_cast<void***>(base+0xf47ae0);
     if (!ReadableMemory(instanceGlobal,sizeof(void*)) || !ReadableMemory(*instanceGlobal,5026)) {dlclose(library);return;}
     auto instance=static_cast<unsigned char*>(*instanceGlobal);
@@ -160,7 +172,7 @@ static void ProbeQuestHandOffsets() {
     using LocalPose=Mat4(*)(void*,bool);
     ++samples;
     for (int side=0;side<2;++side) {
-        const Mat4 local=reinterpret_cast<LocalPose>(base+0x4163f0)(instance,side!=0);
+        const Mat4 local=reinterpret_cast<LocalPose>(localPose)(instance,side!=0);
         Mat4 grip{};memcpy(&grip,instance+32+64*side,sizeof(grip));
         unsigned char active,tracked,cached;
         memcpy(&active,instance+4888,1);memcpy(&tracked,instance+977+side,1);memcpy(&cached,instance+5024+side,1);
@@ -185,15 +197,16 @@ static void EnsureQuestLayerTargets() {
     if (!factory || !dladdr(factory,&info) || !info.dli_fbase) { dlclose(library); return; }
     auto base=static_cast<unsigned char*>(info.dli_fbase);
     const unsigned char signature[]={0xff,0x3,0x2,0xd1,0xfd,0x7b,0x2,0xa9,0xfc,0x6f,0x3,0xa9,0xfa,0x67,0x4,0xa9,0xf8,0x5f,0x5,0xa9,0xf6,0x57,0x6,0xa9,0xf4,0x4f,0x7,0xa9,0xfd,0x83,0x0,0x91};
-    if (memcmp(base+0x3ed58c,signature,sizeof(signature))!=0) {
-        attempted=true; LOG("LAYERS allocator signature mismatch; no call"); dlclose(library); return;
+    unsigned char* allocator=GquestResolveSite(base,"LAYERS allocator",signature,sizeof(signature),0x3ed58c);
+    if (!allocator) {
+        attempted=true; LOG("LAYERS allocator unresolved; no call"); dlclose(library); return;
     }
     // The allocator itself loads this relocated material-system global.
     auto materialGlobal=*reinterpret_cast<void***>(base+0xf47948);
     if (!materialGlobal || !*materialGlobal) { dlclose(library); return; }
     attempted=true;
     LOG("LAYERS initializing retained client targets on engine thread");
-    reinterpret_cast<void(*)()>(base+0x3ed58c)();
+    reinterpret_cast<void(*)()>(allocator)();
     for (int i=0;i<5;++i) {
         auto record=base+0xf4e818+i*48;
         void* texture; int surface;
@@ -523,6 +536,7 @@ extern "C" int LauncherMainAndroid(int argc, char** argv) {
     jobject activity = getActivity();
     if (!activity) { LOG("FAIL SDL activity missing"); return 1; }
     LOG("ENTRY SDL engine thread argc=%d", argc);
+    GquestScanLog = GquestScanLogToBridge;
     // Must run before the Rust policy loads the profile and before any XR swapchain
     // exists, because the eye resolution is latched at startup.
     ConfigureDetectedDevice(env);

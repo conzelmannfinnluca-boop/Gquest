@@ -358,7 +358,7 @@ bleibt an den privaten Dateien hängen — eine bewusste Rechteentscheidung
 
 | # | Schuld | Risiko | Empfehlung |
 |---|---|---|---|
-| T1 | 10+ hartcodierte VAs in `libclient.so` | kritisch — bricht bei jedem GDroid-Update | Offsets aus Signatur-Scan ableiten statt konstant |
+| T1 | 10+ hartcodierte VAs in `libclient.so` | kritisch — bricht bei jedem GDroid-Update | **teilweise erledigt**: vier Code-Stellen werden per Byte-Signatur gesucht (`gquest_signature.h`), kein/mehrdeutiger Treffer bricht ab; GOT-/BSS-Globals bleiben gepinnt |
 | T2 | GOT-Patching von `liblauncher.so` | hoch | durch dokumentierte Launcher-Argumente ersetzen, wo möglich |
 | T3 | 4-Byte-Patch in `libclient.so` im APK | hoch | Alternative: Cvar nach Init per eigenem Code setzen |
 | T4 | `rtk proxy`-Build-Wrapper | mittel | **behoben** — direkte `python3`-Aufrufe, `--check`/`--tests` |

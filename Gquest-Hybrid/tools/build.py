@@ -75,11 +75,13 @@ BRIDGE_MIRRORS: list[str] = [
     "gquest_native_finger_profiles.h",
     "gquest_native_fingers.h",
     "gquest_retired_content.h",
+    "gquest_signature.h",
     "gquest_vr_lua.h",
 ]
 
 # Boundary tests that only need a host C++ compiler and the headers.
-HOST_CPP_TESTS = ["native_fingers", "vr_lua", "retired_content", "device_model"]
+HOST_CPP_TESTS = ["native_fingers", "vr_lua", "retired_content", "device_model",
+                  "signature_scan"]
 
 # Lua boundary harnesses. They need a Lua 5.4 shared library but no private data;
 # run_lua_checks.py resolves a locally built one or a system install.

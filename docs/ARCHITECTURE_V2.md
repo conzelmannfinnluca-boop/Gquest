@@ -498,6 +498,15 @@ die vorherige Sicherung geladen und der Fehler geloggt. Kein stiller Teil-Load.
 | Mods | Manifest-Signatur optional, Konfliktprüfung, Plattformfilter |
 | Native | bestehende Signaturprüfung + Fail-Closed der Bridge bleibt Pflicht |
 
+Seit der Umstellung werden die vier gepatchten **Code**-Stellen nicht mehr über feste
+virtuelle Adressen angesprochen, sondern über ihre aufgezeichneten Bytes gesucht
+(`gquest_signature.h`): genau ein Treffer ⇒ diese Adresse wird benutzt, kein oder mehrere
+Treffer ⇒ die Stelle bleibt unangetastet und der Grund steht im Log. Die frühere Adresse
+wird nur noch für die Drift-Meldung verglichen, nicht mehr als Wahrheit. Innere Offsets
+(z. B. der zu patchende Sprung 0x224 Byte nach Funktionsbeginn) bleiben relativ und werden
+zusätzlich gegen erwartete Instruktionen geprüft. Daten-Globals (GOT-Slots,
+BSS-Records) lassen sich so nicht finden und bleiben auf den auditierten Build gepinnt.
+
 Das Sicherheitsniveau der bestehenden Bridge (Byte-Signatur vor Patch, `mprotect`
 zurück auf Originalrechte, `MAP_FIXED_NOREPLACE`, Trampolin-Reichweitenprüfung) ist
 Vorbild für alle künftigen nativen Eingriffe.
