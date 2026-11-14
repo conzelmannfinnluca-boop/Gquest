@@ -20,6 +20,7 @@
 #include <cerrno>
 #include <memory>
 #include "gquest_runtime.h"
+#include "gquest_device_profile.h"
 
 static void BridgeLog(const char* format, ...) {
     char text[1024];
@@ -433,6 +434,58 @@ static bool InstallVRContent(JNIEnv* env, jobject activity) {
     return ok;
 }
 
+// android.os.Build.MODEL names the headset ("Quest 3", "Quest 3S", ...). The id is
+// handed to the Rust startup policy through GQUEST_DEVICE and written next to the
+// profile so the VR menu preselects the same device. Every failure path leaves both
+// untouched, so an unreadable Build field can never invent a device.
+static std::string ReadJavaStringField(JNIEnv* env, jclass cls, const char* name) {
+    jfieldID field = env->GetStaticFieldID(cls, name, "Ljava/lang/String;");
+    if (env->ExceptionCheck()) { env->ExceptionClear(); return {}; }
+    if (!field) return {};
+    auto value = static_cast<jstring>(env->GetStaticObjectField(cls, field));
+    if (env->ExceptionCheck()) { env->ExceptionClear(); return {}; }
+    if (!value) return {};
+    std::string text;
+    if (const char* chars = env->GetStringUTFChars(value, nullptr)) {
+        text = chars;
+        env->ReleaseStringUTFChars(value, chars);
+    }
+    if (env->ExceptionCheck()) env->ExceptionClear();
+    env->DeleteLocalRef(value);
+    return text;
+}
+
+static void ConfigureDetectedDevice(JNIEnv* env) {
+    jclass build = env->FindClass("android/os/Build");
+    if (!build) {
+        if (env->ExceptionCheck()) env->ExceptionClear();
+        LOG("DEVICE Build class unavailable; saved profile kept");
+        return;
+    }
+    const std::string model = ReadJavaStringField(env, build, "MODEL");
+    const std::string device = ReadJavaStringField(env, build, "DEVICE");
+    env->DeleteLocalRef(build);
+    const char* id = GquestDeviceId(GquestClassifyDevice(model.c_str(), device.c_str()));
+    if (!id) {
+        LOG("DEVICE unrecognized model='%s' device='%s'; saved profile kept",
+            model.c_str(), device.c_str());
+        return;
+    }
+    setenv("GQUEST_DEVICE", id, 1);
+    const std::string root =
+        "/storage/emulated/0/Android/data/com.gmodvr.qvrx/files/user/garrysmod/data/";
+    if (EnsureContentDirectory(root)) {
+        const std::string hint = root + "gquest_device.txt";
+        if (FILE* file = fopen(hint.c_str(), "w")) {
+            fprintf(file, "%s\n", id);
+            fclose(file);
+        } else {
+            LOG("DEVICE cannot write %s; menu keeps its saved choice", hint.c_str());
+        }
+    }
+    LOG("DEVICE detected=%s model='%s' device='%s'", id, model.c_str(), device.c_str());
+}
+
 extern "C" int LauncherMainAndroid(int argc, char** argv) {
     // Keep the original engine loaded as a distinct dependency. This wrapper
     // changes no original native instructions and runs only in the lab package.
@@ -470,6 +523,9 @@ extern "C" int LauncherMainAndroid(int argc, char** argv) {
     jobject activity = getActivity();
     if (!activity) { LOG("FAIL SDL activity missing"); return 1; }
     LOG("ENTRY SDL engine thread argc=%d", argc);
+    // Must run before the Rust policy loads the profile and before any XR swapchain
+    // exists, because the eye resolution is latched at startup.
+    ConfigureDetectedDevice(env);
     if (!InstallVRContent(env, activity)) {
         LOG("STOP incomplete VR content installation"); env->DeleteLocalRef(activity); return 1;
     }

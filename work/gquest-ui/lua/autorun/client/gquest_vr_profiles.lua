@@ -125,9 +125,35 @@ function P.Serialize(state)
     return table.concat(lines, "\n") .. "\n"
 end
 
-function P.Load()
+P.DEVICE_HINT_PATH = "gquest_device.txt"
+
+--- The headset the native bridge identified at startup, if any. Written by the
+--- bridge from android.os.Build.MODEL; absent when the build cannot read it.
+function P.Detected()
+    local text = file.Read and file.Read(P.DEVICE_HINT_PATH, "DATA") or nil
+    if type(text) ~= "string" then return nil end
+    local id = string.match(text, "^%s*([%w]+)")
+    if id and P.DEVICES[id] then return id end
+    return nil
+end
+
+function P.Load(detectedId)
     local text = file.Read and file.Read(P.PATH, "DATA") or nil
-    return P.Parse(text)
+    local state = P.Parse(text)
+    if type(text) ~= "string" or text == "" then
+        -- Nothing saved yet: start on the headset that is actually in use, so the
+        -- numbers shown here are the ones the runtime picked (same recommendation).
+        -- SetDevice is deliberately not used: it stores the current values first and
+        -- would restore them unchanged when the detected device is already selected.
+        local detected = detectedId or P.Detected()
+        if detected and P.DEVICES[detected] then
+            state.device = detected
+            state.deviceTiers = P.DEVICES[detected].tiers
+            state.saved = {}
+            P.Recommend(state)
+        end
+    end
+    return state
 end
 
 function P.Save(state)

@@ -407,6 +407,32 @@ Die sechs Stufen sind die Allowlist des Rust-Profilparsers; jede andere Zeichenk
 fällt auf 1032×1104 zurück. Das VR-Menü wählt das Gerät und merkt sich pro Gerät die
 letzte Wahl. FFR-Stufen 0–3 und Raten 72/90 Hz gelten für beide Geräte gleich.
 
+### Geräteerkennung
+
+Die Bridge liest beim Start `android.os.Build.MODEL` (Rückfall: `Build.DEVICE` mit den
+Codenamen `panther`/`eureka`/`hollywood`/`seacliff`) und bildet daraus eine Geräte-ID
+(`quest3`, `quest3s`, …). Das Modell gewinnt gegen den Codenamen; „Quest 3S“ wird vor
+„Quest 3“ geprüft, weil es dessen Präfix ist.
+
+Die ID geht über die Umgebungsvariable `GQUEST_DEVICE` an die Rust-Startkomponente und
+zusätzlich als `data/gquest_device.txt` an das Lua-Menü, damit beide dieselbe Annahme
+haben. Die Erkennung läuft vor dem Laden des Profils und vor dem ersten XR-Swapchain,
+weil die Eye-Resolution beim Start festgeschrieben wird.
+
+| Lage | Ergebnis |
+|---|---|
+| keine Profildatei | Empfehlung des erkannten Geräts |
+| Stufe nicht im Satz des erkannten Geräts | Empfehlung statt fremder Auflösung |
+| Stufe gültig, gleiches Gerät | gespeicherte Wahl bleibt |
+| Gerät unbekannt oder `Build` nicht lesbar | gespeicherte Wahl bleibt |
+
+Die Stufensätze beider Geräte sind disjunkt, deshalb genügt die Gültigkeitsprüfung; die
+Gerätezeile der Datei liest nur das Menü.
+
+**Nicht getestet:** das Lesen der Java-Felder selbst (braucht Android). Getestet ist die
+Klassifizierung (`tests/device_model.cpp`) und die Auflösungslogik (Rust- und
+Lua-Harness).
+
 PCVR nutzt dieselben Mechanismen mit eigener Skalierung („Quality+“).
 
 Techniken, die im Core verankert werden (nicht dem Host überlassen):

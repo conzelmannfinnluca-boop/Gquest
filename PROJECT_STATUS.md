@@ -16,8 +16,8 @@ existiert.
 Ein **experimentelles VR-Overlay** auf der geschlossenen GDroid-0.1.30-APK
 (`com.gmodvr.qvrx`), bestehend aus:
 
-- eigenem C++-Bridge (`liblauncheq.so`, 552 Zeilen),
-- eigener Rust-Startkomponente (210 Zeilen, 5 Tests),
+- eigenem C++-Bridge (`liblauncheq.so`, 608 Zeilen, inkl. Geräteerkennung),
+- eigener Rust-Startkomponente (366 Zeilen, 9 Tests),
 - eigenem GLua-Modul `gquest_vr` (C++, 170 Zeilen),
 - Lua-Overlay (~1.090 Zeilen) für Waffen, Nachladen, Menü und Tracking,
 - nativen ARM64-Hooks für Fingerprofile und linke Handfläche,
@@ -36,7 +36,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 
 | System | Status | Beleg / Anmerkung |
 |---|---|---|
-| Rust-Startprofil + Launch-Argumente | DONE | 5 Unit-Tests im Code; Injection-Test vorhanden |
+| Rust-Startprofil + Launch-Argumente | DONE | 9 Unit-Tests im Code; Injection-Test vorhanden |
 | C++/Rust-ABI | DONE | `ffi_smoke.cpp` (benötigt Rust-Lib) |
 | VR-Content-Installation (APK→Gerät) | DONE | TSV-Manifest, Größen, Traversal-Schutz, atomar |
 | ArcVR-Retirement (63 Dateien) | DONE | C++-Test hier ausgeführt, PASS |
@@ -67,12 +67,14 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Lua-Sandbox + Permissions | NOT STARTED | Engine-Lua ist nicht sandboxed |
 | Mod-Manager / Workshop | NOT STARTED | GDroid-Mod-Manager wird genutzt |
 | Map-System / Map-Editor | NOT STARTED | – |
-| Performance-HUD | NOT STARTED | – |
+| Performance-HUD (Anzeige) | DONE | Overlay im `gquest_perf_hud.lua`; auf Hardware nicht gesichtet |
 | Automatisierte Gerätetests | NOT STARTED | nur manuelle Trägerbestätigung |
 | Performance-Sampler + CSV | DONE | `gquest_perf_hud.lua`, 9. Lua-Harness deckt Statistik und Ausgabe ab |
 | Performance-Messung auf Quest 3 | NOT TESTED | Instrumentierung fertig, Hardware-Lauf steht aus |
 | Geräteprofile Quest 3 / 3S | DONE | eigene Stufensätze, vom Runtime akzeptiert, im Menü wählbar |
 | Geräteprofile auf Quest 3S | NOT TESTED | Stufen definiert, aber kein Lauf auf 3S-Hardware |
+| Geräteerkennung (Klassifizierung) | DONE | `android.os.Build.MODEL`/`.DEVICE` → Geräte-ID, C++-Test hier ausgeführt |
+| Geräteerkennung (JNI auf Gerät) | NOT TESTED | `Build`-Felder lesen nur auf Android prüfbar; hier kein Gerät |
 | Lizenz + Herkunftsnachweis | DONE | `LICENSE` (MIT), `THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/` |
 
 ---
@@ -82,12 +84,13 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Voraussetzungen + Spiegel-Drift, ohne Traceback |
-| `build.py --tests` | **DONE** | 3 C++-Grenztests + 6 Rust-Tests + 10 Lua-Harnesses |
+| `build.py --tests` | **DONE** | 4 C++-Grenztests + 9 Rust-Tests + ABI-Smoke + 10 Lua-Harnesses |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
-| Rust `cargo test` | **DONE** (6 von 6) | Toolchain lokal in `work/toolchains` installiert |
-| C++-Grenztests | **DONE** (3 von 3) | siehe Abschnitt 4 |
+| Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
+| C++-Grenztests | **DONE** (4 von 4) | siehe Abschnitt 4 |
 | Lua-Harnesses (10) | **DONE** (10 von 10) | lokale Lua-5.4-Toolchain gebaut |
-| C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle
+| C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle |
+| Android-Bridge-Build | **BLOCKED** | braucht NDK und `jni.h`; hier nicht kompilierbar |
 | APK-Verifikation | **BLOCKED** | kein Basis-APK |
 
 Fehlende, bewusst nicht versionierte Voraussetzungen: `outputs/GDroid-0.1.30.apk`,
@@ -110,8 +113,8 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **3 C++-Grenztests, 6 Rust-Tests, C++/Rust-ABI-Smoke und 10 Lua-Harnesses
-bestanden**, Exit-Code 0.
+Ergebnis: **4 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke und 10 Lua-Harnesses
+bestanden**, Exit-Code 0 — 24 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -120,12 +123,14 @@ Rust-Tests:
 - CRLF und alle Auflösungsstufen bleiben erhalten
 - Explizite Level-Kommandos (`+connect`, `+load`, `+changelevel`) werden nicht überschrieben
 - FFI behandelt Nullzeiger, hält `argv` eigentümerrichtig und nullterminiert
+- Geräteerkennung: eine frische Installation übernimmt die Empfehlung des erkannten Geräts; eine Stufe des anderen Headsets schnappt auf die Empfehlung; gleiches Gerät, unbekanntes Gerät und fehlende Erkennung lassen die Wahl unangetastet
 
 C++-Grenztests:
 - `PASS native finger wrapper: all profiles, left/root/flags untouched, original input interpolation, invalid/off passthrough`
 - `PASS explicit native action sets: weapon/eject, both hands, missing set/action, inactive, invalid hand and embedded-NUL guards`
 - `PASS VR Lua bridge: both hands/head/aim, quaternion axes, real validity/finite gates, input routing, inactive/invalid input and bounded haptics`
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
+- `PASS device model classification: 3S beats 3, case/whitespace/near-miss guards, codename fallback, nulls and stable ids`
 
 Lua-Harnesses (10/10):
 - Griff-Cache: echte modelllokale Anker, Null-Baseline-Regression, vier Teil-Schreib-Rollbacks, finite/range/schema-Guards
@@ -137,13 +142,15 @@ Lua-Harnesses (10/10):
 - Pose-Gate und Reload-Client: HLVR-Aliase, linke Hand/Session/Tod-Gates, kein doppeltes Eject
 - Performance-Sampler: konstante Bildrate, Hitch-Erkennung, 1%-Low, Fenster-Klemmen und -Überlauf, Ablehnung von nan/inf/Null, Disable-Gate, CSV-Form und Header-einmalig, Summary- und Overlay-Gates
 - Geräteprofile: getrennte Stufensätze beider Geräte (alle sechs vom Runtime akzeptiert), Defaults deckungsgleich mit dem Runtime-Default, Altformat- und CRLF-Parsing, Fremdstufen-Snap, Rückfall bei ungültigen Werten, gemerkte Presets über Gerätewechsel, Setter-Guards, stabiler Round-Trip
+- Geräteerkennung im Menü: Hinweisdatei lesen, Whitespace/CRLF tolerieren, unbekannte ID ignorieren, frische Installation auf dem erkannten Gerät starten, gespeichertes Profil nie überschreiben
 - Menü-Navigation: Root → Ausrichtung → Zurück → Schließen → Wiederöffnen → Waffen
 
 Zusätzlich geprüft: `--check` meldet alle 9 fehlenden Voraussetzungen mit Zweck und
 Beschaffungsweg; ohne `liblua5.4` meldet der Test-Modus `SKIPPED` statt `FAIL`.
 
-**Nicht ausgeführt:** APK-Verifikation, Android-Cross-Build, jeder Hardware-Test, jede
-Frametime-Messung auf einem Headset. Diese Liste ist absichtlich vollständig — nichts
+**Nicht ausgeführt:** APK-Verifikation, Android-Cross-Build (und damit auch kein
+Kompilieren der Bridge), jeder Hardware-Test, jede Frametime-Messung auf einem
+Headset. Diese Liste ist absichtlich vollständig — nichts
 davon wird als bestanden behauptet.
 
 ---
@@ -174,6 +181,10 @@ Es existiert kein Lauf auf Quest 3S. Seit der Profiltrennung hat das Gerät eige
 Stufen (916×960 / 1374×1440 / 1558×1632, Empfehlung Ausgewogen bei 72 Hz), die der
 Rust-Parser akzeptiert — aber keine davon wurde auf 3S-Hardware verifiziert. Das ist
 ein Release-Blocker, kein Schönheitsfehler.
+
+Seit der Geräteerkennung wählt der Start die 3S-Empfehlung selbst, sobald
+`android.os.Build.MODEL` das Gerät meldet. Das **Lesen** der Java-Felder ist hier
+nicht ausführbar; nur die Klassifizierung dahinter ist getestet.
 
 ---
 
@@ -207,7 +218,7 @@ bestanden ist, wird Crossplay als nicht verfügbar dokumentiert.
 | K4 | `rtk proxy`-Build | mittel | **erledigt** — `--check`/`--tests`/Vollbuild ohne Wrapper |
 | K5 | Duplikate `work/*` ↔ `Gquest-Hybrid/bridge/*` | mittel | offen |
 | K6 | Lizenz am eigenen Code | mittel | **erledigt** — MIT, siehe `LICENSE` |
-| K7 | Quest 3S ungetestet | hoch | offen |
+| K7 | Quest 3S ungetestet | hoch | offen — Profile und Erkennung vorhanden, Hardware fehlt |
 | K8 | Nur Pistole hat native Munitions-Protokoll | mittel | offen |
 | K9 | Keine Frametime-Messung | mittel | **Instrumentierung erledigt**, Hardware-Lauf offen |
 | K10 | Linke Hand nutzt Original-Fingerpfad | niedrig | bewusst |
@@ -228,7 +239,7 @@ Konkret als erstes Paket:
 4. Ein Fake-Host, der 60 Frames Posen liefert, ohne OpenXR, Android oder Engine.
 
 Warum nicht „Build fertig“: Phase 3 ist bis auf die optionale Zusammenführung der
-Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (11 Tests grün),
+Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (24 Prüfungen grün),
 damit ist der nächste sinnvolle Schritt der Core-Schnitt.
 
 ---

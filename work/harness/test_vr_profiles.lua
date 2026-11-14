@@ -140,6 +140,44 @@ assert(reloaded.foveation == 3 and reloaded.rate == 90, "round trip numbers")
 assert(reloaded.saved.quest3 and reloaded.saved.quest3.tier == 1, "round trip preset slot")
 assert(P.Serialize(reloaded) == savedText, "serialize must be idempotent")
 
+-- 14) The detected headset is read from the bridge hint file.
+writes = {}
+assert(P.Detected() == nil, "no hint file must yield nil")
+writes[P.DEVICE_HINT_PATH] = "quest3s\n"
+assert(P.Detected() == "quest3s", "hint file not read")
+writes[P.DEVICE_HINT_PATH] = "  quest3  \r\n"
+assert(P.Detected() == "quest3", "hint file must tolerate whitespace and CRLF")
+writes[P.DEVICE_HINT_PATH] = "questpro\n"
+assert(P.Detected() == nil, "unknown hint must be ignored")
+
+-- 15) With nothing saved, the menu starts on the detected device and shows the same
+-- recommendation the Rust policy applies, so the numbers cannot disagree.
+writes = {}
+writes[P.DEVICE_HINT_PATH] = "quest3s\n"
+local fresh = P.Load()
+assert(fresh.device == "quest3s", "fresh load must use the detected device")
+assert(fresh.tier == "1374x1440" and fresh.foveation == 2 and fresh.rate == 72,
+    "fresh load must use the detected device recommendation")
+writes[P.DEVICE_HINT_PATH] = "quest3\n"
+local freshThree = P.Load()
+assert(freshThree.device == "quest3" and freshThree.tier == "1680x1760" and freshThree.rate == 90,
+    "fresh Quest 3 load")
+
+-- 16) An existing profile wins over detection: a user's choice is never overwritten.
+writes = {}
+writes[P.DEVICE_HINT_PATH] = "quest3\n"
+writes[P.PATH] = "916x960\n3\n72\nquest3s\n"
+local savedState = P.Load()
+assert(savedState.device == "quest3s" and savedState.tier == "916x960",
+    "saved profile must win over detection")
+
+-- 17) An explicit id overrides the hint file; an unknown one changes nothing.
+writes = {}
+local explicit = P.Load("quest3s")
+assert(explicit.device == "quest3s", "explicit detected id ignored")
+local bogus = P.Load("questpro")
+assert(bogus.device == "quest3", "unknown detected id must not switch the device")
+
 print("PASS per-device VR profiles: separate tier sets accepted by the runtime, runtime-matching "
     .. "defaults, legacy and CRLF parsing, foreign-tier snap, invalid value fallbacks, preset "
-    .. "remembering across device switches, setter guards and stable round trip")
+    .. "remembering across device switches, setter guards, stable round trip and detection-aware load")

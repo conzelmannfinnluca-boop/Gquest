@@ -266,8 +266,9 @@ PCVR-Builds erst nach Phase 21.
 | Punkt | Quest 3 | Quest 3S |
 |---|---|---|
 | Status | PARTIALLY IMPLEMENTED, hardwarebestätigt | **NOT TESTED** |
-| Eye-Resolution-Stufe | 1680×1760 (Quality) | 1548×1656 (Balanced) |
-| Default-Profil | Quality | Balanced |
+| Eye-Resolution-Stufe | 1680×1760 (Schärfer) | 1374×1440 (Ausgewogen) |
+| Default-Profil | Schärfer, 90 Hz | Ausgewogen, 72 Hz |
+| Geräteerkennung | liest `Build.MODEL` | liest `Build.MODEL` |
 | Bekannte offene Punkte | Frametime-Messung fehlt systematisch | kompletter Ersteindruck fehlt |
 
 **Quest-3S-Anpassungen, die sicher nötig sind:**

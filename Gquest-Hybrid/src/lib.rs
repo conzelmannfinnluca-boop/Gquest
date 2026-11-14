@@ -50,12 +50,83 @@ pub fn parse_profile(bytes: &[u8]) -> GquestProfile {
     if lines.next() == Some(b"90".as_slice()) { profile.refresh_rate = 90; }
     profile
 }
-fn load_profile() -> GquestProfile {
-    let mut bytes = Vec::new();
-    match std::fs::File::open(PROFILE).and_then(|file| file.take(4097).read_to_end(&mut bytes)) {
-        Ok(_) => parse_profile(&bytes),
-        Err(_) => GquestProfile::default(),
+/// Tiers that belong to a device. A tier outside the device's own set is not
+/// accepted silently: a profile copied from the other headset must not run the
+/// wrong resolution just because the string is in the global allowlist.
+const QUEST3_TIERS: [&[u8]; 3] = [b"1032x1104", b"1548x1656", b"1680x1760"];
+const QUEST3S_TIERS: [&[u8]; 3] = [b"916x960", b"1374x1440", b"1558x1632"];
+
+/// Recommended profile per device. Must match P.DEVICES[*].recommend in
+/// work/gquest-ui/lua/autorun/client/gquest_vr_profiles.lua.
+const DEVICE_DEFAULTS: [(&str, u32, u32, u32, u32); 2] = [
+    ("quest3", 1680, 1760, 2, 90),
+    ("quest3s", 1374, 1440, 2, 72),
+];
+
+fn device_tiers(device: &str) -> Option<&'static [&'static [u8]]> {
+    match device {
+        "quest3" => Some(&QUEST3_TIERS[..]),
+        "quest3s" => Some(&QUEST3S_TIERS[..]),
+        _ => None,
     }
+}
+
+fn device_default(device: &str) -> Option<(u32, u32, u32, u32)> {
+    DEVICE_DEFAULTS.iter()
+        .find(|(id, _, _, _, _)| *id == device)
+        .map(|(_, width, height, foveation, rate)| (*width, *height, *foveation, *rate))
+}
+
+fn detected_device() -> Option<String> {
+    let value = std::env::var("GQUEST_DEVICE").ok()?.trim().to_string();
+    if device_tiers(&value).is_some() { Some(value) } else { None }
+}
+
+/// Resolve the saved profile against the headset that is actually in use.
+/// - Nothing saved yet: adopt the detected device's recommendation.
+/// - Tier not valid on this device: adopt the recommendation instead of running a
+///   resolution nobody chose.
+/// - Valid tier, unknown device or no detection: never touch the user's choice.
+///
+/// The profile's device line is not needed here: the tier sets of the two headsets
+/// are disjoint, so validity alone already identifies a foreign tier.
+pub fn finalize_profile(mut profile: GquestProfile, detected: Option<&str>) -> GquestProfile {
+    let device = match detected.filter(|id| device_tiers(id).is_some()) {
+        Some(id) => id,
+        None => return profile,
+    };
+    let (width, height, foveation, rate) = match device_default(device) {
+        Some(values) => values,
+        None => return profile,
+    };
+    if profile.profile_loaded == 0 {
+        profile.eye_width = width;
+        profile.eye_height = height;
+        profile.foveation = foveation;
+        profile.refresh_rate = rate;
+        return profile;
+    }
+    let current = format!("{}x{}", profile.eye_width, profile.eye_height);
+    let valid = device_tiers(device).unwrap().iter().any(|tier| *tier == current.as_bytes());
+    if !valid {
+        profile.eye_width = width;
+        profile.eye_height = height;
+        profile.foveation = foveation;
+        profile.refresh_rate = rate;
+    }
+    profile
+}
+
+fn load_profile() -> GquestProfile {
+    let detected = detected_device();
+    let mut bytes = Vec::new();
+    let opened = std::fs::File::open(PROFILE).and_then(|file| file.take(4097).read_to_end(&mut bytes));
+    let profile = match opened {
+        // An existing but empty file counts as "nothing configured yet".
+        Ok(_) if !bytes.is_empty() => parse_profile(&bytes),
+        _ => GquestProfile::default(),
+    };
+    finalize_profile(profile, detected.as_deref())
 }
 fn defaults(profile: GquestProfile) -> Vec<Vec<u8>> {
     let values = [
@@ -175,6 +246,57 @@ mod tests {
         assert_eq!(parse_profile(&vec![b'x';4097]), GquestProfile::default());
         let p = parse_profile(b"invalid\n0\n90");
         assert_eq!((p.foveation,p.refresh_rate),(0,90));
+    }
+    #[test]
+    fn a_fresh_install_adopts_the_detected_devices_recommendation() {
+        for (device, width, height, foveation, rate) in DEVICE_DEFAULTS {
+            let profile = finalize_profile(GquestProfile::default(), Some(device));
+            assert_eq!(
+                (profile.eye_width, profile.eye_height, profile.foveation, profile.refresh_rate),
+                (width, height, foveation, rate),
+                "{device}"
+            );
+        }
+        // The Lua menu recommends the same numbers; these are the shared constants.
+        assert_eq!(device_default("quest3"), Some((1680, 1760, 2, 90)));
+        assert_eq!(device_default("quest3s"), Some((1374, 1440, 2, 72)));
+    }
+    #[test]
+    fn a_tier_from_the_other_headset_snaps_to_the_recommendation() {
+        // Every tier belongs to exactly one headset, so a saved tier outside this
+        // device's set can only come from the other one.
+        for tier in ["1680x1760", "1548x1656", "1032x1104"] {
+            let foreign = parse_profile(format!("{tier}\n3\n90\nquest3\n").as_bytes());
+            let fixed = finalize_profile(foreign, Some("quest3s"));
+            assert_eq!(
+                (fixed.eye_width, fixed.eye_height, fixed.foveation, fixed.refresh_rate),
+                (1374, 1440, 2, 72),
+                "{tier}"
+            );
+        }
+        // A tier that is valid on the detected device is kept exactly as chosen,
+        // including a foveation and rate the recommendation would have changed.
+        let chosen = parse_profile(b"916x960\n1\n90\n");
+        let kept = finalize_profile(chosen, Some("quest3s"));
+        assert_eq!(
+            (kept.eye_width, kept.eye_height, kept.foveation, kept.refresh_rate),
+            (916, 960, 1, 90)
+        );
+    }
+    #[test]
+    fn same_device_and_unrecognised_devices_never_change_the_choice() {
+        let saved = parse_profile(b"1548x1656\n1\n90\nquest3\n");
+        let same = finalize_profile(saved, Some("quest3"));
+        assert_eq!((same.eye_width, same.foveation, same.refresh_rate), (1548, 1, 90));
+        // Headset the policy has no tiers for: nothing is guessed.
+        let other = finalize_profile(saved, Some("questpro"));
+        assert_eq!((other.eye_width, other.eye_height), (1548, 1656));
+        // No detection at all (non-Android or unreadable Build): unchanged.
+        let none = finalize_profile(saved, None);
+        assert_eq!((none.eye_width, none.eye_height), (1548, 1656));
+        // Junk in the variable must not be treated as a device id.
+        let junk = finalize_profile(saved, Some("Quest 3S "));
+        assert_eq!((junk.eye_width, junk.eye_height), (1548, 1656));
     }
     #[test]
     fn every_device_tier_parses_and_menu_bookkeeping_is_ignored() {

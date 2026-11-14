@@ -30,6 +30,7 @@ brauchen:
 | `retired_content` | 63 ArcVR-Dateien gesichert, fremdes Addon bleibt, Wiederholung, Namenskollision, Symlink-Schutz |
 | 10 Lua-Harnesses | Griff-/Mündungs-Caches, Modellpolitik, Ausrüstung, Waffenkatalog, Pose-Gate, Reload-Client, Reserve-Transfer, Performance-Sampler, Geräteprofile, Menü-Navigation |
 | Rust-Unit-Tests | Startargumente, Profilparser beider Geräte, ABI-Grenzen — laufen mit, sobald `cargo` vorhanden ist |
+| Geräteklassifizierung | `Quest 3S` vor `Quest 3`, Groß-/Kleinschreibung, Codename-Rückfall, Fast-Treffer, Nullzeiger |
 | C++/Rust-ABI-Smoke | sechs Startfälle gegen die Release-Bibliothek, `GquestProfile`-Größe, `argv`-Eigentum |
 
 Die Lua-Harnesses laufen, sobald eine `liblua5.4` auffindbar ist; sonst meldet der
@@ -98,7 +99,7 @@ Spielinhalte, Signaturschlüssel. `.gitignore` schließt ihre Endungen aus.
 1. Basis-APK gegen Pin prüfen (`verify_gdroid_base.py`): Digest, 34 native Bibliotheken,
    vier Signaturblöcke, Finger-Blend-Aufruf, VR-Init-Patch.
 2. Zehn Lua-Harnesses (Lua 5.4, siehe oben).
-3. `cargo test`, drei C++-Grenztests, `cargo build --release`, C++/Rust-ABI-Smoke.
+3. `cargo test`, vier C++-Grenztests, `cargo build --release`, C++/Rust-ABI-Smoke.
 4. Cross-Build `liblauncheq.so` gegen NDK und `liblauncher.so` des Basispakets.
 5. Overlay-APK bauen (`build_quest_lab.py`), `zipalign`, signieren, verifizieren.
 6. Payload-Identität: nur `AndroidManifest.xml`, `classes.dex` und
