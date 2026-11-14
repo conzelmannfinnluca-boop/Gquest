@@ -196,6 +196,22 @@ assert(mismatchSeverity == "mismatch" and mismatchText:find("Quest 3 ", 1, true)
 -- An explicit id wins over the hint file, so the menu can reuse the value it loaded.
 assert(select(2, P.DetectionLabel(matched, "quest3s")) == "match", "explicit id ignored")
 
+-- 19) Every status text must fit the one-row budget for every device name. A longer
+-- name would still wrap (the menu reserves extra height), but it would no longer be one
+-- glance.
+local function statusLength(text) return #text end
+for _, id in ipairs(P.ORDER) do
+    local state = P.Defaults()
+    state.device = id
+    for _, detectedId in ipairs({ id, P.ORDER[1] == id and P.ORDER[2] or P.ORDER[1] }) do
+        local text = P.DetectionLabel(state, detectedId)
+        assert(statusLength(text) <= P.STATUS_LINE_BUDGET,
+            "status text too long for one row: " .. text)
+    end
+end
+assert(statusLength(P.DetectionLabel(P.Defaults(), "questpro")) <= P.STATUS_LINE_BUDGET,
+    "no-detection text too long")
+
 print("PASS per-device VR profiles: separate tier sets accepted by the runtime, runtime-matching "
     .. "defaults, legacy and CRLF parsing, foreign-tier snap, invalid value fallbacks, preset "
     .. "remembering across device switches, setter guards, stable round trip, detection-aware "

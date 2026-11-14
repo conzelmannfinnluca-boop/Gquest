@@ -137,18 +137,24 @@ function P.Detected()
     return nil
 end
 
+--- Characters that still fit on one status row: 580 px of label width at
+--- DermaDefaultBold. Estimated from the font, not measured in Derma, so the menu also
+--- grows the label for longer text instead of clipping it.
+P.STATUS_LINE_BUDGET = 60
+
 --- One line for the VR menu: did the automatic detection agree with the selection?
 --- Returns the text plus a severity ("match", "mismatch", "none") for the colour.
+--- Kept short so a realistic device name stays inside P.STATUS_LINE_BUDGET.
 function P.DetectionLabel(state, detectedId)
     local detected = detectedId or P.Detected()
     local device = detected and P.DEVICES[detected] or nil
     if not device then
-        return "Automatisch erkannt: kein Geraet - Auswahl bleibt manuell", "none"
+        return "Erkannt: kein Geraet - Auswahl manuell", "none"
     end
     if state and state.device == detected then
-        return "Automatisch erkannt: " .. device.label .. " - passt zur Auswahl", "match"
+        return "Erkannt: " .. device.label .. " - passt zur Auswahl", "match"
     end
-    return "Automatisch erkannt: " .. device.label .. " - Auswahl weicht ab", "mismatch"
+    return "Erkannt: " .. device.label .. " - Auswahl weicht ab", "mismatch"
 end
 
 function P.Load(detectedId)

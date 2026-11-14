@@ -430,9 +430,18 @@ Die Stufensätze beider Geräte sind disjunkt, deshalb genügt die Gültigkeitsp
 Gerätezeile der Datei liest nur das Menü.
 
 Im VR-Menü steht direkt unter der Geräteauswahl eine Statuszeile mit drei Zuständen:
-„passt zur Auswahl“ (grün), „Auswahl weicht ab“ (orange) und „kein Gerät erkannt“
-(grau). Damit ist eine fehlgeschlagene Erkennung sichtbar, statt sich nur als
-unerwartete Bildrate zu zeigen.
+`Erkannt: <Gerät> - passt zur Auswahl` (grün), `Erkannt: <Gerät> - Auswahl weicht ab`
+(orange) und `Erkannt: kein Geraet - Auswahl manuell` (grau). Damit ist eine
+fehlgeschlagene Erkennung sichtbar, statt sich nur als unerwartete Bildrate zu zeigen.
+
+Die Texte bleiben unter `P.STATUS_LINE_BUDGET` = 60 Zeichen (heute maximal 38), was auf
+eine Zeile bei 580 px Labelbreite ausgelegt ist. Das Budget ist aus der Schriftgröße
+abgeleitet, nicht in Derma gemessen. Der Zeilenhöhe wird zusätzlich aus der Textlänge
+berechnet und das Label bekommt `SetAutoStretchVertical(true)`, damit ein längerer
+Gerätename umbricht statt abgeschnitten zu werden.
+
+**Nicht geprüft:** das tatsächliche Derma-Rendering. Hier läuft kein GMod, also sind
+Umbruchpunkt, Farben und Zeilenhöhe im Headset unbestätigt.
 
 **Nicht getestet:** das Lesen der Java-Felder selbst (braucht Android). Getestet ist die
 Klassifizierung (`tests/device_model.cpp`) und die Auflösungslogik (Rust- und

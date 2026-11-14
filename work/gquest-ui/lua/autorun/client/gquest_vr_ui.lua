@@ -100,6 +100,18 @@ local function settingsPanel(parent)
         label:SetTextColor(tint or Color(235,235,235)); label:SetPos(16,y); label:SetSize(580,height)
         y = y + height + 12
     end
+    -- Like text(), but the reserved height follows the string length, so a long device
+    -- name wraps into a second row instead of being cut off at the label edge.
+    local function statusLine(value, tint)
+        local budget = (profiles and profiles.STATUS_LINE_BUDGET) or 60
+        local lines = math.max(1, math.ceil(#value / budget))
+        local label = panel:Add("DLabel")
+        label:SetText(value); label:SetFont("DermaDefaultBold"); label:SetWrap(true)
+        label:SetAutoStretchVertical(true)
+        label:SetTextColor(tint or Color(235,235,235)); label:SetPos(16,y)
+        label:SetSize(580, 24 * lines)
+        y = y + 24 * lines + 12
+    end
     local function combo(title, choices, selected, changed)
         text(title,24)
         local box = panel:Add("DComboBox"); box:SetPos(16,y); box:SetSize(560,42)
@@ -134,7 +146,7 @@ local function settingsPanel(parent)
         local severityColors = {
             match = Color(120,200,140), mismatch = Color(230,160,90), none = Color(170,170,170)
         }
-        text(statusText, 24, severityColors[severity])
+        statusLine(statusText, severityColors[severity])
         local tierChoices = {}
         for index, tier in ipairs(device.tiers) do
             tierChoices[#tierChoices+1] = { string.format("%s - %s", device.tier_labels[index], tier), index }
