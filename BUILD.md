@@ -49,6 +49,7 @@ brauchen:
 | Geräteerfassung | `capture_device.py --test`: Klassifizierung, getprop-Pfad, Logcat-Zeile, Widerspruchs-Urteil — mit Stub-adb, kein Headset |
 | Übersprungene Gruppen | Erscheinen als `UEBERSPRUNGEN` mit Grund und dem Zusatz „nicht geprüft" und werden am Ende zusätzlich aufgelistet; sie zählen nie als bestanden |
 | Schneller Prüflauf | `build.py --units`: nur die 5 C++-Grenztests und die drei Werkzeug-Selbsttests, ohne NDK, Rust und Lua. Exit 0 = alle 4 Gruppen bestanden, Exit 1 = mindestens eine fehlgeschlagen |
+| Lesbarer Speicher | `readable_memory`: gemappte Seite, letztes Byte, `PROT_NONE`, Bereich über eine Mapping-Grenze, Nullzeiger, überlaufende Länge und Länge 0 mit `mmap`/`mprotect` geprüft |
 | Content-Installation | `content_install`: Manifest wird bei absolutem Pfad, `..`, leerem Pfad, nicht-numerischer/überlaufender Größe und CRLF abgelehnt; `mkdir -p` idempotent und steigt nicht in eine Datei hinab |
 | Geräte-JNI | `device_jni`: Mock-JNI prüft Aufrufkette, `GET_META_DATA`-Flag, Fehlerpfade (fehlender Schlüssel, leeres Bundle, werfende Aufrufe) und dass jede lokale Referenz freigegeben wird. Das echte `PackageManager`-Verhalten bleibt ungeprüft |
 | Überlagerungs-Manifest | `overlay_manifest.py --test`: Wert zurücklesen, zusammenführen, Duplikate und unbekannte IDs ablehnen — synthetische Manifeste, keine APK |

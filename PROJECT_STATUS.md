@@ -89,11 +89,11 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Build- und 4 Test-Voraussetzungen + Spiegel-Drift, ohne Traceback; Fallbacks wie in den Läufen |
-| `build.py --tests` | **DONE** | 7 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 3 Werkzeug-Selbsttests + 10 Lua |
-| `build.py --units` | **DONE** | 7 C++ + 3 Werkzeug-Selbsttests in 4 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
+| `build.py --tests` | **DONE** | 8 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 3 Werkzeug-Selbsttests + 10 Lua |
+| `build.py --units` | **DONE** | 8 C++ + 3 Werkzeug-Selbsttests in 4 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
-| C++-Grenztests | **DONE** (7 von 7) | siehe Abschnitt 4 |
+| C++-Grenztests | **DONE** (8 von 8) | siehe Abschnitt 4 |
 | Lua-Harnesses (10) | **DONE** (10 von 10) | lokale Lua-5.4-Toolchain gebaut |
 | C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle |
 | Android-Bridge-Cross-Compile | **DONE** | `aarch64-linux-android29`, `-Wall -Wextra -Werror`, keine Warnung |
@@ -121,9 +121,9 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **7 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
+Ergebnis: **8 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
 Auswertungs-, Erfassungs- und Manifest-Selbsttest sowie 10 Lua-Harnesses bestanden**,
-Exit-Code 0 — 31 Prüfungen.
+Exit-Code 0 — 32 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -140,6 +140,7 @@ C++-Grenztests:
 - `PASS VR Lua bridge: both hands/head/aim, quaternion axes, real validity/finite gates, input routing, inactive/invalid input and bounded haptics`
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 - `PASS device model classification: 3S beats 3, case/whitespace/near-miss guards, codename fallback, nulls and stable ids`
+- `PASS readable memory: inside/at-edge accepted, PROT_NONE, spans across a mapping boundary, null and a wrapping length refused, zero length reports the address itself`
 - `PASS content install: manifest rejects absolute paths, .. segments, non-numeric and overflowing sizes, empty paths and CRLF; directory creation is idempotent and refuses to descend into a file`
 - `PASS device JNI readers: meta-data requested with GET_META_DATA, absent key and null bundle stay empty, throwing calls clear the exception, every local reference released`
 - `PASS signature scan: unique hit at first byte, ambiguous duplicates and overlapping hits rejected, short prefix stops being decisive once it repeats, bad ranges not found, resolver fails closed with a reason`
@@ -192,16 +193,22 @@ davon wird als bestanden behauptet.
 
 ### 4.1 Ungetestete Bridge-Teile (benannt, nicht still)
 
-Die Bridge besteht aus 14 Funktionen. Drei haben eine teilweise Host-Abdeckung, eine ist
-trivial, und die übrigen hängen an geladenen Bibliotheken, EGL, einer JNI-Laufzeit oder
-einem Gerätepfad. Diese Tabelle ist eine Aussage über die **Abdeckung**, kein Urteil über
-die Qualität — sie existiert, damit eine Lücke nicht dadurch verschwindet, dass niemand sie
-aufschreibt.
+Die Bridge besteht aus 14 Funktionen. Vier haben eine Host-Abdeckung (drei davon teilweise),
+eine ist trivial, und die übrigen neun hängen an geladenen Bibliotheken, EGL, einer
+JNI-Laufzeit oder einem Gerätepfad. Diese Tabelle ist eine Aussage über die **Abdeckung**,
+kein Urteil über die Qualität — sie existiert, damit eine Lücke nicht dadurch verschwindet,
+dass niemand sie aufschreibt.
+
+**Reihenfolge nach Risiko (Schaden × Häufigkeit).** Zuerst war `ReadableMemory` dran: sie
+trägt **jede** gepinnte Speicherprüfung, ein falsches „lesbar" macht also aus einem
+abgefangenen Fehler einen Schreibzugriff in fremden Speicher — und sie war als einzige
+hostseitig vollständig prüfbar. Danach folgen `ConfigureQuestLeftPalm` (patcht laufenden
+Code, opt-in, Rücknahme beim Shutdown) und `InstallInputSnapshotBridge` / `XRInputSnapshot`
+(Vtable- bzw. Provider-Patch in `libvrxr`); beide brauchen das Gerät.
 
 | Funktion | Aufgabe | Warum kein Host-Test | Was ein Test abdecken würde |
 |---|---|---|---|
 | `BridgeLog` | Logcat + Datei unter `/data/user/0/…` | `__android_log_print` und fester Gerätepfad | Trunkierung bei 1024 Zeichen, Formatfehler |
-| `ReadableMemory` | liest `/proc/self/maps`, prüft lesbaren Bereich | **teilweise prüfbar**: mappen/`munmap` auf dem Host würde den Parser decken | Parser, Überlauf `begin+length`, nicht gemappte Seite |
 | `GquestScanLogToBridge` | eine Zeile, leitet Scan-Meldungen ins Log | trivial; Hook der getesteten Scan-Engine | – |
 | `ConfigureQuestLeftPalm` | Signatursuche + Patch des Konstruktors (`+0x224`) im geladenen `libclient.so`, Rücknahme beim Shutdown | braucht den geladenen Client | Patch an/aus, Rücknahme, Fehlerpfad bei Drift |
 | `ProbeQuestHandOffsets` | liest Instruktionen an gepinnten Daten-Globals (`0xf47ae0`, `0xf47948`, `0xf4e818`) | braucht den geladenen Client | gepinnte Offsets, Verhalten bei abweichender Build |

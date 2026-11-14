@@ -23,6 +23,7 @@
 #include "gquest_device_profile.h"
 #include "gquest_device_jni.h"
 #include "gquest_content_install.h"
+#include "gquest_readable_memory.h"
 #include "gquest_signature.h"
 
 static void BridgeLog(const char* format, ...) {
@@ -50,17 +51,6 @@ static EGLDisplay EngineDisplay = EGL_NO_DISPLAY;
 static pid_t EngineContextOwner = 0;
 using PollEvent = int (*)(void*);
 static PollEvent OriginalPollEvent;
-static bool ReadableMemory(const void* address, size_t length) {
-    const uintptr_t begin=reinterpret_cast<uintptr_t>(address);
-    if (!begin || begin+length<begin) return false;
-    FILE* maps=fopen("/proc/self/maps","r");
-    if (!maps) return false;
-    char line[512], permissions[5]; unsigned long low,high; bool readable=false;
-    while (fgets(line,sizeof(line),maps)) {
-        if (sscanf(line,"%lx-%lx %4s",&low,&high,permissions)==3 && permissions[0]=='r' && begin>=low && begin+length<=high) { readable=true;break; }
-    }
-    fclose(maps);return readable;
-}
 // The scan engine is header-only and must not depend on this logger, so it takes a hook.
 // Whatever it reports is a version drift or an unresolved patch site, and both belong in
 // the log next to the other native diagnostics.
@@ -108,7 +98,7 @@ static void ConfigureQuestLeftPalm(bool shuttingDown=false) {
             blocked=true;LOG("LEFT_PALM constructor/branch unresolved; no change");dlclose(library);return;
         }
         instanceGlobal=*reinterpret_cast<void***>(candidate+0xf47ae0);
-        if (!ReadableMemory(instanceGlobal,sizeof(void*))) {dlclose(library);return;}
+        if (!GquestReadableMemory(instanceGlobal,sizeof(void*))) {dlclose(library);return;}
         patchInstruction=reinterpret_cast<uint32_t*>(constructor+0x224);
         base=candidate;pinnedLibrary=library;
         LOG("LEFT_PALM exact constructor/branch verified; opt-in candidate ready");
@@ -119,7 +109,7 @@ static void ConfigureQuestLeftPalm(bool shuttingDown=false) {
         auto current=static_cast<unsigned char*>(*instanceGlobal);
         if (current!=lastInstanceChecked) {
             lastInstanceChecked=current;
-            instance=ReadableMemory(current,5026)?current:nullptr;
+            instance=GquestReadableMemory(current,5026)?current:nullptr;
         }
         cachedController=instance && instance[4888] && !instance[977] && instance[5024];
     }
@@ -168,7 +158,7 @@ static void ProbeQuestHandOffsets() {
     unsigned char* localPose=GquestResolveSite(base,"HAND_LOCAL localpose",signature,sizeof(signature),0x4163f0);
     if (!localPose) {enabled=false;LOG("HAND_LOCAL localpose unresolved; no observation");dlclose(library);return;}
     auto instanceGlobal=*reinterpret_cast<void***>(base+0xf47ae0);
-    if (!ReadableMemory(instanceGlobal,sizeof(void*)) || !ReadableMemory(*instanceGlobal,5026)) {dlclose(library);return;}
+    if (!GquestReadableMemory(instanceGlobal,sizeof(void*)) || !GquestReadableMemory(*instanceGlobal,5026)) {dlclose(library);return;}
     auto instance=static_cast<unsigned char*>(*instanceGlobal);
     struct alignas(16) Mat4 {float values[16];};
     using LocalPose=Mat4(*)(void*,bool);
