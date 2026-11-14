@@ -89,6 +89,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Voraussetzungen + Spiegel-Drift, ohne Traceback |
 | `build.py --tests` | **DONE** | 5 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 3 Werkzeug-Selbsttests + 10 Lua |
+| `build.py --units` | **DONE** | 5 C++ + 3 Werkzeug-Selbsttests in 4 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
 | C++-Grenztests | **DONE** (5 von 5) | siehe Abschnitt 4 |

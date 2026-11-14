@@ -336,10 +336,11 @@ def run_lua_harnesses() -> str:
     return "passed" if result.returncode == 0 else "failed"
 
 
-def run_host_cpp_tests() -> int:
+def run_cpp_boundary_tests() -> list[str]:
+    """Compile and run the host boundary tests; returns the names that did not pass."""
     OUT.mkdir(exist_ok=True)
     bridge = PROJECT / "bridge"
-    failures = 0
+    failed: list[str] = []
     for name in HOST_CPP_TESTS:
         source = PROJECT / f"tests/{name}.cpp"
         binary = OUT / f"{name}-test"
@@ -356,7 +357,7 @@ def run_host_cpp_tests() -> int:
         if compiled.returncode != 0:
             log("BUILD FAILED")
             log(compiled.stderr.strip()[-2000:])
-            failures += 1
+            failed.append(name)
             continue
         executed = subprocess.run([str(binary)], cwd=BASE, capture_output=True, text=True)
         if executed.stdout.strip():
@@ -365,9 +366,14 @@ def run_host_cpp_tests() -> int:
             log(f"FAILED (exit {executed.returncode})")
             if executed.stderr.strip():
                 log(executed.stderr.strip()[-2000:])
-            failures += 1
+            failed.append(name)
         else:
             log("PASS")
+    return failed
+
+
+def run_host_cpp_tests() -> int:
+    failures = len(run_cpp_boundary_tests())
 
     rust_state = run_rust_tests()
     if rust_state == "failed":
@@ -515,6 +521,34 @@ def build() -> None:
                       if k != "added_gquest_overlay_payloads"}, indent=2))
 
 
+def run_units() -> int:
+    """C++ boundary tests and the tool self-tests in one fast run.
+
+    Nothing here needs private data, a headset, an NDK or Lua. Exit status is the whole
+    answer: 0 when every group passed, 1 when any group failed. A group is never reported
+    as passed unless it actually ran.
+    """
+    failed_cpp = run_cpp_boundary_tests()
+    groups: list[tuple[str, str]] = [
+        (f"C++-Grenztests ({len(HOST_CPP_TESTS)} Dateien)",
+         "passed" if not failed_cpp else "failed"),
+        ("Performance-Auswertung (Selbsttest)", run_perf_report_selftest()),
+        ("Geraeteerfassung (Selbsttest)", run_capture_selftest()),
+        ("Ueberlagerungs-Manifest (Selbsttest)", run_manifest_selftest()),
+    ]
+    failures = sum(1 for _, state in groups if state != "passed")
+    width = max(len(label) for label, _ in groups)
+    log("\n=== Zusammenfassung ===")
+    for label, state in groups:
+        tag = "ok" if state == "passed" else "FEHLER"
+        log(f"  [{tag:<6}] {label.ljust(width)}  {state}")
+    if failed_cpp:
+        log("  fehlgeschlagen: " + ", ".join(failed_cpp))
+    log(f"\nErgebnis: {len(groups) - failures}/{len(groups)} Pruefgruppen bestanden.")
+    log("Exit 0 = alles bestanden, Exit 1 = mindestens eine Gruppe fehlgeschlagen.")
+    return 1 if failures else 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description="GQuest build: GDroid overlay APK with own bridge and VR content.")
@@ -522,12 +556,17 @@ def main(argv: list[str] | None = None) -> int:
                         help="only report missing prerequisites and mirror drift")
     parser.add_argument("--tests", action="store_true",
                         help="run the boundary tests that need no private data")
+    parser.add_argument("--units", action="store_true",
+                        help="only the C++ boundary tests and tool self-tests "
+                             "(no NDK, Rust or Lua); exit 0 = all passed, 1 = failed")
     args = parser.parse_args(argv)
 
     if args.check:
         return report_check()
     if args.tests:
         return run_host_cpp_tests()
+    if args.units:
+        return run_units()
     build()
     return 0
 
