@@ -78,6 +78,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Geräteerkennung (JNI auf Gerät) | PARTIALLY IMPLEMENTED | Aufrufpfad, Fehlerpfade und Referenzzählung gegen Mock-JNI geprüft (`tests/device_jni.cpp`); echtes `PackageManager`-Verhalten NOT TESTED |
 | Reale `Build.MODEL`-Werte Quest 3/3S | NOT TESTED | Erfassungswerkzeug + Protokoll fertig, kein Gerät (`docs/measurements/device-identity.md`) |
 | `com.oculus.supportedDevices` im Overlay | PARTIALLY IMPLEMENTED | Wert wird zusammengeführt statt verdoppelt und zurückgelesen; nie gegen die echte Basis-APK gelaufen |
+| Gepinnte Adressen vs. Audit-Datensatz | PARTIALLY IMPLEMENTED | Konstanten, Offsets und Abbildungsverschiebung geprüft; Segmentzugehörigkeit braucht `libclient.so` (NOT TESTED) |
 | VR-Content-Installation (Manifest-Prüfung) | PARTIALLY IMPLEMENTED | Manifest-Regeln + Verzeichnisanlage host-getestet; `AAsset`-Pfad und Schreiben auf dem Gerät NOT TESTED |
 | Widerspruch MODEL ↔ supportedDevices | DONE | Warnzeile im Log, reine Diagnose ohne Einfluss auf das Profil; auf Gerät NOT TESTED |
 | Lizenz + Herkunftsnachweis | DONE | `LICENSE` (MIT), `THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/` |
@@ -89,8 +90,8 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Build- und 4 Test-Voraussetzungen + Spiegel-Drift, ohne Traceback; Fallbacks wie in den Läufen |
-| `build.py --tests` | **DONE** | 8 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 3 Werkzeug-Selbsttests + 10 Lua |
-| `build.py --units` | **DONE** | 8 C++ + 3 Werkzeug-Selbsttests in 4 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
+| `build.py --tests` | **DONE** | 8 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 4 Werkzeug-Selbsttests + 10 Lua |
+| `build.py --units` | **DONE** | 8 C++ + 4 Werkzeug-Selbsttests in 5 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
 | C++-Grenztests | **DONE** (8 von 8) | siehe Abschnitt 4 |
@@ -122,8 +123,8 @@ python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
 Ergebnis: **8 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
-Auswertungs-, Erfassungs- und Manifest-Selbsttest sowie 10 Lua-Harnesses bestanden**,
-Exit-Code 0 — 32 Prüfungen.
+Auswertungs-, Erfassungs-, Manifest- und Adress-Selbsttest sowie 10 Lua-Harnesses
+bestanden**, Exit-Code 0 — 33 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -162,6 +163,15 @@ Geräteerfassung (`capture_device.py --test`, Stub-adb statt Headset):
 - `getprop`-Pfad und `DEVICE`-Logzeile werden gelesen, fehlender In-App-Wert wird benannt
 - Urteil `konsistent` gegen `WIDERSPRUCH` bei abweichendem App-Wert
 - Protokollzeile wird ersetzt statt angehängt (zweimal erfassen ⇒ eine Zeile)
+
+Gepinnte Adressen (`pinned_addresses.py --test`, Audit-Datensatz + synthetische ELF-Header):
+- relative Offsets der Bridge (`+0x224`, `+0x564`) stimmen mit den Audit-Adressen überein
+- Code-Adressen liegen sämtlich unter den Daten-Globals, alle passen in 32 Bit
+- `VA − Datei-Offset` des Patch-Eintrags ist seitenbündig (`0x4000`); ein falsch gepaartes
+  Adresspaar ergibt `0x3fc4` und wird als Fehler gemeldet
+- ELF-Programmheader-Leser klassifiziert Code als ausführbar und Globals als lesbar,
+  lehnt abgeschnittene und fremde Dateien ab
+- **Nicht geprüft:** die Zugehörigkeit zu den echten Segmenten — dafür fehlt `libclient.so`
 
 Überlagerungs-Manifest (`overlay_manifest.py --test`, synthetische Manifeste):
 - `com.oculus.supportedDevices` wird zurückgelesen statt angenommen

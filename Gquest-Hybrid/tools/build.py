@@ -386,6 +386,18 @@ def run_manifest_selftest() -> str:
     return "passed" if result.returncode == 0 else "failed"
 
 
+def run_pinned_selftest() -> str:
+    """Check the pinned address constants against the audit record."""
+    log("\n=== Gepinnte Adressen (Selbsttest) ===")
+    result = subprocess.run(
+        [sys.executable, str(PROJECT / "tools/pinned_addresses.py"), "--test"],
+        cwd=BASE, capture_output=True, text=True)
+    output = (result.stdout + result.stderr).strip()
+    if output:
+        log("\n".join(output.splitlines()[-6:]))
+    return "passed" if result.returncode == 0 else "failed"
+
+
 def run_lua_harnesses() -> str:
     """Run the Lua harnesses. Returns 'passed', 'skipped' or 'failed'."""
     log("\n=== Lua-Harnesses ===")
@@ -477,6 +489,7 @@ def run_host_cpp_tests() -> int:
     perf_state = run_perf_report_selftest()
     capture_state = run_capture_selftest()
     manifest_state = run_manifest_selftest()
+    pinned_state = run_pinned_selftest()
     lua_state = run_lua_harnesses()
 
     groups: list[tuple[str, str, str]] = [
@@ -494,6 +507,8 @@ def run_host_cpp_tests() -> int:
          check_detail(capture_state, "Selbsttest bestanden", "nicht gelaufen")),
         ("Ueberlagerungs-Manifest", manifest_state,
          check_detail(manifest_state, "Selbsttest bestanden", "nicht gelaufen")),
+        ("Gepinnte Adressen", pinned_state,
+         check_detail(pinned_state, "Selbsttest bestanden", "nicht gelaufen")),
         (f"Lua-Harnesses ({len(LUA_HARNESSES)})", lua_state,
          check_detail(lua_state, "bestanden", "liblua5.4 fehlt")),
     ]
@@ -629,6 +644,7 @@ def run_units() -> int:
         ("Performance-Auswertung", run_perf_report_selftest(), "Selbsttest"),
         ("Geraeteerfassung", run_capture_selftest(), "Selbsttest"),
         ("Ueberlagerungs-Manifest", run_manifest_selftest(), "Selbsttest"),
+        ("Gepinnte Adressen", run_pinned_selftest(), "Selbsttest"),
     ]
     broken = [label for label, state, _ in groups if state == "failed"]
     log("\n=== Zusammenfassung ===")
