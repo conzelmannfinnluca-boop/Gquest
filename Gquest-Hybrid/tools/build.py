@@ -17,6 +17,7 @@ import hashlib
 import json
 import shutil
 import subprocess
+import os
 import sys
 import zipfile
 from pathlib import Path
@@ -25,6 +26,10 @@ PROJECT = Path(__file__).resolve().parents[1]
 BASE = PROJECT.parent
 WORK = BASE / "work"
 OUT = PROJECT / "dist"
+
+# Minimal staged NDK (clang + sysroot headers) from tools/stage_ndk.py. Enough to
+# cross-compile the bridge, not to link it against the base APK.
+STAGED_NDK = WORK / "toolchains/android-ndk"
 
 NDK = WORK / "android-sdk/ndk/23.2.8568313/toolchains/llvm/prebuilt/linux-x86_64/bin"
 TOOLS = WORK / "android-sdk/build-tools/34.0.0"
@@ -227,6 +232,53 @@ def run_abi_smoke() -> str:
     return "passed"
 
 
+def bridge_compiler():
+    """Return (compiler argv, sysroot, env) for an aarch64 Android compile, or None."""
+    full = NDK / "aarch64-linux-android29-clang++"
+    if full.exists():
+        sysroot = NDK.parent / "sysroot"
+        return [str(full)], sysroot, None
+    staged = STAGED_NDK / "bin/clang-12"
+    if staged.exists() and (STAGED_NDK / "sysroot/usr/include").is_dir():
+        env = dict(os.environ, LD_LIBRARY_PATH=str(STAGED_NDK / "lib64"))
+        return [str(staged), "--driver-mode=g++"], STAGED_NDK / "sysroot", env
+    return None
+
+
+def run_bridge_compile() -> str:
+    """Cross-compile the Android bridge so its JNI calls are type-checked.
+
+    Returns 'passed', 'skipped' or 'failed'. This compiles only; linking liblauncheq.so
+    still needs the private base APK and stays part of the full build.
+    """
+    log("\n=== Android-Bridge (aarch64-Cross-Compile) ===")
+    found = bridge_compiler()
+    if found is None:
+        log("SKIPPED: kein NDK gefunden.")
+        log("  Vollstaendig: sdkmanager --install 'ndk;23.2.8568313' nach work/android-sdk")
+        log("  Nur clang + Header: python3 Gquest-Hybrid/tools/stage_ndk.py")
+        return "skipped"
+    compiler, sysroot, env = found
+    OUT.mkdir(exist_ok=True)
+    object_file = OUT / "quest_engine_bridge.o"
+    command = [*compiler, "--target=aarch64-linux-android29", f"--sysroot={sysroot}",
+               "-std=c++17", "-O2", "-Wall", "-Wextra", "-Werror", "-c",
+               f"-I{PROJECT / 'bridge'}", f"-I{PROJECT / 'include'}",
+               str(PROJECT / "bridge/quest_engine_bridge.cpp"), "-o", str(object_file)]
+    log(f"+ {compiler[0]} --target=aarch64-linux-android29 -c bridge/quest_engine_bridge.cpp")
+    compiled = subprocess.run(command, cwd=BASE, capture_output=True, text=True, env=env)
+    if compiled.stdout.strip():
+        log(compiled.stdout.strip()[-1500:])
+    if compiled.returncode != 0:
+        log("FAILED")
+        log(compiled.stderr.strip()[-3000:])
+        return "failed"
+    if compiled.stderr.strip():
+        log(compiled.stderr.strip()[-1500:])
+    log("PASS bridge cross-compiles for aarch64-linux-android29 (keine Warnung, -Werror)")
+    return "passed"
+
+
 def run_lua_harnesses() -> str:
     """Run the Lua harnesses. Returns 'passed', 'skipped' or 'failed'."""
     log("\n=== Lua-Harnesses ===")
@@ -284,21 +336,28 @@ def run_host_cpp_tests() -> int:
     if abi_state == "failed":
         failures += 1
 
+    bridge_state = run_bridge_compile()
+    if bridge_state == "failed":
+        failures += 1
+
     lua_state = run_lua_harnesses()
     if lua_state == "failed":
         failures += 1
 
     log("\nNicht in diesem Modus enthalten (private Voraussetzungen nötig):")
-    log("  - APK-Verifikation und Android-Cross-Build (brauchen Basis-APK und NDK)")
+    log("  - Linken von liblauncheq.so, Overlay-APK, APK-Verifikation (Basis-APK, JDK)")
 
     if failures:
         log(f"\n{failures} Prüfgruppe(n) fehlgeschlagen.")
         return 1
     rust_summary = "Rust-Unit-Tests" if rust_state == "passed" else "Rust übersprungen"
     abi_summary = "ABI-Smoke" if abi_state == "passed" else "ABI-Smoke übersprungen"
+    bridge_summary = ("Bridge-Cross-Compile" if bridge_state == "passed"
+                      else "Bridge-Cross-Compile übersprungen")
     lua_summary = (f"{len(LUA_HARNESSES)} Lua-Harnesses" if lua_state == "passed"
                    else "Lua-Harnesses übersprungen")
-    log(f"\n{len(HOST_CPP_TESTS)} C++-Grenztests, {rust_summary}, {abi_summary}, {lua_summary}.")
+    log(f"\n{len(HOST_CPP_TESTS)} C++-Grenztests, {rust_summary}, {abi_summary}, "
+        f"{bridge_summary}, {lua_summary}.")
     return 0
 
 

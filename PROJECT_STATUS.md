@@ -91,7 +91,8 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | C++-Grenztests | **DONE** (4 von 4) | siehe Abschnitt 4 |
 | Lua-Harnesses (10) | **DONE** (10 von 10) | lokale Lua-5.4-Toolchain gebaut |
 | C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle |
-| Android-Bridge-Build | **BLOCKED** | braucht NDK und `jni.h`; hier nicht kompilierbar |
+| Android-Bridge-Cross-Compile | **DONE** | `aarch64-linux-android29`, `-Wall -Wextra -Werror`, keine Warnung |
+| `liblauncheq.so` linken + Overlay-APK | **BLOCKED** | braucht Basis-APK, JDK, Build-Tools |
 | APK-Verifikation | **BLOCKED** | kein Basis-APK |
 
 Fehlende, bewusst nicht versionierte Voraussetzungen: `outputs/GDroid-0.1.30.apk`,
@@ -105,8 +106,9 @@ diese Dateien jetzt einzeln mit Zweck und Beschaffungsweg auf.
 ## 4. Teststatus (in dieser Sitzung tatsächlich ausgeführt)
 
 Umgebung: Linux, `g++ 13.3.0`, `python3 3.12.3`, keine private APK. Lua 5.4.7 und eine
-Rust-stable-Toolchain wurden lokal nach `work/toolchains/` installiert (per `.gitignore`
-ausgeschlossen, Reinstallationsanleitung in BUILD.md).
+Rust-stable-Toolchain sowie ein NDK-Teil (clang 12.0.9 + Sysroot-Header) wurden lokal nach
+`work/toolchains/` installiert (per `.gitignore` ausgeschlossen, Reinstallationsanleitung
+in BUILD.md).
 
 Ein Befehl, reproduzierbar:
 
@@ -114,8 +116,8 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **4 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke und 10 Lua-Harnesses
-bestanden**, Exit-Code 0 — 24 Prüfungen.
+Ergebnis: **4 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile
+und 10 Lua-Harnesses bestanden**, Exit-Code 0 — 25 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -133,6 +135,11 @@ C++-Grenztests:
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 - `PASS device model classification: 3S beats 3, case/whitespace/near-miss guards, codename fallback, nulls and stable ids`
 
+Android-Bridge (Cross-Compile für aarch64-linux-android29):
+- `PASS bridge cross-compiles for aarch64-linux-android29 (keine Warnung, -Werror)`
+- Gegenprobe: ein absichtlich falscher JNI-Parameter bricht den Lauf mit der echten
+  `jni.h`-Signatur ab — der Check prüft wirklich und ist nicht nur ein Compiler-Aufruf
+
 Lua-Harnesses (10/10):
 - Griff-Cache: echte modelllokale Anker, Null-Baseline-Regression, vier Teil-Schreib-Rollbacks, finite/range/schema-Guards
 - Mündung und Einhand-Frames: umgekehrte Retail-Achsen ersetzt, Munition erhalten, sieben Rollback-Grenzen, Crowbar ohne Vordergriff
@@ -149,9 +156,8 @@ Lua-Harnesses (10/10):
 Zusätzlich geprüft: `--check` meldet alle 9 fehlenden Voraussetzungen mit Zweck und
 Beschaffungsweg; ohne `liblua5.4` meldet der Test-Modus `SKIPPED` statt `FAIL`.
 
-**Nicht ausgeführt:** APK-Verifikation, Android-Cross-Build (und damit auch kein
-Kompilieren der Bridge), jeder Hardware-Test, jede Frametime-Messung auf einem
-Headset. Diese Liste ist absichtlich vollständig — nichts
+**Nicht ausgeführt:** Linken von `liblauncheq.so`, Overlay-APK, APK-Verifikation, jeder
+Hardware-Test, jede Frametime-Messung auf einem Headset. Diese Liste ist absichtlich vollständig — nichts
 davon wird als bestanden behauptet.
 
 ---

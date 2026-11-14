@@ -32,6 +32,21 @@ brauchen:
 | Rust-Unit-Tests | Startargumente, Profilparser beider Geräte, ABI-Grenzen — laufen mit, sobald `cargo` vorhanden ist |
 | Geräteklassifizierung | `Quest 3S` vor `Quest 3`, Groß-/Kleinschreibung, Codename-Rückfall, Fast-Treffer, Nullzeiger |
 | C++/Rust-ABI-Smoke | sechs Startfälle gegen die Release-Bibliothek, `GquestProfile`-Größe, `argv`-Eigentum |
+| Android-Bridge-Cross-Compile | `aarch64-linux-android29` mit `-Wall -Wextra -Werror`; prüft die JNI-Aufrufe gegen die echten Header |
+
+### NDK für den Bridge-Check
+
+Der Testmodus kompiliert `bridge/quest_engine_bridge.cpp` für aarch64, damit die
+JNI-Aufrufe typgeprüft sind. Dafür genügen clang und die Sysroot-Header — kein SDK:
+
+```sh
+python3 Gquest-Hybrid/tools/stage_ndk.py          # lädt das NDK-Zip, legt ~190 MB ab
+python3 Gquest-Hybrid/tools/stage_ndk.py --check  # Stand prüfen
+```
+
+Liegt ein vollständiger NDK an `work/android-sdk/ndk/23.2.8568313`, wird der bevorzugt.
+Das Linken von `liblauncheq.so` braucht weiterhin Basis-APK und JDK und gehört zum
+Gesamtbuild, nicht zum Testmodus.
 
 Die Lua-Harnesses laufen, sobald eine `liblua5.4` auffindbar ist; sonst meldet der
 Modus `SKIPPED` (kein Fehlschlag) und bleibt bei Exit-Code 0. Der Modus meldet
