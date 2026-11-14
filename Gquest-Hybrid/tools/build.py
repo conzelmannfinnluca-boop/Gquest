@@ -257,7 +257,7 @@ def run_bridge_compile() -> str:
     log("\n=== Android-Bridge (aarch64-Cross-Compile) ===")
     found = bridge_compiler()
     if found is None:
-        log("SKIPPED: kein NDK gefunden.")
+        log("SKIPPED: kein NDK gefunden; der Bridge-Code ist damit NICHT typgeprueft.")
         log("  Vollstaendig: sdkmanager --install 'ndk;23.2.8568313' nach work/android-sdk")
         log("  Nur clang + Header: python3 Gquest-Hybrid/tools/stage_ndk.py")
         return "skipped"
@@ -268,6 +268,7 @@ def run_bridge_compile() -> str:
                "-std=c++17", "-O2", "-Wall", "-Wextra", "-Werror", "-c",
                f"-I{PROJECT / 'bridge'}", f"-I{PROJECT / 'include'}",
                str(PROJECT / "bridge/quest_engine_bridge.cpp"), "-o", str(object_file)]
+    log(f"  Toolchain: {compiler[0]}")
     log(f"+ {compiler[0]} --target=aarch64-linux-android29 -c bridge/quest_engine_bridge.cpp")
     compiled = subprocess.run(command, cwd=BASE, capture_output=True, text=True, env=env)
     if compiled.stdout.strip():
@@ -372,57 +373,77 @@ def run_cpp_boundary_tests() -> list[str]:
     return failed
 
 
+GROUP_TAGS = {"passed": "ok", "failed": "FEHLER", "skipped": "UEBERSPRUNGEN"}
+
+
+def format_group_summary(groups: list[tuple[str, str, str]]) -> list[str]:
+    """One aligned line per check group: (label, state, detail).
+
+    "skipped" and "failed" get different words on purpose: a group that did not run is
+    not a group that ran and passed, and reporting it as either would overstate what was
+    verified. An unknown state raises instead of being rendered as something plausible.
+    """
+    tag_width = max(len(tag) for tag in GROUP_TAGS.values())
+    label_width = max(len(label) for label, _, _ in groups)
+    return [f"  [{GROUP_TAGS[state]:<{tag_width}}] {label.ljust(label_width)}  {detail}"
+            for label, state, detail in groups]
+
+
+def check_detail(state: str, passed_text: str, skip_reason: str) -> str:
+    if state == "passed":
+        return passed_text
+    if state == "skipped":
+        return f"{skip_reason} - nicht geprueft"
+    return "fehlgeschlagen"
+
+
 def run_host_cpp_tests() -> int:
-    failures = len(run_cpp_boundary_tests())
-
+    failed_cpp = run_cpp_boundary_tests()
     rust_state = run_rust_tests()
-    if rust_state == "failed":
-        failures += 1
-
     abi_state = run_abi_smoke()
-    if abi_state == "failed":
-        failures += 1
-
     bridge_state = run_bridge_compile()
-    if bridge_state == "failed":
-        failures += 1
-
     perf_state = run_perf_report_selftest()
-    if perf_state == "failed":
-        failures += 1
-
     capture_state = run_capture_selftest()
-    if capture_state == "failed":
-        failures += 1
-
     manifest_state = run_manifest_selftest()
-    if manifest_state == "failed":
-        failures += 1
-
     lua_state = run_lua_harnesses()
-    if lua_state == "failed":
-        failures += 1
 
-    log("\nNicht in diesem Modus enthalten (private Voraussetzungen nötig):")
+    groups: list[tuple[str, str, str]] = [
+        (f"C++-Grenztests ({len(HOST_CPP_TESTS)})",
+         "failed" if failed_cpp else "passed",
+         "fehlgeschlagen: " + ", ".join(failed_cpp) if failed_cpp else "bestanden"),
+        ("Rust-Unit-Tests", rust_state, check_detail(rust_state, "bestanden", "cargo fehlt")),
+        ("C++/Rust-ABI-Smoke", abi_state,
+         check_detail(abi_state, "bestanden", "cargo fehlt")),
+        ("Bridge-Cross-Compile", bridge_state,
+         check_detail(bridge_state, "aarch64-linux-android29, -Werror", "kein NDK gefunden")),
+        ("Performance-Auswertung", perf_state,
+         check_detail(perf_state, "Selbsttest bestanden", "nicht gelaufen")),
+        ("Geraeteerfassung", capture_state,
+         check_detail(capture_state, "Selbsttest bestanden", "nicht gelaufen")),
+        ("Ueberlagerungs-Manifest", manifest_state,
+         check_detail(manifest_state, "Selbsttest bestanden", "nicht gelaufen")),
+        (f"Lua-Harnesses ({len(LUA_HARNESSES)})", lua_state,
+         check_detail(lua_state, "bestanden", "liblua5.4 fehlt")),
+    ]
+    broken = [label for label, state, _ in groups if state == "failed"]
+    skipped = [label for label, state, _ in groups if state == "skipped"]
+
+    log("\n=== Zusammenfassung ===")
+    for line in format_group_summary(groups):
+        log(line)
+    log(f"\nErgebnis: {len(groups) - len(broken) - len(skipped)} bestanden, "
+        f"{len(broken)} fehlgeschlagen, {len(skipped)} uebersprungen.")
+    if skipped:
+        log("Uebersprungen heisst nicht geprueft; diese Gruppen fehlen in der Abdeckung:")
+        for label in skipped:
+            log(f"  - {label}")
+
+    log("\nNicht in diesem Modus enthalten (private Voraussetzungen noetig):")
     log("  - Linken von liblauncheq.so, Overlay-APK, APK-Verifikation (Basis-APK, JDK)")
 
-    if failures:
-        log(f"\n{failures} Prüfgruppe(n) fehlgeschlagen.")
+    if broken:
+        log(f"\n{len(broken)} Pruefgruppe(n) fehlgeschlagen.")
         return 1
-    rust_summary = "Rust-Unit-Tests" if rust_state == "passed" else "Rust übersprungen"
-    abi_summary = "ABI-Smoke" if abi_state == "passed" else "ABI-Smoke übersprungen"
-    bridge_summary = ("Bridge-Cross-Compile" if bridge_state == "passed"
-                      else "Bridge-Cross-Compile übersprungen")
-    perf_summary = "Auswertungs-Selbsttest" if perf_state == "passed" else "Auswertung fehlgeschlagen"
-    capture_summary = ("Erfassungs-Selbsttest" if capture_state == "passed"
-                       else "Erfassung fehlgeschlagen")
-    manifest_summary = ("Manifest-Selbsttest" if manifest_state == "passed"
-                        else "Manifest-Selbsttest fehlgeschlagen")
-    lua_summary = (f"{len(LUA_HARNESSES)} Lua-Harnesses" if lua_state == "passed"
-                   else "Lua-Harnesses übersprungen")
-    log(f"\n{len(HOST_CPP_TESTS)} C++-Grenztests, {rust_summary}, {abi_summary}, "
-        f"{bridge_summary}, {perf_summary}, {capture_summary}, {manifest_summary}, "
-        f"{lua_summary}.")
     return 0
 
 
@@ -529,24 +550,21 @@ def run_units() -> int:
     as passed unless it actually ran.
     """
     failed_cpp = run_cpp_boundary_tests()
-    groups: list[tuple[str, str]] = [
-        (f"C++-Grenztests ({len(HOST_CPP_TESTS)} Dateien)",
-         "passed" if not failed_cpp else "failed"),
-        ("Performance-Auswertung (Selbsttest)", run_perf_report_selftest()),
-        ("Geraeteerfassung (Selbsttest)", run_capture_selftest()),
-        ("Ueberlagerungs-Manifest (Selbsttest)", run_manifest_selftest()),
+    groups: list[tuple[str, str, str]] = [
+        (f"C++-Grenztests ({len(HOST_CPP_TESTS)})",
+         "failed" if failed_cpp else "passed",
+         "fehlgeschlagen: " + ", ".join(failed_cpp) if failed_cpp else "bestanden"),
+        ("Performance-Auswertung", run_perf_report_selftest(), "Selbsttest"),
+        ("Geraeteerfassung", run_capture_selftest(), "Selbsttest"),
+        ("Ueberlagerungs-Manifest", run_manifest_selftest(), "Selbsttest"),
     ]
-    failures = sum(1 for _, state in groups if state != "passed")
-    width = max(len(label) for label, _ in groups)
+    broken = [label for label, state, _ in groups if state == "failed"]
     log("\n=== Zusammenfassung ===")
-    for label, state in groups:
-        tag = "ok" if state == "passed" else "FEHLER"
-        log(f"  [{tag:<6}] {label.ljust(width)}  {state}")
-    if failed_cpp:
-        log("  fehlgeschlagen: " + ", ".join(failed_cpp))
-    log(f"\nErgebnis: {len(groups) - failures}/{len(groups)} Pruefgruppen bestanden.")
+    for line in format_group_summary(groups):
+        log(line)
+    log(f"\nErgebnis: {len(groups) - len(broken)}/{len(groups)} Pruefgruppen bestanden.")
     log("Exit 0 = alles bestanden, Exit 1 = mindestens eine Gruppe fehlgeschlagen.")
-    return 1 if failures else 0
+    return 1 if broken else 0
 
 
 def main(argv: list[str] | None = None) -> int:
