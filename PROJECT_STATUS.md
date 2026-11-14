@@ -190,6 +190,36 @@ davon wird als bestanden behauptet.
 
 ---
 
+### 4.1 Ungetestete Bridge-Teile (benannt, nicht still)
+
+Die Bridge besteht aus 14 Funktionen. Drei haben eine teilweise Host-Abdeckung, eine ist
+trivial, und die übrigen hängen an geladenen Bibliotheken, EGL, einer JNI-Laufzeit oder
+einem Gerätepfad. Diese Tabelle ist eine Aussage über die **Abdeckung**, kein Urteil über
+die Qualität — sie existiert, damit eine Lücke nicht dadurch verschwindet, dass niemand sie
+aufschreibt.
+
+| Funktion | Aufgabe | Warum kein Host-Test | Was ein Test abdecken würde |
+|---|---|---|---|
+| `BridgeLog` | Logcat + Datei unter `/data/user/0/…` | `__android_log_print` und fester Gerätepfad | Trunkierung bei 1024 Zeichen, Formatfehler |
+| `ReadableMemory` | liest `/proc/self/maps`, prüft lesbaren Bereich | **teilweise prüfbar**: mappen/`munmap` auf dem Host würde den Parser decken | Parser, Überlauf `begin+length`, nicht gemappte Seite |
+| `GquestScanLogToBridge` | eine Zeile, leitet Scan-Meldungen ins Log | trivial; Hook der getesteten Scan-Engine | – |
+| `ConfigureQuestLeftPalm` | Signatursuche + Patch des Konstruktors (`+0x224`) im geladenen `libclient.so`, Rücknahme beim Shutdown | braucht den geladenen Client | Patch an/aus, Rücknahme, Fehlerpfad bei Drift |
+| `ProbeQuestHandOffsets` | liest Instruktionen an gepinnten Daten-Globals (`0xf47ae0`, `0xf47948`, `0xf4e818`) | braucht den geladenen Client | gepinnte Offsets, Verhalten bei abweichender Build |
+| `EnsureQuestLayerTargets` | patcht den Layer-Allokator (`0x3ed58c`) | braucht den geladenen Client | Patch-Sicherheit, Idempotenz |
+| `QuestPollEvent` | leitet SDL-Events weiter, greift ins Menü ein | braucht die laufende Event-Schleife | Routing, Rückgabewerte, Weitergabe |
+| `SharedCreateContext` | EGL-Context-Sharing beim Erzeugen | braucht EGL und `liblauncher` | Austausch der Kontexte, Fehlerpfade |
+| `InstallContextSharing` | `dl_iterate_phdr`-Hook installiert den Wrapper | braucht die geladene Bibliothek | Auswahl des richtigen Moduls, Abbruch |
+| `XRInputSnapshot` | Snapshot-Provider für `libvrxr` | wird nur von der XR-Bibliothek aufgerufen | Feldbelegung, Größen, ungültige Eingabe |
+| `InstallInputSnapshotBridge` | Vtable-Patch in `libvrxr` | braucht die geladene Bibliothek | Patch nur bei passender Signatur |
+| `InstallVRContent` | kopiert das VR-Content-Paket | Manifest-Regeln **sind** getestet; `AAssetManager` und das Schreiben brauchen Assets + schreibbares Ziel | Kopierschleife, `.quest-lab-part`-Rename, Größenvergleich |
+| `ConfigureDetectedDevice` | Geräte-ID setzen, Hinweisdatei schreiben | JNI-Teil **ist** getestet; `gquest_device.txt` braucht den Gerätepfad | Dateiinhalt, Fehlerpfad ohne Schreibrecht |
+| `LauncherMainAndroid` | Orchestrierung: `dlopen`/`dlsym`, Reihenfolge Gerät → Content → ABI → Start | braucht alle Bibliotheken gleichzeitig | Reihenfolge und jeder Abbruchpfad |
+
+Wer eine dieser Funktionen ohne Gerät prüfbar macht, streicht sie hier — die Liste soll
+kürzer werden, nicht vollständiger aussehen.
+
+---
+
 ## 5. Quest-3-Status
 
 **PARTIALLY IMPLEMENTED, hardwarebestätigt.**
