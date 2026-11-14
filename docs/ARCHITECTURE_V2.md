@@ -403,6 +403,10 @@ anderen Gerät eine andere Last.
 | Quest 3S | Ausgewogen | 1374×1440 | 75 % | **Standard** (FFR 2, 72 Hz) |
 | Quest 3S | Schärfer | 1558×1632 | 85 % | – |
 
+Wie die Stufen auf Hardware verglichen werden — Versuchsplan, Kennzahlen, Rauschgrenze
+und Entscheidungsregel — steht in `docs/PERF_PROTOCOL.md`. Das Verfahren ist
+geschrieben, aber nie durchgeführt.
+
 Die sechs Stufen sind die Allowlist des Rust-Profilparsers; jede andere Zeichenkette
 fällt auf 1032×1104 zurück. Das VR-Menü wählt das Gerät und merkt sich pro Gerät die
 letzte Wahl. FFR-Stufen 0–3 und Raten 72/90 Hz gelten für beide Geräte gleich.

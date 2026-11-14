@@ -171,6 +171,8 @@ Einschränkungen, die im Status bleiben:
 - Bildrate ist **noch nicht auf Hardware gemessen**. Die Instrumentierung ist fertig
   (`gquest_perf`), aber es liegt keine Frametime-Reihe von einem Quest-3-Lauf vor.
   Frühere Läufe lagen teils unter 72 Hz — das ist eine Beobachtung, keine Messung.
+  Das Verfahren inklusive Auswertung und Entscheidungsregel steht in
+  `docs/PERF_PROTOCOL.md`; durchgeführt wurde es nie.
 
 ---
 
@@ -221,7 +223,7 @@ bestanden ist, wird Crossplay als nicht verfügbar dokumentiert.
 | K6 | Lizenz am eigenen Code | mittel | **erledigt** — MIT, siehe `LICENSE` |
 | K7 | Quest 3S ungetestet | hoch | offen — Profile und Erkennung vorhanden, Hardware fehlt |
 | K8 | Nur Pistole hat native Munitions-Protokoll | mittel | offen |
-| K9 | Keine Frametime-Messung | mittel | **Instrumentierung erledigt**, Hardware-Lauf offen |
+| K9 | Keine Frametime-Messung | mittel | **Instrumentierung + Protokoll erledigt**, Hardware-Lauf offen (`docs/PERF_PROTOCOL.md`) |
 | K10 | Linke Hand nutzt Original-Fingerpfad | niedrig | bewusst |
 
 ---
