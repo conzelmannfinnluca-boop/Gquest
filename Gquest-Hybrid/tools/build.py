@@ -403,6 +403,18 @@ def run_pinned_selftest() -> str:
     return "passed" if result.returncode == 0 else "failed"
 
 
+def run_frame_policy_selftest() -> str:
+    """Check that no weapon or hand path integrates raw frame time."""
+    log("\n=== Frame-Zeit-Politik (Selbsttest) ===")
+    result = subprocess.run(
+        [sys.executable, str(PROJECT / "tools/frame_policy.py"), "--test"],
+        cwd=BASE, capture_output=True, text=True)
+    output = (result.stdout + result.stderr).strip()
+    if output:
+        log("\n".join(output.splitlines()[-6:]))
+    return "passed" if result.returncode == 0 else "failed"
+
+
 def run_lua_harnesses() -> str:
     """Run the Lua harnesses. Returns 'passed', 'skipped' or 'failed'."""
     log("\n=== Lua-Harnesses ===")
@@ -497,6 +509,7 @@ def run_host_cpp_tests() -> int:
     capture_state = run_capture_selftest()
     manifest_state = run_manifest_selftest()
     pinned_state = run_pinned_selftest()
+    frame_state = run_frame_policy_selftest()
     lua_state = run_lua_harnesses()
 
     groups: list[tuple[str, str, str]] = [
@@ -516,6 +529,8 @@ def run_host_cpp_tests() -> int:
          check_detail(manifest_state, "Selbsttest bestanden", "nicht gelaufen")),
         ("Gepinnte Adressen", pinned_state,
          check_detail(pinned_state, "Selbsttest bestanden", "nicht gelaufen")),
+        ("Frame-Zeit-Politik", frame_state,
+         check_detail(frame_state, "Selbsttest bestanden", "nicht gelaufen")),
         (f"Lua-Harnesses ({len(LUA_HARNESSES)})", lua_state,
          check_detail(lua_state, "bestanden", "liblua5.4 fehlt")),
     ]
@@ -652,6 +667,7 @@ def run_units() -> int:
         ("Geraeteerfassung", run_capture_selftest(), "Selbsttest"),
         ("Ueberlagerungs-Manifest", run_manifest_selftest(), "Selbsttest"),
         ("Gepinnte Adressen", run_pinned_selftest(), "Selbsttest"),
+        ("Frame-Zeit-Politik", run_frame_policy_selftest(), "Selbsttest"),
     ]
     broken = [label for label, state, _ in groups if state == "failed"]
     log("\n=== Zusammenfassung ===")

@@ -84,6 +84,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Paket 1: Plattform-Interfaces | DONE | `core/platform/` engine-frei, Grenztest `platform`, Gate G1 erfüllt |
 | Gate G2: Fake-Host | DONE | `core/host_fake/`, 60 Frames + Playspace + Content-Install ohne Engine; dazu Jitter, verlorene Samples, eingefrorene/rückwärts laufende/NaN-Uhr und Stall. Auf dem Gerät weiterhin NOT TESTED (G3) |
 | Frame-Zeit im Core | DONE | `FrameTimer` misst, hält bei ungültigen Samples und resynct; Stall wird auf 0,5 s geklemmt, nicht integriert |
+| Frame-Zeit in Waffen-/Handpfaden | PARTIALLY IMPLEMENTED | dort gibt es **keine** Glättung: `FrameTime` steht projektweit nur im Perf-Sampler (der messen muss, nicht klemmen). Der Guard `frame_policy.py` verhindert rohe Frame-Zeit außerhalb der Messung, bis die erste Glättung den geklemmten Delta nehmen muss |
 | Snap-Turn im Overlay (Lua) | DONE | `gquest_playspace.lua` dreht den View-Yaw, damit folgt der gesamte Provider; Controller-Bindung NOT TESTED (keine Aktionnamen ohne Gerät) |
 | Posen-Dekodierung (Snapshot → Position/Winkel) | DONE | direkt host-getestet inkl. 60er-Fake-Source; echtes XR-Input auf Gerät NOT TESTED |
 | Gepinnte Adressen vs. Audit-Datensatz | PARTIALLY IMPLEMENTED | Konstanten, Offsets und Abbildungsverschiebung geprüft; Segmentzugehörigkeit braucht `libclient.so` (NOT TESTED) |
@@ -98,8 +99,8 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Build- und 4 Test-Voraussetzungen + Spiegel-Drift, ohne Traceback; Fallbacks wie in den Läufen |
-| `build.py --tests` | **DONE** | 12 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 4 Werkzeug-Selbsttests + 11 Lua |
-| `build.py --units` | **DONE** | 12 C++ + 4 Werkzeug-Selbsttests in 5 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
+| `build.py --tests` | **DONE** | 12 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 5 Werkzeug-Selbsttests + 11 Lua |
+| `build.py --units` | **DONE** | 12 C++ + 5 Werkzeug-Selbsttests in 6 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
 | C++-Grenztests | **DONE** (12 von 12) | siehe Abschnitt 4 |
@@ -132,7 +133,7 @@ python3 Gquest-Hybrid/tools/build.py --tests
 
 Ergebnis: **12 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
 Auswertungs-, Erfassungs-, Manifest- und Adress-Selbsttest sowie 11 Lua-Harnesses
-bestanden**, Exit-Code 0 — 38 Prüfungen.
+bestanden**, Exit-Code 0 — 39 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -176,6 +177,11 @@ Geräteerfassung (`capture_device.py --test`, Stub-adb statt Headset):
 - `getprop`-Pfad und `DEVICE`-Logzeile werden gelesen, fehlender In-App-Wert wird benannt
 - Urteil `konsistent` gegen `WIDERSPRUCH` bei abweichendem App-Wert
 - Protokollzeile wird ersetzt statt angehängt (zweimal erfassen ⇒ eine Zeile)
+
+Frame-Zeit-Politik (`frame_policy.py --test`):
+- der Scanner selbst: rohe Frame-Zeit in Waffen-/Handcode wird gefunden, ein Kommentar nicht, der Perf-Sampler ist erlaubt
+- danach der echte Lua-Baum: heute kein Verstoß (die einzige Nutzung ist die Messung im Sampler)
+- Mutation gegengeprüft: ein `FrameTime()` in `gquest_weapon_align.lua` lässt den Lauf mit Exit 1 und der Zeilennummer scheitern
 
 Gepinnte Adressen (`pinned_addresses.py --test`, Audit-Datensatz + synthetische ELF-Header):
 - relative Offsets der Bridge (`+0x224`, `+0x564`) stimmen mit den Audit-Adressen überein
@@ -338,7 +344,7 @@ Konkret als erstes Paket:
 4. Ein Fake-Host, der 60 Frames Posen liefert, ohne OpenXR, Android oder Engine.
 
 Warum nicht „Build fertig“: Phase 3 ist bis auf die optionale Zusammenführung der
-Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (38 Prüfungen grün),
+Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (39 Prüfungen grün),
 damit ist der nächste sinnvolle Schritt der Core-Schnitt.
 
 **Stand:** Paket 2 (PoseSnapshot + `isfinite`/Norm-Gates) und Paket 4 (Fake-Source mit 60
@@ -430,7 +436,7 @@ Playspace und Content-Install laufen schon ohne Engine grün.
 - **G1** Der Core baut und testet ohne Engine-Header — **erfüllt** (`platform`-Test übersetzt ohne Engine).
 - **G2** Ein Fake-Host treibt 60 Frames, Playspace und Content-Install ohne OpenXR/Android —
   **erfüllt** (`core/host_fake/`, `fake_host`-Test).
-- **G3** Das Overlay bleibt auf GDroid unverändert grün (Regression der 38 Prüfungen).
+- **G3** Das Overlay bleibt auf GDroid unverändert grün (Regression der 39 Prüfungen).
 - **G4** Erst dann ein OpenXR-Host, der nur Kopf, Hände und ein Testobjekt zeigt.
 
 **Abbruchkriterien:** Das Overlay bricht ≥2× pro GDroid-Release, oder das Interface lässt
