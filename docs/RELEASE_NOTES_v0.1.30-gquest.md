@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest-Rust-GDroid.apk` | 59.518.440 Bytes | `195f572f259154127ae74c55bd13f7609f60cb4cd471b487cdb6b7c573461791` |
-| `verification.json` | 2,2 KB | `74564cca4377fda785af9de211b3bac72db4aa560d54b4f99f018b2b3fe36223` |
+| `Gquest-Rust-GDroid.apk` | 59.518.440 Bytes | `bff34dee9c5fed4fb1c0b4b3848da400b17c9be0ab55762b1c6ed053bdfde2b6` |
+| `verification.json` | 2,2 KB | `b68557c5a34282f759674fff0692770e6fee85c414f7cf35e1187afd0cc0f554` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -45,36 +45,36 @@ Wer diese Datei weiterverbreitet, tut das auf eigene Verantwortung. Wenn der GDr
 Rechteinhaber der enthaltenen Bestandteile widerspricht, gehört das Release entfernt — die
 Quellen bleiben nutzbar, siehe „Selbst bauen".
 
-## Installation
+## Installation auf einem frischen Gerät
 
-**Die Signatur unterscheidet sich von der offiziellen GDroid-App.** Nachgeprüft mit
-`apksigner`:
+**Es kollidiert nicht mit der offiziellen GDroid-App.** Die Basis heißt `com.gmodvr.flat`, dieses
+Paket `com.gmodvr.qvrx` — bewusst umbenannt, damit es daneben installiert werden kann.
 
-| Paket | Signierer | Zertifikat SHA256 |
+| | offizielle GDroid 0.1.30 | dieses APK |
 |---|---|---|
-| offizielle GDroid 0.1.30 | `CN=Source Android Local Build` | `4ea5579e427cd59f…` |
-| dieses APK | `CN=Android Debug` | `7013b3046d18208f…` |
+| Paket | `com.gmodvr.flat` | `com.gmodvr.qvrx` |
+| versionCode / versionName | 74 / 0.1.30 | 74 / 0.1.30 |
+| minSdk / targetSdk | 26 / 35 | 26 / 35 |
+| ABI | `arm64-v8a` | `arm64-v8a` |
+| native Bibliotheken | 34 | 35 (plus `liblauncheq.so`) |
+| Signatur | `CN=Source Android Local Build`, v2+v3 | `CN=Android Debug`, v2+v3 |
 
-Android verlangt bei einem Update denselben Signierer. Daraus folgt:
+Daraus folgt für die Installation:
 
-- **`adb install -r` über eine offizielle GDroid-Installation schlägt fehl**
-  (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`).
-- Wer es installieren will, muss die offizielle App vorher **deinstallieren** — dabei gehen
-  App-Daten und Einstellungen verloren. GDroid bietet vorher *Settings & tools → Back up
-  saves*.
-- Wer ohnehin selbst baut (eigener Debug-Schlüssel), kann diesen Build über seine eigene
-  Installation legen, sofern der Schlüssel derselbe ist.
+- **Frische Installation:** `adb install Gquest-Rust-GDroid.apk` — oder Datei im Dateimanager
+  öffnen. Beide Apps können gleichzeitig installiert sein.
+- **`-r` über die offizielle GDroid-App ist nicht nötig und nicht möglich**, weil es ein anderes
+  Paket ist.
+- **Die Signatur zählt beim Aktualisieren von GQuest selbst.** Ein späterer GQuest-Build mit
+  anderem Schlüssel lässt sich nicht über diesen legen (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`);
+  dann vorher deinstallieren. Wer selbst baut, behält seinen eigenen Schlüssel und kann ohne
+  Deinstallation aktualisieren.
 
-```sh
-adb install Gquest-Rust-GDroid.apk
-```
-
-Voraussetzungen: Quest 3/3S, arm64-v8a, Android 8+ (minSdk 26), `versionCode` 74.
+Voraussetzungen: Quest 3/3S oder ein anderes arm64-Gerät, Android 8+ (minSdk 26).
 
 **Es ist kein Content-Paket.** Enthalten sind 16 Lua-Dateien des Overlays. Karten und
 Waffenmodelle fehlen; der Installer schreibt beim Start nur diese Lua-Dateien und lässt
-vorhandenen Content unangetastet. Auf einer Installation ohne Content fehlt also der Inhalt,
-nicht die Funktion.
+vorhandenen Content unangetastet.
 
 ## Was im Paket steckt
 
@@ -89,6 +89,10 @@ Gegenüber der Basis-APK geprüft, Eintrag für Eintrag:
   Kotlin-Metadaten); sie werden beim Neusignieren ersetzt, kein Inhalt geht verloren
 - **unverändert:** 33 der 34 nativen Bibliotheken, Byte für Byte; die 34. ist `libclient.so`
   mit dem gepatchten VR-Init
+- **16-KB-Seiten:** alle nativen Bibliotheken haben `p_align` 16384, auch die eigene
+  `liblauncheq.so` (der Linker bekommt `-Wl,-z,max-page-size=16384`). Mit `targetSdk 35` wäre
+  eine 4-KB-Ausrichtung auf Android-15-Geräten mit 16-KB-Seiten ein Ladefehler.
+  `extractNativeLibs` steht auf `true`, die Ausrichtung im ZIP spielt deshalb keine Rolle.
 
 ## Trägerbestätigt auf Quest 3
 

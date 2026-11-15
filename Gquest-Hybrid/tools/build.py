@@ -612,6 +612,10 @@ def build() -> None:
         "-I" + str(PROJECT / "include"), PROJECT / "bridge/quest_engine_bridge.cpp",
         PROJECT / "target/aarch64-linux-android/release/libgquest_runtime.a",
         "-o", WORK / "liblauncheq.so", "-llog", "-ldl", "-lEGL", "-lGLESv3", "-landroid",
+        # 16 KB pages: the rest of the package is already built for them (libclient.so has
+        # p_align 16384) and targetSdk 35 makes it a requirement on Android 15 devices.
+        # NDK 23 still defaults to 4096, so the alignment is asked for explicitly.
+        "-Wl,-z,max-page-size=16384", "-Wl,-z,common-page-size=16384",
         "-Wl,--no-undefined", "-Wl,--exclude-libs,ALL", "-Wl,--no-as-needed",
         WORK / "gdroid-0.1.30-native/liblauncher.so", "-Wl,-soname,liblauncheq.so")
     run(sys.executable, WORK / "build_quest_lab.py")
