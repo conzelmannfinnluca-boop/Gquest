@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Judge the log of a real first start: launcher readiness, content install, device detection,
-hand smoothing, hand pipeline, weapon mechanics and gestures.
+hand smoothing, hand pipeline, weapon mechanics, the weapon panel and gestures.
 
 The hardware test is the step this project cannot do itself, so the log is the only evidence it
 ever produces. Reading it by eye invites the usual mistake: "no CONTENT line" looks the same as
@@ -50,6 +50,18 @@ MECH_STATE = re.compile(
     r"GQUEST_MECH STATE class=(\S+) kind=(\S+) action=(\S+) capacity=(\d+) chamber=(\d+) "
     r"mag=(\d+) safety=(\w+) slide=(\w+) inserted=(\w+) stored=(\d+)")
 MECH_GROWS_ONLY = {"init", "mag-in", "reload"}
+# The state command explains a missing state instead of staying silent, so these lines say why
+# the panel had nothing to draw - not that anything failed.
+MECH_STATE_NONE = re.compile(r"GQUEST_MECH state: no supported weapon class=(\S+)")
+MECH_STATE_UNREADABLE = re.compile(r"GQUEST_MECH state: unreadable engine state class=(\S+)")
+MECH_RESET = re.compile(r"GQUEST_MECH reset class=(\S+)")
+
+# The weapon panel: one click per action in the headset. A pick also has to reach the server
+# (gquest_hl2_equip), otherwise the pending line times out and the gun never changes.
+PANEL_OPENED = re.compile(r"GQUEST_WEAPON_MENU opened")
+PANEL_COMMAND = re.compile(r"GQUEST_WEAPON_MENU command=(\S+)")
+PANEL_SELECTED = re.compile(r"GQUEST_WEAPON_MENU selected=(\S+)")
+EQUIPPED = re.compile(r"GQUEST_HL2 equipped=(\S+)")
 
 GESTURE_READY = re.compile(r"GQUEST_MECHGESTURE ready")
 GESTURE_INACTIVE = re.compile(r"GQUEST_MECHGESTURE action_inactive=(\S+)")
@@ -175,7 +187,23 @@ def evaluate(text: str) -> tuple[list[tuple[str, str, str]], int]:
         findings.append((OK, "Mechanik",
                          f"Zustand {match.group(1)}: {match.group(2)}, Kapazitaet "
                          f"{match.group(4)}, Kammer {match.group(5)}, Magazin {match.group(6)}"))
-    if not events and not states_lines and not refused:
+    unsupported = [m.group(1) for m in (MECH_STATE_NONE.search(l) for l in lines) if m]
+    for klass in list(dict.fromkeys(unsupported))[:3]:
+        findings.append((OK, "Mechanik",
+                         f"Zustand fuer {klass} angefordert: die Klasse hat kein Profil, die "
+                         f"Waffe bleibt Retail - erwartet, keine Fehlfunktion"))
+    unreadable = [m.group(1) for m in (MECH_STATE_UNREADABLE.search(l) for l in lines) if m]
+    for klass in list(dict.fromkeys(unreadable))[:3]:
+        findings.append((WARN, "Mechanik",
+                         f"Engine-Zustand fuer {klass} nicht lesbar - die Mechanik laesst die "
+                         f"Waffe in Ruhe, statt zu raten; die Anzeige nennt den Grund"))
+    resets = [m.group(1) for m in (MECH_RESET.search(l) for l in lines) if m]
+    for klass in list(dict.fromkeys(resets))[:3]:
+        findings.append((OK, "Mechanik",
+                         f"Zustand fuer {klass} verworfen - der naechste Schuss liest die Engine "
+                         f"neu statt aus einem veralteten Modell zu rechnen"))
+    if not events and not states_lines and not refused and not unsupported \
+            and not unreadable and not resets:
         if any(MECH_READY.search(l) for l in lines):
             findings.append((UNKNOWN, "Mechanik",
                              "Modul geladen, aber kein Zustandswechsel - nie geschossen, nie "
@@ -221,7 +249,34 @@ def evaluate(text: str) -> tuple[list[tuple[str, str, str]], int]:
             else:
                 findings.append((OK, "Mechanik", detail))
 
-    # 7. Gestures: a missing action name is the one failure that kills the gesture path.
+    # 7. Weapon panel: did the headset reach a button, and did the pick reach the server?
+    opened = sum(1 for line in lines if PANEL_OPENED.search(line))
+    commands = [m.group(1) for m in (PANEL_COMMAND.search(l) for l in lines) if m]
+    picks = [m.group(1) for m in (PANEL_SELECTED.search(l) for l in lines) if m]
+    equipped = [m.group(1) for m in (EQUIPPED.search(l) for l in lines) if m]
+    if opened or commands or picks:
+        detail = f"{opened} Oeffnen, {len(commands)} Mechanik-Knopf/Knoepfe"
+        if commands:
+            detail += " (" + ", ".join(dict.fromkeys(commands)) + ")"
+        findings.append((OK, "Waffenmenue", detail + f", {len(picks)} Waffenwahl(en)"))
+        # Two independent prints have to agree: the click in the panel and the equip on the
+        # server. A pick without its equip line is the case where the line would stay pending.
+        if picks and not equipped:
+            findings.append((WARN, "Waffenmenue",
+                             f"Auswahl {picks[-1]} ohne GQUEST_HL2 equipped - der Befehl kam "
+                             f"nicht am Server an (Einzelspieler? Waffe verweigert?)"))
+        elif picks and equipped and picks[-1] != equipped[-1]:
+            findings.append((WARN, "Waffenmenue",
+                             f"letzte Auswahl {picks[-1]}, zuletzt ausgeruestet {equipped[-1]} "
+                             f"- Klick und Hand sind sich uneins"))
+        elif equipped:
+            findings.append((OK, "Waffenmenue", f"zuletzt ausgeruestet: {equipped[-1]}"))
+    else:
+        findings.append((UNKNOWN, "Waffenmenue",
+                         "keine GQUEST_WEAPON_MENU-Zeile - Panel nie geoeffnet oder print "
+                         "erreicht logcat nicht"))
+
+    # 8. Gestures: a missing action name is the one failure that kills the gesture path.
     inactive = [m.group(1) for m in (GESTURE_INACTIVE.search(l) for l in lines) if m]
     for name in dict.fromkeys(inactive):
         findings.append((WARN, "Gesten",
@@ -261,6 +316,9 @@ def print_report(findings: list[tuple[str, str, str]]) -> None:
 # --- self-test -------------------------------------------------------------------------
 
 GOOD = """\
+11-15 10:00:00.900  1000  1000 I GQUEST  : GQUEST_WEAPON_MENU opened
+11-15 10:00:00.910  1000  1000 I GQUEST  : GQUEST_WEAPON_MENU selected=weapon_pistol
+11-15 10:00:00.950  1000  1000 I GQUEST  : GQUEST_HL2 equipped=weapon_pistol model=models/weapons/w_pistol.mdl
 11-15 10:00:01.001  1000  1000 I GQUEST  : GQUEST_RUST READY abi=1 eye=right ffr=2 refresh=72 loaded=2 argc=4
 11-15 10:00:01.100  1000  1000 I GQUEST  : CONTENT ready=1 installed=16 existing=3 root=/storage/emulated/0/Android/data/com.gmodvr.qvrx/files/user/vr_content/
 11-15 10:00:01.200  1000  1000 I GQUEST  : DEVICE detected=quest3 model='Quest 3' device='eureka' supported='quest3,quest3s'
@@ -270,6 +328,7 @@ GOOD = """\
 
 MECHANICS = """\
 11-15 10:00:02.000  1000  1000 I GQUEST  : GQUEST_MECH ready: gquest_mech_state / _rack / _mag / _reload / _safety
+11-15 10:00:02.050  1000  1000 I GQUEST  : GQUEST_WEAPON_MENU command=gquest_mech_mag
 11-15 10:00:02.100  1000  1000 I GQUEST  : GQUEST_MECH action=init class=weapon_pistol chamber=1 mag=17 total=18 safety=false slide=false inserted=true stored=0
 11-15 10:00:03.000  1000  1000 I GQUEST  : GQUEST_MECH action=fire class=weapon_pistol chamber=1 mag=16 total=17 safety=false slide=false inserted=true stored=0
 11-15 10:00:04.000  1000  1000 I GQUEST  : GQUEST_MECH action=mag-out class=weapon_pistol chamber=1 mag=0 total=1 safety=false slide=true inserted=false stored=16
@@ -300,6 +359,24 @@ def selftest() -> int:
         ("Taste nicht verfuegbar", GOOD +
          "11-15 10:00:10.000  1000  1000 I GQUEST  : GQUEST_MECHGESTURE action_inactive=rack\n",
          0, "nicht verfuegbar"),
+        ("Zustand ohne Profil", GOOD +
+         "11-15 10:00:11.000  1000  1000 I GQUEST  : GQUEST_MECH state: no supported weapon "
+         "class=weapon_crowbar\n",
+         0, "kein Profil"),
+        ("Engine-Zustand unlesbar", GOOD +
+         "11-15 10:00:11.000  1000  1000 I GQUEST  : GQUEST_MECH state: unreadable engine "
+         "state class=weapon_ar2\n",
+         0, "nicht lesbar"),
+        ("Zustand nach Resync verworfen", GOOD +
+         "11-15 10:00:11.000  1000  1000 I GQUEST  : GQUEST_MECH reset class=weapon_pistol\n",
+         0, "verworfen"),
+        ("Wahl ohne Ausruestung", GOOD.replace(
+            "GQUEST_HL2 equipped=weapon_pistol model=models/weapons/w_pistol.mdl",
+            "GQUEST_HL2 noop"), 0, "ohne GQUEST_HL2 equipped"),
+        ("Klick und Hand uneins", GOOD.replace(
+            "GQUEST_HL2 equipped=weapon_pistol model=models/weapons/w_pistol.mdl",
+            "GQUEST_HL2 equipped=weapon_357 model=models/weapons/w_357.mdl"), 0,
+         "Klick und Hand sind sich uneins"),
         ("Hand bleibt haengen", GOOD.replace(
             "GQUEST_HANDS hand=right state=ok drops=2",
             "GQUEST_HANDS hand=right state=held drops=2"), 0, "gehalten am Ende"),
@@ -336,10 +413,11 @@ def selftest() -> int:
         for line in failures:
             print("  " + line)
         return 1
-    print("PASS Log-Auswertung: vollstaendiges Log besteht; abgelehntes Manifest, abgebrochene "
-          "Installation, Launcher-Stop, erfundene Munition, ein verweigerter Waffenschreibvorgang "
-          "und eine Stufe mit falscher Zeitkonstante scheitern; unbekanntes Geraet, fehlende "
-          "Geste und eine haengende Hand sind Warnungen; ein Log ohne Marker ergibt Exit 2")
+    print("PASS Log-Auswertung: vollstaendiges Log besteht (inkl. Waffenmenue und Ausruestung); "
+          "abgelehntes Manifest, abgebrochene Installation, Launcher-Stop, erfundene Munition, ein "
+          "verweigerter Waffenschreibvorgang und eine Stufe mit falscher Zeitkonstante scheitern; "
+          "unbekanntes Geraet, fehlende Geste, haengende Hand, ein unlesbarer Engine-Zustand und "
+          "eine Wahl ohne Ausruestung sind Warnungen; ein Log ohne Marker ergibt Exit 2")
     return 0
 
 

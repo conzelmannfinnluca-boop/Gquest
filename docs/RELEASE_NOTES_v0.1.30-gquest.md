@@ -192,12 +192,13 @@ adb logcat -d > quest-start.log
 python3 Gquest-Hybrid/tools/evaluate_hardware_log.py quest-start.log
 ```
 
-Beurteilt werden sieben Bereiche: Launcher-Start (`GQUEST_RUST READY`/`STOP`), Content-Installation
+Beurteilt werden acht Bereiche: Launcher-Start (`GQUEST_RUST READY`/`STOP`), Content-Installation
 (`CONTENT ready=… installed=… existing=…`), Geräteerkennung (`DEVICE detected=…`), die
 Glättungsstufe, die den Filter wirklich erreicht hat (`GQUEST_HANDSMOOTH level=… tau=…`), die
 Hand-Pipeline (`GQUEST_HANDS hand=… state=ok|held drops=…`), die Waffenmechanik
-(`GQUEST_MECH action=… chamber=… mag=… total=…`) und die Gesten (`GQUEST_MECHGESTURE mag|rack`).
-Fehlt eine Zeile, steht dort **UNBEKANNT** — nicht „in Ordnung".
+(`GQUEST_MECH action=… chamber=… mag=… total=…`), das Waffenmenü
+(`GQUEST_WEAPON_MENU opened|command=…|selected=…` gegen `GQUEST_HL2 equipped=…`) und die Gesten
+(`GQUEST_MECHGESTURE mag|rack`). Fehlt eine Zeile, steht dort **UNBEKANNT** — nicht „in Ordnung".
 
 Die Mechanik wird nicht nur gezählt, sondern geprüft: `Kammer + Magazin` muss die Summe ergeben,
 ein Schuss muss die Summe um genau eins senken, und sie darf nur bei Magazinwechsel oder
@@ -205,6 +206,14 @@ Nachladen wieder steigen. Ein `GQUEST_MECH write refused` ist ein Fehler, keine 
 folgt die Waffe der Engine und nicht dem Modell. Eine fehlende VR-Aktion
 (`GQUEST_MECHGESTURE action_inactive=…`) ist eine Warnung — die Taste löst dann nichts aus, die
 Konsolenbefehle `gquest_mech_*` bleiben der Weg.
+
+Auch die neuen Panel-Meldungen werden eingeordnet, statt als Rauschen zu gelten:
+`GQUEST_MECH state: no supported weapon class=…` (Klasse ohne Profil, erwartet) und
+`GQUEST_MECH reset class=…` (Zustand bewusst verworfen) sind in Ordnung; ein
+`unreadable engine state class=…` ist eine Warnung, weil die Mechanik die Waffe dann in Ruhe
+lässt. Im Waffenmenü wird der Klick mit der Ausrüstung abgeglichen: eine Waffe gewählt, aber
+kein `GQUEST_HL2 equipped=…` dahinter ist eine Warnung — genau der Fall, in dem die Zeile im
+Panel auf „wird ausgeruestet“ stehen bliebe.
 
 ## Automatisch geprüft — ohne Headset
 
