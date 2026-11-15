@@ -6,6 +6,7 @@
 #include <cstring>
 #include <dlfcn.h>
 #include <algorithm>
+#include "gquest_pose_snapshot.h"
 namespace GquestVRLua {
 struct lua_State;
 using Function=int(*)(lua_State*);
@@ -37,21 +38,14 @@ struct API {
 } api;
 static bool active() {return api.booted() && api.running();}
 static int IsActive(lua_State* L) {api.pushBool(L,active());return 1;}
-static Triple angles(const float* q) {
- const float x=q[0],y=q[1],z=q[2],w=q[3],deg=57.2957795131f;
- return {std::asin(std::max(-1.f,std::min(1.f,2*(w*y-z*x))))*deg,
-   std::atan2(2*(w*z+x*y),1-2*(y*y+z*z))*deg,
-   std::atan2(2*(w*x+y*z),1-2*(x*x+y*y))*deg};
-}
+// The arithmetic lives in gquest_pose_snapshot.h so it can be tested without the Lua
+// bindings; this wrapper only maps its struct onto the Lua bridge type.
 static bool decode(const unsigned char* data,size_t pos,size_t quat,Triple& position,Triple& angle) {
- float p[3],q[4];memcpy(p,data+pos,sizeof(p));memcpy(q,data+quat,sizeof(q));
- for(float v:p) if(!std::isfinite(v)) return false;
- float norm=0;for(float v:q) {if(!std::isfinite(v)) return false;norm+=v*v;}
- if(norm<0.5f || norm>1.5f) return false;
- // Preserve the established Gquest playspace convention. World conversion
- // remains in its existing Lua tracking provider.
- constexpr float units=39.370098f;
- position={p[0]*units,-p[2]*units,p[1]*units};angle=angles(q);return true;
+ GquestPose::Snapshot decoded{};
+ if(!GquestPose::Decode(data,pos,quat,decoded)) return false;
+ position={decoded.position.x,decoded.position.y,decoded.position.z};
+ angle={decoded.angle.pitch,decoded.angle.yaw,decoded.angle.roll};
+ return true;
 }
 static int pose(lua_State* L,int kind) {
  alignas(16) unsigned char snapshot[4288]={};

@@ -42,8 +42,8 @@ int main() {
   assert(fabs(triples[0].x-39.370098)<0.001 && fabs(triples[0].y+118.110294)<0.001 && fabs(triples[0].z-78.740196)<0.001);
   assert(triples[1].x==0 && triples[1].y==0 && triples[1].z==0);
  }}
- const float yawQ[]={0,0,0.70710678f,0.70710678f};auto yaw=angles(yawQ);assert(fabs(yaw.y-90)<0.001);
- const float pitchQ[]={0,0.70710678f,0,0.70710678f};auto pitch=angles(pitchQ);assert(fabs(pitch.x-90)<0.03);
+ const float yawQ[]={0,0,0.70710678f,0.70710678f};auto yaw=GquestPose::AnglesFromQuaternion(yawQ);assert(fabs(yaw.yaw-90)<0.001);
+ const float pitchQ[]={0,0.70710678f,0,0.70710678f};auto pitch=GquestPose::AnglesFromQuaternion(pitchQ);assert(fabs(pitch.pitch-90)<0.03);
  uint32_t zero=0;memcpy(packet+172,&zero,4);reset();Hand(nullptr);assert(values.back()==0 && triples[0].x==0);
  live=false;reset();Head(nullptr);assert(values.back()==0 && triples[0].x==0);live=true;
  located=false;reset();Head(nullptr);assert(values.back()==0);located=true;

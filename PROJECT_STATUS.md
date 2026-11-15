@@ -78,6 +78,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Geräteerkennung (JNI auf Gerät) | PARTIALLY IMPLEMENTED | Aufrufpfad, Fehlerpfade und Referenzzählung gegen Mock-JNI geprüft (`tests/device_jni.cpp`); echtes `PackageManager`-Verhalten NOT TESTED |
 | Reale `Build.MODEL`-Werte Quest 3/3S | NOT TESTED | Erfassungswerkzeug + Protokoll fertig, kein Gerät (`docs/measurements/device-identity.md`) |
 | `com.oculus.supportedDevices` im Overlay | PARTIALLY IMPLEMENTED | Wert wird zusammengeführt statt verdoppelt und zurückgelesen; nie gegen die echte Basis-APK gelaufen |
+| Posen-Dekodierung (Snapshot → Position/Winkel) | DONE | direkt host-getestet inkl. 60er-Fake-Source; echtes XR-Input auf Gerät NOT TESTED |
 | Gepinnte Adressen vs. Audit-Datensatz | PARTIALLY IMPLEMENTED | Konstanten, Offsets und Abbildungsverschiebung geprüft; Segmentzugehörigkeit braucht `libclient.so` (NOT TESTED) |
 | VR-Content-Installation (Manifest-Prüfung) | PARTIALLY IMPLEMENTED | Manifest-Regeln + Verzeichnisanlage host-getestet; `AAsset`-Pfad und Schreiben auf dem Gerät NOT TESTED |
 | Widerspruch MODEL ↔ supportedDevices | DONE | Warnzeile im Log, reine Diagnose ohne Einfluss auf das Profil; auf Gerät NOT TESTED |
@@ -90,11 +91,11 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Build- und 4 Test-Voraussetzungen + Spiegel-Drift, ohne Traceback; Fallbacks wie in den Läufen |
-| `build.py --tests` | **DONE** | 8 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 4 Werkzeug-Selbsttests + 10 Lua |
-| `build.py --units` | **DONE** | 8 C++ + 4 Werkzeug-Selbsttests in 5 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
+| `build.py --tests` | **DONE** | 9 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 4 Werkzeug-Selbsttests + 10 Lua |
+| `build.py --units` | **DONE** | 9 C++ + 4 Werkzeug-Selbsttests in 5 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
-| C++-Grenztests | **DONE** (8 von 8) | siehe Abschnitt 4 |
+| C++-Grenztests | **DONE** (9 von 9) | siehe Abschnitt 4 |
 | Lua-Harnesses (10) | **DONE** (10 von 10) | lokale Lua-5.4-Toolchain gebaut |
 | C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle |
 | Android-Bridge-Cross-Compile | **DONE** | `aarch64-linux-android29`, `-Wall -Wextra -Werror`, keine Warnung |
@@ -122,9 +123,9 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **8 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
+Ergebnis: **9 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
 Auswertungs-, Erfassungs-, Manifest- und Adress-Selbsttest sowie 10 Lua-Harnesses
-bestanden**, Exit-Code 0 — 33 Prüfungen.
+bestanden**, Exit-Code 0 — 34 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -141,6 +142,7 @@ C++-Grenztests:
 - `PASS VR Lua bridge: both hands/head/aim, quaternion axes, real validity/finite gates, input routing, inactive/invalid input and bounded haptics`
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 - `PASS device model classification: 3S beats 3, case/whitespace/near-miss guards, codename fallback, nulls and stable ids`
+- `PASS pose snapshot: metre-to-inch mapping with Y/Z swap, yaw/pitch axes, non-finite and out-of-window quaternions refused without a half-written result, 60 fake frames with 58 valid`
 - `PASS readable memory: inside/at-edge accepted, PROT_NONE, spans across a mapping boundary, null and a wrapping length refused, zero length reports the address itself`
 - `PASS content install: manifest rejects absolute paths, .. segments, non-numeric and overflowing sizes, empty paths and CRLF; directory creation is idempotent and refuses to descend into a file`
 - `PASS device JNI readers: meta-data requested with GET_META_DATA, absent key and null bundle stay empty, throwing calls clear the exception, every local reference released`
@@ -323,8 +325,16 @@ Konkret als erstes Paket:
 4. Ein Fake-Host, der 60 Frames Posen liefert, ohne OpenXR, Android oder Engine.
 
 Warum nicht „Build fertig“: Phase 3 ist bis auf die optionale Zusammenführung der
-Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (24 Prüfungen grün),
+Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (34 Prüfungen grün),
 damit ist der nächste sinnvolle Schritt der Core-Schnitt.
+
+**Stand:** Paket 2 (PoseSnapshot + `isfinite`/Norm-Gates) und Paket 4 (Fake-Source mit 60
+Frames, ohne OpenXR/Android/Engine) sind als **E1-unabhängiger** Teil umgesetzt:
+`bridge/gquest_pose_snapshot.h` + `tests/pose_snapshot.cpp`. Sie liegen bewusst in
+`bridge/` und nicht in einem neuen `core/`-Baum, weil dessen Zuschnitt genau das ist, was
+E1 festlegt — der Code ist in allen drei Varianten unverändert nutzbar. Paket 1
+(`IPlatformHost`, `IVRBackend`, `IAssetSource`, `IClock`, `ILog`) und Paket 3 (Playspace)
+warten auf E1.
 
 ---
 

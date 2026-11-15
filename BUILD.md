@@ -49,6 +49,7 @@ brauchen:
 | Geräteerfassung | `capture_device.py --test`: Klassifizierung, getprop-Pfad, Logcat-Zeile, Widerspruchs-Urteil — mit Stub-adb, kein Headset |
 | Übersprungene Gruppen | Erscheinen als `UEBERSPRUNGEN` mit Grund und dem Zusatz „nicht geprüft" und werden am Ende zusätzlich aufgelistet; sie zählen nie als bestanden |
 | Schneller Prüflauf | `build.py --units`: nur die 5 C++-Grenztests und die drei Werkzeug-Selbsttests, ohne NDK, Rust und Lua. Exit 0 = alle 4 Gruppen bestanden, Exit 1 = mindestens eine fehlgeschlagen |
+| Posen-Dekodierung | `pose_snapshot`: Meter→Zoll mit Y/Z-Tausch, Gier/Nick-Achsen, nicht-finite und norm-fremde Quaternionen abgelehnt (Ergebnis bleibt unangetastet), 60 Frames aus einer Fake-Quelle mit 58 gültigen |
 | Gepinnte Adressen | `pinned_addresses.py --test`: Bridge-Offsets gegen den Audit-Datensatz, ELF-Programmheader-Leser an synthetischen Headern, Code/Daten-Klassifizierung. Ohne `libclient.so` bleibt die Segmentzugehörigkeit offen (Exit 2 im Normalauf) |
 | Lesbarer Speicher | `readable_memory`: gemappte Seite, letztes Byte, `PROT_NONE`, Bereich über eine Mapping-Grenze, Nullzeiger, überlaufende Länge und Länge 0 mit `mmap`/`mprotect` geprüft |
 | Content-Installation | `content_install`: Manifest wird bei absolutem Pfad, `..`, leerem Pfad, nicht-numerischer/überlaufender Größe und CRLF abgelehnt; `mkdir -p` idempotent und steigt nicht in eine Datei hinab |
