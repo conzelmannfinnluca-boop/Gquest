@@ -59,7 +59,9 @@ static Angles AnglesFromQuaternion(const float* q) {
 
 // Returns false for a non-finite component or an unusable orientation, and leaves `out`
 // untouched in that case: the caller publishes zeroed values instead of a guess.
-static bool Decode(const unsigned char* snapshot, std::size_t positionOffset,
+// [[maybe_unused]]: this header is shared, and a consumer that only needs Snapshot/Vec3
+// (the playspace math) must not warn about the decoder it does not call.
+[[maybe_unused]] static bool Decode(const unsigned char* snapshot, std::size_t positionOffset,
                    std::size_t quaternionOffset, Snapshot& out) {
     float position[3];
     float orientation[4];

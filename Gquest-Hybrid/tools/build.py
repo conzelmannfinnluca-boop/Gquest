@@ -88,7 +88,8 @@ BRIDGE_MIRRORS: list[str] = [
 
 # Boundary tests that only need a host C++ compiler and the headers.
 HOST_CPP_TESTS = ["native_fingers", "vr_lua", "retired_content", "device_model",
-                  "device_jni", "content_install", "pose_snapshot", "readable_memory",
+                  "device_jni", "content_install", "playspace", "pose_snapshot",
+                  "readable_memory",
                   "signature_scan"]
 
 # Lua boundary harnesses. They need a Lua 5.4 shared library but no private data;
