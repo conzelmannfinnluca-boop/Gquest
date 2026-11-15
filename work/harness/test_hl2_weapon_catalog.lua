@@ -73,9 +73,24 @@ nextPayload="class=weapon_pistol kind=magazine chamber=0 mag=0 capacity=18 safet
 receivers.GquestMechState()
 assert(live().text:find("Sicherung an",1,true) and live().text:find("Verschluss offen",1,true)
  and live().text:find("Magazin draussen",1,true),"state line must follow the second state, got "..tostring(live().text))
+-- An empty line is a result: every case names the weapon and the reason.
+nextPayload="state=none reason=nohand class=none code=none"
+receivers.GquestMechState()
+assert(live().text:find("nichts in der Hand",1,true),"empty hands must be named, got "..tostring(live().text))
+nextPayload="state=none reason=dead class=none code=none"
+receivers.GquestMechState()
+assert(live().text:find("Spieler tot",1,true),"a dead player must be named, got "..tostring(live().text))
+nextPayload="state=none reason=unsupported class=weapon_crowbar code=none"
+receivers.GquestMechState()
+assert(live().text:find("Brechstange",1,true) and live().text:find("weapon_crowbar",1,true)
+ and live().text:find("hat keine Mechanik",1,true),"an unsupported weapon must be named, got "..tostring(live().text))
+nextPayload="state=none reason=engine class=hlvr_pistol code=weapon_has_no_clip"
+receivers.GquestMechState()
+assert(live().text:find("Pistole",1,true) and live().text:find("hlvr_pistol",1,true)
+ and live().text:find("kein Magazin am Modell",1,true),"an unreadable engine value must say why, got "..tostring(live().text))
 nextPayload="none"
 receivers.GquestMechState()
-assert(live().text:find("keine mit Mechanik",1,true),"no weapon must be named as such")
+assert(live().text:find("keine mit Mechanik",1,true),"an old server without a reason must still say something")
 assert(timers.GquestMechPoll,"a poll timer must run while the panel is open")
 timers.GquestMechPoll()
 assert(timers.GquestMechPoll,"the poll must keep running while the panel is open")
@@ -88,4 +103,5 @@ timers.GquestMechPoll()
 assert(timers.GquestMechPoll==nil,"the poll must stop with the panel")
 print("PASS HL2-only catalog: eleven real weapon selections, no ArcVR control, selection closes "
  .."tracked menu, six mechanics buttons that issue their command without closing the panel, "
- .."and a live chamber/magazine line fed by the server state")
+ .."a live chamber/magazine line fed by the server state, and a reason naming the weapon "
+ .."whenever that line has no numbers")

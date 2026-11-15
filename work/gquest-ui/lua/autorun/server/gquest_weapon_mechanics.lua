@@ -446,27 +446,50 @@ local function pushState(player, text)
     net.Send(player)
 end
 
+--- Nothing to draw is a result too: the panel names the weapon and the reason, so an empty
+--- line can be checked against what is actually in the hand. Codes stay one token each, and
+--- the engine's own reason text is flattened to underscores.
+local function emptyPayload(reason, class, code)
+    if code then code = string.gsub(tostring(code), "%s+", "_") end
+    return string.format("state=none reason=%s class=%s code=%s",
+        reason, class or "none", code or "none")
+end
+
+--- Either the state, or the reason it is missing. The active weapon is read here directly:
+--- the mechanic only accepts a profile, but the panel must also be able to say "this weapon
+--- has no mechanic" instead of showing nothing.
+local function pollPayload(player)
+    if not IsValid(player) then return emptyPayload("dead") end
+    if type(player.Alive) == "function" and not player:Alive() then return emptyPayload("dead") end
+    local weapon = player.GetActiveWeapon and player:GetActiveWeapon()
+    if not IsValid(weapon) then return emptyPayload("nohand") end
+    local class = tostring(weapon:GetClass())
+    local profile = GquestMech.Profile(class)
+    if not profile then return emptyPayload("unsupported", class) end
+    local state, code = stateFor(weapon, profile)
+    if not state then return emptyPayload("engine", class, code) end
+    return statePayload(weapon, profile, state)
+end
+
 --- Read-only reply for the panel's poll: sends the state, writes no log line. A poll every
 --- half second must not fill the log the evaluator reads.
 concommand.Add("gquest_mech_poll", function(player)
-    local weapon, profile = commandWeapon(player)
-    if not weapon then pushState(player, "none") return end
-    local state = stateFor(weapon, profile)
-    if not state then pushState(player, "none") return end
-    pushState(player, statePayload(weapon, profile, state))
+    pushState(player, pollPayload(player))
 end)
 
 concommand.Add("gquest_mech_state", function(player)
-    local weapon, profile = commandWeapon(player)
-    if not weapon then
-        print("GQUEST_MECH state: no supported weapon")
-        pushState(player, "none")
+    local weapon = IsValid(player) and player.GetActiveWeapon and player:GetActiveWeapon() or nil
+    local class = IsValid(weapon) and tostring(weapon:GetClass()) or "none"
+    local profile = IsValid(weapon) and GquestMech.Profile(class) or nil
+    if not profile then
+        print("GQUEST_MECH state: no supported weapon class=" .. class)
+        pushState(player, pollPayload(player))
         return
     end
     local state = stateFor(weapon, profile)
     if not state then
-        print("GQUEST_MECH state: unreadable engine state")
-        pushState(player, "none")
+        print("GQUEST_MECH state: unreadable engine state class=" .. class)
+        pushState(player, pollPayload(player))
         return
     end
     print(string.format("GQUEST_MECH STATE class=%s kind=%s action=%s capacity=%d chamber=%d mag=%d safety=%s slide=%s inserted=%s stored=%d engine=%s",

@@ -229,12 +229,34 @@ assert(#printed == before, "a poll must not write a log line")
 commands.gquest_mech_state(player_)
 assert(sent.name == "GquestMechState" and string.find(sent.text, "capacity=18", 1, true),
     "the state command must also feed the panel")
+-- A missing state is explained, not left blank: the panel must be able to name the weapon
+-- and the reason, so "nothing is displayed" is never all the headset shows.
 local unarmed = {IsPlayer = function() return true end, Alive = function() return true end,
     GetActiveWeapon = function() return nil end}
+before = #printed
 commands.gquest_mech_poll(unarmed)
-assert(sent.text == "none" and sent.player == unarmed, "an unarmed player must get an empty state")
+assert(sent.player == unarmed, "the poll must answer only the player who asked")
+assert(string.find(sent.text, "reason=nohand", 1, true), "empty hands must be reported, got " .. tostring(sent.text))
+assert(#printed == before, "a poll must not write a log line, not even for an empty hand")
+commands.gquest_mech_poll(fakePlayer(clipWeapon("weapon_crowbar", 0, 0), 0))
+assert(string.find(sent.text, "reason=unsupported", 1, true)
+    and string.find(sent.text, "class=weapon_crowbar", 1, true),
+    "a weapon without a profile must be named as unsupported, got " .. tostring(sent.text))
+commands.gquest_mech_poll(fakePlayer(clipWeapon("weapon_ar2", 30, 0), 0))
+assert(string.find(sent.text, "reason=engine", 1, true)
+    and string.find(sent.text, "class=weapon_ar2", 1, true)
+    and string.find(sent.text, "code=weapon_has_no_magazine", 1, true),
+    "an unreadable engine value must carry its reason code, got " .. tostring(sent.text))
+-- A reason text with spaces would break the panel's parser, so every field stays key=value.
+for token in string.gmatch(sent.text, "%S+") do
+    assert(string.find(token, "=", 1, true), "every field must be key=value, stray: " .. token)
+end
+local dead = {IsPlayer = function() return true end, Alive = function() return false end,
+    GetActiveWeapon = function() return nil end}
+commands.gquest_mech_poll(dead)
+assert(string.find(sent.text, "reason=dead", 1, true), "a dead player must be reported")
 
 realPrint("PASS weapon mechanics: chamber split, auto cycle, empty-chamber click, slide lock, safety, "
     .. "live-round ejection to reserve, retaining magazine, reserve cap, no free chambering, "
     .. "revolver cylinder, pump action, tube reload, native magazine write, write rollback, "
-    .. "resync, disabled gate and a silent state poll for the weapon panel")
+    .. "resync, disabled gate and a silent state poll that explains a missing state")

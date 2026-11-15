@@ -6,13 +6,53 @@ local frame
 GQUEST_MECH_LIVE = GQUEST_MECH_LIVE or "none"
 local liveLabel
 
+-- Names from this catalog, so a weapon without mechanics is named the way the menu names it.
+local NAMES = {
+    weapon_pistol = "Pistole", weapon_357 = ".357 Revolver", weapon_smg1 = "SMG",
+    weapon_ar2 = "AR2", weapon_shotgun = "Schrotflinte", weapon_crossbow = "Armbrust",
+    weapon_rpg = "Raketenwerfer", weapon_crowbar = "Brechstange", weapon_frag = "Granate",
+    weapon_physcannon = "Gravity Gun", weapon_physgun = "Physgun",
+}
+local SUPPORTED = "Pistole, .357, SMG, AR2, Schrotflinte, Armbrust, RPG"
+-- The server flattens its engine reason to a code; these are the ones it can send.
+local CODES = {
+    weapon_has_no_clip = "kein Magazin am Modell",
+    weapon_has_no_magazine = "kein lesbares Magazin",
+    native_capacity_invalid = "Magazingroesse unlesbar",
+    clip_unreadable = "Magazinstand unlesbar",
+}
+
+local function weaponName(class)
+    if type(class) ~= "string" then return "unbekannt" end
+    -- Native HLVR classes are the same guns with a prefix; the catalog names are unprefixed.
+    local key = class
+    if string.sub(class, 1, 5) == "hlvr_" then key = "weapon_" .. string.sub(class, 6) end
+    return NAMES[key] or class
+end
+
 local function liveText(payload)
     if type(payload) ~= "string" or payload == "" or payload == "none" then
         return "Waffe: keine mit Mechanik in der Hand"
     end
     local field = {}
     for key, value in string.gmatch(payload, "(%a+)=([^ ]+)") do field[key] = value end
-    if not field.chamber then return "Waffe: keine Mechanik-Daten" end
+    if not field.chamber then
+        -- No numbers: name the weapon and the reason instead of leaving the line empty.
+        if field.reason == "nohand" then
+            return "Waffe: nichts in der Hand - Mechanik nur fuer " .. SUPPORTED
+        end
+        if field.reason == "dead" then return "Waffe: Spieler tot - keine Mechanik" end
+        if field.reason == "unsupported" then
+            return string.format("Waffe: %s (%s) - hat keine Mechanik, nur %s",
+                weaponName(field.class), field.class or "?", SUPPORTED)
+        end
+        if field.reason == "engine" then
+            local code = field.code or "unbekannt"
+            return string.format("Waffe: %s (%s) - %s", weaponName(field.class),
+                field.class or "?", CODES[code] or string.gsub(code, "_", " "))
+        end
+        return "Waffe: keine Mechanik-Daten"
+    end
     local safety = field.safety == "true" and "Sicherung an" or "Sicherung aus"
     local slide = field.slide == "true" and "Verschluss offen" or "Verschluss zu"
     local magazine = field.inserted == "false" and ", Magazin draussen" or ""
@@ -59,8 +99,11 @@ function GquestWeapons.Open()
     reload:SetText("Nachladen / HL2-Magazin auswerfen")
     reload.DoClick=function() frame:Close();gui.HideGameUI();RunConsoleCommand("gquest_reload") end
     -- Live chamber and magazine, from the server's own numbers.
-    local live=vgui.Create("DLabel",frame);live:Dock(TOP);live:SetTall(30)
+    local live=vgui.Create("DLabel",frame);live:Dock(TOP)
     live:SetFont("DermaDefaultBold")
+    -- A reason can be longer than the panel is wide, so the line wraps and grows instead of
+    -- being cut off mid sentence.
+    live:SetWrap(true);live:SetAutoStretchVertical(true);live:SetTall(30)
     liveLabel=live;renderLive()
     RunConsoleCommand("gquest_mech_poll")
     timer.Create("GquestMechPoll",0.5,0,function()

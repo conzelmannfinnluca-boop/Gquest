@@ -72,6 +72,12 @@ bisher. Der Fehlerfall ist „Retail-Verhalten", nicht „Waffe tot".
 | Sicherung | `gquest_mech_safety` |
 | Zustand ansehen | `gquest_mech_state` (Log + Anzeige im Waffen-Panel) |
 | Zustand nur für die Anzeige abfragen | `gquest_mech_poll` — schreibt keine Log-Zeile |
+
+`gquest_mech_poll` antwortet immer: entweder mit dem Zustand oder mit dem Grund, warum es
+keinen gibt — `reason=nohand` (nichts in der Hand), `reason=dead`, `reason=unsupported
+class=weapon_crowbar` (Klasse ohne Profil, z. B. Brechstange, Gravity Gun) oder `reason=engine
+class=… code=…` (Profil vorhanden, aber der Engine-Wert ist nicht lesbar). Die Anzeige im
+Waffen-Panel nennt dann Waffe und Grund im Klartext.
 | Modell verwerfen und neu aus der Engine lesen | `gquest_mech_reset` |
 
 Convars: `gquest_mech_enabled` (Standard 1), `gquest_mech_gestures` (Standard 1),

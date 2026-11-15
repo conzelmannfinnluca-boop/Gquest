@@ -47,8 +47,11 @@ Im Spiel eine Pistole aus dem Waffenmenü nehmen. Alles Folgende gibt es auch **
 VR-Menü → **Waffen** → Knöpfe `Magazin`, `Durchladen`, `Nachladen`, `Sicherung`, `Zustand`,
 `Haende`. Das Panel bleibt dabei offen, damit mehrere Aktionen hintereinander gehen, und zeigt
 über den Knöpfen live `Waffe: … - Kammer 1, Magazin 17/18, Sicherung aus, Verschluss zu`.
-Bewegt sich diese Zeile nicht, kommt der Zustand nicht am Client an (Net-Nachricht
-`GquestMechState`), dann bitte melden.
+Steht dort statt Zahlen ein Grund, ist das Absicht und sagt, was gerade los ist: `nichts in der
+Hand`, `Brechstange (weapon_crowbar) - hat keine Mechanik` (nur die sieben Profile haben eine)
+oder `Pistole (hlvr_pistol) - kein lesbares Magazin` (Engine-Wert unbrauchbar). Steht dort
+gar nichts oder bleibt der Text auf einem alten Stand, kommt die Net-Nachricht
+`GquestMechState` nicht an, dann bitte melden.
 
 Oder in der Konsole:
 

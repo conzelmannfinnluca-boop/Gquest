@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.530.965 Bytes | `b65e05e73e20d821565c16236bb312b832b19394ad7f72c61897a88d8ede7607` |
-| `verification.json` | 2,4 KB | `c6a4338eb6021da2736629ba1fbc0500f99f251977ec0f6c6fe26ad85a3c6508` |
+| `Gquest.apk` | 59.530.965 Bytes | `74c834441e9eddf1fb926ca76c3d3634caa6fbe60595e52093c4591f46e27e48` |
+| `verification.json` | 2,4 KB | `d04542ae8add296e53bc55703968577659d99fc175670f82e257aba282274b30` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -48,6 +48,11 @@ nicht: es bleibt bei gemessenen 898 px Inhalt in 970 px und 0 px Scrollen.
 17/18, Sicherung aus, Verschluss zu`. Die Zahlen kommen als Net-Nachricht vom Server, der sie
 besitzt; die Abfrage dahinter (`gquest_mech_poll`) schreibt bewusst **keine** Log-Zeile, damit
 die Anzeige den Hardware-Log nicht flutet.
+- **Leere Zeile erklärt sich:** Statt nur zu schweigen nennt dieselbe Zeile die Waffe und den
+Grund — `Waffe: Brechstange (weapon_crowbar) - hat keine Mechanik, nur Pistole, .357, SMG, AR2,
+Schrotflinte, Armbrust, RPG`, `Waffe: nichts in der Hand - …` oder `Waffe: Pistole
+(hlvr_pistol) - kein lesbares Magazin`, wenn der Engine-Wert nicht stimmt. So ist am Kopf
+ablesbar, ob die Waffe nicht unterstützt wird oder ob der Zustand nicht ankommt.
 
 **Unbestätigt (NOT TESTED, braucht das Headset):**
 
