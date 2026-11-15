@@ -228,8 +228,53 @@ assert(adopted.saved.quest3 and adopted.saved.quest3.tier == 3,
 assert(P.AdoptDetected(adopted, "questpro") == false, "unknown device must not be adopted")
 assert(P.AdoptDetected(nil, "quest3s") == false, "missing state must not be adopted")
 
+-- 12) Comfort settings are player-level, validated, and written where a build without
+-- the section ignores them.
+local comfort = P.Defaults()
+assert(comfort.snapStep == 30 and comfort.stance == "stand", "comfort defaults")
+assert(P.SetSnapStep(comfort, 47).snapStep == 30, "unsupported snap step accepted")
+assert(P.SetSnapStep(comfort, 45).snapStep == 45, "valid snap step refused")
+assert(P.SetStance(comfort, "sitting").stance == "stand", "invalid stance accepted")
+assert(P.SetStance(comfort, "seated").stance == "seated", "valid stance refused")
+
+-- A file without the keys keeps the defaults; a broken one never becomes a turn the
+-- player did not choose.
+assert(P.Parse("1032x1104\n2\n72\nquest3\n").snapStep == 30, "missing key must default")
+assert(P.Parse("1032x1104\n2\n72\nquest3\nsnap=37\n").snapStep == 30, "unsupported step accepted")
+assert(P.Parse("1032x1104\n2\n72\nquest3\nsnap=abc\n").snapStep == 30, "garbage step accepted")
+assert(P.Parse("1032x1104\n2\n72\nquest3\nstance=lying\n").stance == "stand", "unknown stance accepted")
+
+-- A remembered preset and a comfort key share the file without disturbing each other.
+local mixed = P.Parse("1548x1656\n2\n90\nquest3\nquest3=3,1,90\nsnap=15\n")
+assert(mixed.saved.quest3.tier == 3 and mixed.snapStep == 15, "preset and comfort must coexist")
+
+-- Both keys survive a round trip, and the three runtime lines stay exactly where the
+-- Rust reader expects them.
+local written = P.Serialize(comfort)
+assert(string.find(written, "snap=45", 1, true), "snap key must be written")
+assert(string.find(written, "stance=seated", 1, true), "stance key must be written")
+local runtimeLines = {}
+for line in string.gmatch(written, "[^\r\n]+") do runtimeLines[#runtimeLines + 1] = line end
+assert(runtimeLines[1] == comfort.tier and runtimeLines[2] == "2" and runtimeLines[3] == "72",
+    "runtime lines must stay first")
+local round = P.Parse(written)
+assert(round.snapStep == 45 and round.stance == "seated", "comfort round trip")
+
+-- 13) The menu's cycling button visits every step and comes back to the start.
+local cycle = P.Defaults()
+local seen = {}
+for _ = 1, #P.SNAP_STEPS do
+    seen[#seen + 1] = cycle.snapStep
+    P.CycleSnapStep(cycle)
+end
+assert(table.concat(seen, ",") == "30,45,90,15", "cycle order: " .. table.concat(seen, ","))
+assert(cycle.snapStep == 30, "cycle must wrap")
+assert(P.ToggleStance(cycle).stance == "seated", "stance toggle to seated")
+assert(P.ToggleStance(cycle).stance == "stand", "stance toggle back")
+
 print("PASS per-device VR profiles: separate tier sets accepted by the runtime, runtime-matching "
     .. "defaults, legacy and CRLF parsing, foreign-tier snap, invalid value fallbacks, preset "
     .. "remembering across device switches, setter guards, stable round trip, detection-aware "
-    .. "load, the three-state detection status line, its character budget and adopting the "
-    .. "detected device")
+    .. "load, the three-state detection status line, its character budget, adopting the "
+    .. "detected device, and validated player-level snap step and stance keys that keep the "
+    .. "three runtime lines first")

@@ -19,6 +19,15 @@ local function applyProfile()
     RunConsoleCommand("vr_ffr_level", tostring(profileState.foveation))
     RunConsoleCommand("vr_refresh_rate", tostring(profileState.rate))
 end
+-- The turn itself lives in gquest_playspace.lua; the menu owns only the step width, so
+-- there is one implementation of the turn. Called once at load and again on every change,
+-- which is why a saved step already applies before the menu is ever opened.
+local function applyComfort()
+    if GquestPlayspace and profileState and profileState.snapStep then
+        GquestPlayspace.STEP = profileState.snapStep
+    end
+end
+applyComfort()
 local function closeRoot()
     menuBlockedUntil=RealTime()+1.25
     if IsValid(rootFrame) then rootFrame:Close() end
@@ -179,6 +188,35 @@ local function settingsPanel(parent)
         combo("Bildwiederholrate", {{"72 Hz",72},{"90 Hz",90}},profileState.rate,function(value)
             profiles.SetRate(profileState,value); saveProfile(); applyProfile()
         end)
+    end
+    if profiles and profileState then
+        text("Playspace",28)
+        text("Snap-Turn dreht den Blick in festen Schritten (Konsole: gquest_snap_ccw / gquest_snap_cw). Der Schritt gilt sofort und wird gespeichert. Sitzend wird nur gespeichert: es wirkt erst mit dem Core-Umstieg, weil die Kopfpose noch am Spielerauge haengt.",96)
+        -- Buttons instead of dropdowns: with a controller in a headset a cycling button
+        -- is one click, a combo box is a focus change and a list.
+        local stepButton=panel:Add("DButton")
+        local function stepText()
+            return string.format("Snap-Turn: %d Grad (klicken zum Wechseln)",profileState.snapStep)
+        end
+        stepButton:SetText(stepText()); stepButton:SetPos(16,y); stepButton:SetSize(560,46)
+        stepButton.DoClick=function()
+            profiles.CycleSnapStep(profileState); saveProfile(); applyComfort()
+            stepButton:SetText(stepText())
+            notification.AddLegacy("Snap-Turn "..profileState.snapStep.." Grad",NOTIFY_GENERIC,3)
+        end
+        y = y + 58
+        local stanceButton=panel:Add("DButton")
+        local function stanceText()
+            return "Fortbewegung: "..(profileState.stance=="seated" and "Sitzend" or "Stehend")
+        end
+        stanceButton:SetText(stanceText()); stanceButton:SetPos(16,y); stanceButton:SetSize(560,46)
+        stanceButton.DoClick=function()
+            profiles.ToggleStance(profileState); saveProfile()
+            stanceButton:SetText(stanceText())
+            notification.AddLegacy(profileState.stance=="seated"
+                and "Sitzend gespeichert (wirkt mit dem Core-Umstieg)" or "Stehend gespeichert",NOTIFY_GENERIC,4)
+        end
+        y = y + 58
     end
     text("Waffenmodelle",28)
     text("Prueft im laufenden Spiel, welches Handmodell jede Waffe tatsaechlich benutzt und ob alle Modelle geladen werden. Das Ergebnis steht im Log und in data/gquest/weapon_models.json.",76)

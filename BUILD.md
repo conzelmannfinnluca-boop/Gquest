@@ -40,7 +40,7 @@ brauchen:
 | `native_fingers` | alle 12 Fingerprofile, linke Hand/Wurzel/Flags unverändert, Passthrough bei ungültigem Profil |
 | `vr_lua` | beide Hände, Kopf, Zielpose, Quaternion-Achsen, NaN-Gates, Action-Routing, Haptik-Clamping |
 | `retired_content` | 63 ArcVR-Dateien gesichert, fremdes Addon bleibt, Wiederholung, Namenskollision, Symlink-Schutz |
-| 10 Lua-Harnesses | Griff-/Mündungs-Caches, Modellpolitik, Ausrüstung, Waffenkatalog, Pose-Gate, Reload-Client, Reserve-Transfer, Performance-Sampler, Geräteprofile, Menü-Navigation |
+| 11 Lua-Harnesses | Griff-/Mündungs-Caches, Modellpolitik, Ausrüstung, Waffenkatalog, Pose-Gate, Reload-Client, Reserve-Transfer, Performance-Sampler, Geräteprofile (inkl. Komfort-Schlüssel), Menü-Navigation (inkl. Playspace-Knöpfe), Playspace |
 | Rust-Unit-Tests | Startargumente, Profilparser beider Geräte, ABI-Grenzen — laufen mit, sobald `cargo` vorhanden ist |
 | Geräteklassifizierung | `Quest 3S` vor `Quest 3`, Groß-/Kleinschreibung, Codename-Rückfall, Fast-Treffer, Nullzeiger |
 | C++/Rust-ABI-Smoke | sechs Startfälle gegen die Release-Bibliothek, `GquestProfile`-Größe, `argv`-Eigentum |

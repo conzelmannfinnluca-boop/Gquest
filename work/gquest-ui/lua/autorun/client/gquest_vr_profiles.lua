@@ -11,9 +11,12 @@
 --   line 3  refresh rate 72|90    read by the Rust runtime
 --   line 4  device id             menu bookkeeping, ignored by the runtime
 --   line 5+ remembered preset per device: quest3=<tier>,<foveation>,<rate>
+--           comfort keys: snap=<degrees>, stance=stand|seated
 --
 -- The runtime reads only the first three lines, so a profile written before this
 -- split keeps working and an older build ignores the extra lines instead of failing.
+-- The comfort keys carry no commas on purpose: a build whose parser only knows the
+-- preset shape skips them instead of reading them as a broken preset.
 --
 -- This module holds no UI and issues no console commands: it parses, resolves and
 -- serialises. The menu and the tests both use it.
@@ -27,6 +30,13 @@ P.ORDER = { "quest3", "quest3s" }
 -- Must match the Rust default in Gquest-Hybrid/src/lib.rs: a profile file that does
 -- not exist yet has to show the values the game is actually running with.
 P.RUNTIME_DEFAULT = { tier = "1032x1104", foveation = 2, rate = 72 }
+
+-- Comfort settings belong to the player, not to the panel: unlike the tier sets they are
+-- the same on both headsets, so they are stored once instead of per device.
+P.SNAP_STEPS = { 15, 30, 45, 90 }
+P.STANCES = { "stand", "seated" }
+P.DEFAULT_SNAP_STEP = 30
+P.DEFAULT_STANCE = "stand"
 
 P.DEVICES = {
     quest3 = {
@@ -46,6 +56,21 @@ P.DEVICES = {
 
 local function isRate(value)
     return value == 72 or value == 90
+end
+
+function P.IsSnapStep(value)
+    if type(value) ~= "number" then return false end
+    for _, step in ipairs(P.SNAP_STEPS) do
+        if step == value then return true end
+    end
+    return false
+end
+
+function P.IsStance(value)
+    for _, stance in ipairs(P.STANCES) do
+        if stance == value then return true end
+    end
+    return false
 end
 
 local function isFoveation(value)
@@ -72,6 +97,8 @@ function P.Defaults()
         tierIndex = tierIndex(deviceId, P.RUNTIME_DEFAULT.tier) or 1,
         foveation = P.RUNTIME_DEFAULT.foveation,
         rate = P.RUNTIME_DEFAULT.rate,
+        snapStep = P.DEFAULT_SNAP_STEP,
+        stance = P.DEFAULT_STANCE,
         saved = {},
         deviceTiers = device.tiers,
     }
@@ -109,6 +136,14 @@ function P.Parse(text)
             if validTier and isFoveation(parsedFoveation) and isRate(parsedRate) then
                 state.saved[id] = { tier = parsedTier, foveation = parsedFoveation, rate = parsedRate }
             end
+        else
+            -- Comfort keys share the file but not the preset shape. A line that is
+            -- neither is skipped, never guessed at: an unknown step would silently
+            -- become a turn the player did not choose.
+            local snap = string.match(lines[index], "^snap=(%d+)$")
+            if snap and P.IsSnapStep(tonumber(snap)) then state.snapStep = tonumber(snap) end
+            local stance = string.match(lines[index], "^stance=(%w+)$")
+            if stance and P.IsStance(stance) then state.stance = stance end
         end
     end
     return state
@@ -122,6 +157,8 @@ function P.Serialize(state)
             lines[#lines + 1] = string.format("%s=%d,%d,%d", id, saved.tier, saved.foveation, saved.rate)
         end
     end
+    lines[#lines + 1] = string.format("snap=%d", state.snapStep or P.DEFAULT_SNAP_STEP)
+    lines[#lines + 1] = "stance=" .. (P.IsStance(state.stance) and state.stance or P.DEFAULT_STANCE)
     return table.concat(lines, "\n") .. "\n"
 end
 
@@ -232,6 +269,34 @@ end
 
 function P.SetRate(state, value)
     if isRate(value) then state.rate = value end
+    return state
+end
+
+function P.SetSnapStep(state, value)
+    if state and P.IsSnapStep(value) then state.snapStep = value end
+    return state
+end
+
+function P.SetStance(state, value)
+    if state and P.IsStance(value) then state.stance = value end
+    return state
+end
+
+--- Next step size in the list, wrapping. One button in the menu cycles through them,
+--- because a dropdown is the slowest control to reach with a controller in a headset.
+function P.CycleSnapStep(state)
+    if not state then return state end
+    local current = 0
+    for index, step in ipairs(P.SNAP_STEPS) do
+        if step == state.snapStep then current = index end
+    end
+    state.snapStep = P.SNAP_STEPS[current % #P.SNAP_STEPS + 1]
+    return state
+end
+
+function P.ToggleStance(state)
+    if not state then return state end
+    state.stance = (state.stance == "seated") and "stand" or "seated"
     return state
 end
 

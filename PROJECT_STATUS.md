@@ -72,6 +72,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Performance-Sampler + CSV | DONE | `gquest_perf_hud.lua`, 9. Lua-Harness deckt Statistik und Ausgabe ab |
 | Performance-Messung auf Quest 3 | NOT TESTED | Instrumentierung fertig, Hardware-Lauf steht aus |
 | Geräteprofile Quest 3 / 3S | DONE | eigene Stufensätze, vom Runtime akzeptiert, im Menü wählbar |
+| Playspace im Menü | DONE | Schrittweite 15/30/45/90 gespeichert und sofort angewendet; Sitzend/Stehend gespeichert, Wirkung NOT TESTED (wartet auf E1) |
 | Geräteprofile auf Quest 3S | NOT TESTED | Stufen definiert, aber kein Lauf auf 3S-Hardware |
 | Geräteerkennung (Klassifizierung) | DONE | `android.os.Build.MODEL`/`.DEVICE` → Geräte-ID, C++-Test hier ausgeführt |
 | Erkennungs-Statuszeile + Umstellen-Knopf | DONE | drei Zustände, Textbudget und Knopf getestet; Derma-Rendering ungeprüft |
@@ -194,9 +195,9 @@ Lua-Harnesses (11/11):
 - Waffenkatalog: elf echte Auswahlen, keine ArcVR-Bedienung
 - Pose-Gate und Reload-Client: HLVR-Aliase, linke Hand/Session/Tod-Gates, kein doppeltes Eject
 - Performance-Sampler: konstante Bildrate, Hitch-Erkennung, 1%-Low, Fenster-Klemmen und -Überlauf, Ablehnung von nan/inf/Null, Disable-Gate, CSV-Form und Header-einmalig, Summary- und Overlay-Gates
-- Geräteprofile: getrennte Stufensätze beider Geräte (alle sechs vom Runtime akzeptiert), Defaults deckungsgleich mit dem Runtime-Default, Altformat- und CRLF-Parsing, Fremdstufen-Snap, Rückfall bei ungültigen Werten, gemerkte Presets über Gerätewechsel, Setter-Guards, stabiler Round-Trip
+- Geräteprofile: getrennte Stufensätze beider Geräte (alle sechs vom Runtime akzeptiert), Defaults deckungsgleich mit dem Runtime-Default, Altformat- und CRLF-Parsing, Fremdstufen-Snap, Rückfall bei ungültigen Werten, gemerkte Presets über Gerätewechsel, Setter-Guards, stabiler Round-Trip, Komfort-Schlüssel `snap=`/`stance=` gegen ungültige und fremde Werte abgesichert, Preset und Komfort-Key nebeneinander, die drei Runtime-Zeilen bleiben die ersten
 - Geräteerkennung im Menü: Hinweisdatei lesen, Whitespace/CRLF tolerieren, unbekannte ID ignorieren, frische Installation auf dem erkannten Gerät starten, gespeichertes Profil nie überschreiben, Statuszeile für alle drei Zustände inklusive Textbudget je Gerätename, Umstellen auf das erkannte Gerät samt Empfehlung, Menü-Klick auf den Knopf
-- Menü-Navigation: Root → Ausrichtung → Zurück → Schließen → Wiederöffnen → Waffen
+- Menü-Navigation: Root → Ausrichtung → Zurück → Schließen → Wiederöffnen → Waffen; Snap-Turn-Knopf dreht die Schrittweite weiter und erreicht das Turn-Modul sofort, Sitzend-Knopf schaltet um, beides wird gespeichert
 - Playspace: Snap-Turn 30° in beide Richtungen, Pitch/Roll bleiben, eigener Schritt, Wrap über beide Nahtstellen (−200 → +160), ungültige Richtungen/Schritte/Typen und fehlender Spieler abgelehnt, View dabei unverändert
 
 Zusätzlich geprüft: `--check` meldet alle 9 fehlenden Voraussetzungen mit Zweck und
