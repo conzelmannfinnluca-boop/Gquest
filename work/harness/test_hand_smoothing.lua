@@ -116,7 +116,38 @@ GquestHandSmoothing.Enabled = true
 assert(GquestHandSmoothing.Apply(0, nil, 1 / 72, true) == nil)
 assert(GquestHandSmoothing.Apply(0, { pos = { x = 0 } }, 1 / 72, true) == nil)
 
+-- Levels: the menu stores a name, this module owns the time constant.
+assert(GquestHandSmoothing.SetLevel("off"))
+assert(not GquestHandSmoothing.Enabled)
+GquestHandSmoothing.Reset()
+GquestHandSmoothing.Apply(0, pose(0, 0, 0), 0, false)
+out = GquestHandSmoothing.Apply(0, pose(10, 0, 0), 1 / 72, true)
+assert(Near(out.pos.x, 10), "off must pass through")
+
+assert(GquestHandSmoothing.SetLevel("mild") and GquestHandSmoothing.Enabled)
+assert(Near(GquestHandSmoothing.TAU, 0.03))
+assert(GquestHandSmoothing.SetLevel("strong") and Near(GquestHandSmoothing.TAU, 0.06))
+
+-- The same step has to move a strongly smoothed hand less than a mildly smoothed one.
+GquestHandSmoothing.Reset()
+GquestHandSmoothing.SetLevel("mild")
+GquestHandSmoothing.Apply(0, pose(0, 0, 0), 0, false)
+local mildX = GquestHandSmoothing.Apply(0, pose(10, 0, 0), 1 / 72, true).pos.x
+GquestHandSmoothing.Reset()
+GquestHandSmoothing.SetLevel("strong")
+GquestHandSmoothing.Apply(0, pose(0, 0, 0), 0, false)
+local strongX = GquestHandSmoothing.Apply(0, pose(10, 0, 0), 1 / 72, true).pos.x
+assert(strongX < mildX, "strong must lag more than mild")
+
+-- An unknown name is refused and leaves the current setting alone.
+assert(not GquestHandSmoothing.SetLevel("extreme"))
+assert(Near(GquestHandSmoothing.TAU, 0.06) and GquestHandSmoothing.Enabled)
+GquestHandSmoothing.SetLevel("mild")
+GquestHandSmoothing.Reset()
+
 print("PASS hand smoothing: frame step starts, measures, holds a repeated or broken reading "
     .. "and clamps a stall to 0.5 s; hands snap on the first sample, smooth by a factor taken "
     .. "from the step, end in the same place at 36 and 72 Hz, hold without a step, snap on a "
-    .. "teleport and take the short way across the angle seam")
+    .. "teleport and take the short way across the angle seam; the menu levels map off to "
+    .. "pass-through and strong to a longer constant than mild, and an unknown level is "
+    .. "refused without changing the setting")

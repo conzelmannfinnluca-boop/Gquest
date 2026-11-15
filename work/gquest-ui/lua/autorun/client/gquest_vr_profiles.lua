@@ -11,7 +11,7 @@
 --   line 3  refresh rate 72|90    read by the Rust runtime
 --   line 4  device id             menu bookkeeping, ignored by the runtime
 --   line 5+ remembered preset per device: quest3=<tier>,<foveation>,<rate>
---           comfort keys: snap=<degrees>, stance=stand|seated
+--           comfort keys: snap=<degrees>, stance=stand|seated, smooth=off|mild|strong
 --
 -- The runtime reads only the first three lines, so a profile written before this
 -- split keeps working and an older build ignores the extra lines instead of failing.
@@ -35,8 +35,10 @@ P.RUNTIME_DEFAULT = { tier = "1032x1104", foveation = 2, rate = 72 }
 -- the same on both headsets, so they are stored once instead of per device.
 P.SNAP_STEPS = { 15, 30, 45, 90 }
 P.STANCES = { "stand", "seated" }
+P.SMOOTHING = { "off", "mild", "strong" }
 P.DEFAULT_SNAP_STEP = 30
 P.DEFAULT_STANCE = "stand"
+P.DEFAULT_SMOOTHING = "mild"
 
 P.DEVICES = {
     quest3 = {
@@ -62,6 +64,13 @@ function P.IsSnapStep(value)
     if type(value) ~= "number" then return false end
     for _, step in ipairs(P.SNAP_STEPS) do
         if step == value then return true end
+    end
+    return false
+end
+
+function P.IsSmoothing(value)
+    for _, level in ipairs(P.SMOOTHING) do
+        if level == value then return true end
     end
     return false
 end
@@ -99,6 +108,7 @@ function P.Defaults()
         rate = P.RUNTIME_DEFAULT.rate,
         snapStep = P.DEFAULT_SNAP_STEP,
         stance = P.DEFAULT_STANCE,
+        smoothing = P.DEFAULT_SMOOTHING,
         saved = {},
         deviceTiers = device.tiers,
     }
@@ -144,6 +154,8 @@ function P.Parse(text)
             if snap and P.IsSnapStep(tonumber(snap)) then state.snapStep = tonumber(snap) end
             local stance = string.match(lines[index], "^stance=(%w+)$")
             if stance and P.IsStance(stance) then state.stance = stance end
+            local smoothing = string.match(lines[index], "^smooth=(%w+)$")
+            if smoothing and P.IsSmoothing(smoothing) then state.smoothing = smoothing end
         end
     end
     return state
@@ -159,6 +171,8 @@ function P.Serialize(state)
     end
     lines[#lines + 1] = string.format("snap=%d", state.snapStep or P.DEFAULT_SNAP_STEP)
     lines[#lines + 1] = "stance=" .. (P.IsStance(state.stance) and state.stance or P.DEFAULT_STANCE)
+    lines[#lines + 1] = "smooth=" ..
+        (P.IsSmoothing(state.smoothing) and state.smoothing or P.DEFAULT_SMOOTHING)
     return table.concat(lines, "\n") .. "\n"
 end
 
@@ -291,6 +305,22 @@ function P.CycleSnapStep(state)
         if step == state.snapStep then current = index end
     end
     state.snapStep = P.SNAP_STEPS[current % #P.SNAP_STEPS + 1]
+    return state
+end
+
+function P.SetSmoothing(state, value)
+    if state and P.IsSmoothing(value) then state.smoothing = value end
+    return state
+end
+
+--- Next level in the list, wrapping: one button instead of a dropdown, as with the step.
+function P.CycleSmoothing(state)
+    if not state then return state end
+    local current = 0
+    for index, level in ipairs(P.SMOOTHING) do
+        if level == state.smoothing then current = index end
+    end
+    state.smoothing = P.SMOOTHING[current % #P.SMOOTHING + 1]
     return state
 end
 

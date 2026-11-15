@@ -16,6 +16,9 @@ GquestHandSmoothing.Enabled = true
 -- 30 ms: enough to take the jitter out of the tracking, short enough to stay usable in a fight.
 GquestHandSmoothing.TAU = 0.03
 GquestHandSmoothing.TELEPORT_INCHES = 24
+-- The menu stores a name, this table owns what the name means. Off is not a zero constant:
+-- it disables the filter outright so no state is kept and nothing can drift.
+GquestHandSmoothing.LEVELS = { off = 0, mild = 0.03, strong = 0.06 }
 
 local state = {}  -- [hand] = {pos={x,y,z}, ang={p,y,r}}
 
@@ -29,6 +32,16 @@ local function factorFor(deltaSeconds)
     end
     if GquestHandSmoothing.TAU <= 0 then return 1 end
     return 1 - math.exp(-deltaSeconds / GquestHandSmoothing.TAU)
+end
+
+--- Set the smoothing from a level name. False for an unknown name, which leaves the current
+--- setting untouched instead of falling back to a guess.
+function GquestHandSmoothing.SetLevel(level)
+    local tau = GquestHandSmoothing.LEVELS[level]
+    if tau == nil then return false end
+    GquestHandSmoothing.Enabled = tau > 0
+    GquestHandSmoothing.TAU = tau
+    return true
 end
 
 --- Forget one hand, or every hand when `hand` is nil. The next sample then snaps.

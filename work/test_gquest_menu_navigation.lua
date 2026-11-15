@@ -33,6 +33,7 @@ GQUEST_WEAPON_ALIGN={BuildPanel=function(parent) return create("DPanel",parent) 
 -- The menu reads its profiles from the shared module, as it does in game.
 dofile("work/gquest-ui/lua/autorun/client/gquest_vr_profiles.lua")
 dofile("work/gquest-ui/lua/autorun/client/gquest_playspace.lua")
+dofile("work/gquest-ui/lua/autorun/client/gquest_hand_smoothing.lua")
 dofile("work/gquest-ui/lua/autorun/client/gquest_vr_ui.lua")
 local function click(text)
  for i=#panels,1,-1 do local p=panels[i];if p.text==text and p.valid then assert(type(p.DoClick)=="function");p.DoClick();return end end
@@ -66,6 +67,15 @@ click("Fortbewegung: Stehend")
 assert(files["gquest_vr_profile.txt"]:find("stance=seated",1,true),"stance must be saved")
 click("Fortbewegung: Sitzend")
 assert(files["gquest_vr_profile.txt"]:find("stance=stand",1,true),"stance must toggle back")
+-- Hand smoothing: the button cycles the level, the module takes it and the file keeps it.
+assert(GquestHandSmoothing.Enabled and math.abs(GquestHandSmoothing.TAU-0.03)<0.0001,
+ "the saved mild level must apply on load")
+click("Handglaettung: Mild (klicken zum Wechseln)")
+assert(math.abs(GquestHandSmoothing.TAU-0.06)<0.0001,"cycle must reach the module, got "..tostring(GquestHandSmoothing.TAU))
+assert(files["gquest_vr_profile.txt"]:find("smooth=strong",1,true),"level must be saved")
+click("Handglaettung: Stark (klicken zum Wechseln)")
+assert(not GquestHandSmoothing.Enabled,"off must disable the filter")
+assert(files["gquest_vr_profile.txt"]:find("smooth=off",1,true),"off must be saved")
 -- The frame sizes itself from the content instead of a fixed 680. Asserted with the
 -- measurement: the section stack needs more than the old fixed height, so the frame grows to
 -- the screen limit, and the usable height (frame minus chrome) is reported for the record.
@@ -81,4 +91,4 @@ assert(frame.height>680,"frame must grow past the old fixed 680")
 print("GQUEST_UI panel: content="..frame.ContentHeight.."px frame="..frame.height.."px usable="
  ..(frame.height-GquestUI.SETTINGS_CHROME).."px scroll="
  ..math.max(0,frame.ContentHeight-(frame.height-GquestUI.SETTINGS_CHROME)).."px")
-print("PASS menu callbacks: root -> alignment -> back -> close -> reopen -> weapons; exact former global-openRoot regression, visibility gate, detection-mismatch adopt button, playspace step/stance buttons that save and apply, and a frame that sizes itself from the reported content height")
+print("PASS menu callbacks: root -> alignment -> back -> close -> reopen -> weapons; exact former global-openRoot regression, visibility gate, detection-mismatch adopt button, playspace and smoothing buttons that save and apply, and a frame that sizes itself from the reported content height")

@@ -73,7 +73,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Performance-Messung auf Quest 3 | NOT TESTED | Instrumentierung fertig, Hardware-Lauf steht aus |
 | Geräteprofile Quest 3 / 3S | DONE | eigene Stufensätze, vom Runtime akzeptiert, im Menü wählbar |
 | Playspace im Menü | DONE | Schrittweite 15/30/45/90 gespeichert und sofort angewendet; Sitzend/Stehend gespeichert, Wirkung NOT TESTED (wartet auf E1) |
-| Einstellungs-Panel-Höhe | PARTIALLY IMPLEMENTED | Rahmen wächst jetzt mit dem Inhalt bis zur Bildschirmhöhe; gemessen 1238 px Inhalt bei 970 px nutzbar, also **268 px Scrollen** offen. Seitenteilung nötig, um ganz ohne Scrollen auszukommen |
+| Einstellungs-Panel-Höhe | PARTIALLY IMPLEMENTED | Rahmen wächst mit dem Inhalt bis zur Bildschirmhöhe; gemessen 1296 px Inhalt bei 970 px nutzbar, also **326 px Scrollen** offen. Seitenteilung nötig, um ganz ohne Scrollen auszukommen |
 | Geräteprofile auf Quest 3S | NOT TESTED | Stufen definiert, aber kein Lauf auf 3S-Hardware |
 | Geräteerkennung (Klassifizierung) | DONE | `android.os.Build.MODEL`/`.DEVICE` → Geräte-ID, C++-Test hier ausgeführt |
 | Erkennungs-Statuszeile + Umstellen-Knopf | DONE | drei Zustände, Textbudget und Knopf getestet; Derma-Rendering ungeprüft |
@@ -84,7 +84,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Paket 1: Plattform-Interfaces | DONE | `core/platform/` engine-frei, Grenztest `platform`, Gate G1 erfüllt |
 | Gate G2: Fake-Host | DONE | `core/host_fake/`, 60 Frames + Playspace + Content-Install ohne Engine; dazu Jitter, verlorene Samples, eingefrorene/rückwärts laufende/NaN-Uhr und Stall. Auf dem Gerät weiterhin NOT TESTED (G3) |
 | Frame-Zeit im Core | DONE | `FrameTimer` misst, hält bei ungültigen Samples und resynct; Stall wird auf 0,5 s geklemmt, nicht integriert |
-| Handposen-Glättung | DONE | `gquest_hand_smoothing.lua`: τ 30 ms, Faktor aus dem geklemmten Schritt (36 Hz und 72 Hz enden gleich); Kopf bleibt ungeglättet; erster Sample snappt, ohne Schritt wird gehalten, Teleport > 24″ snappt. Im Provider verdrahtet, auf Gerät NOT TESTED |
+| Handposen-Glättung | DONE | `gquest_hand_smoothing.lua`: Faktor aus dem geklemmten Schritt (36 Hz und 72 Hz enden gleich); Kopf bleibt ungeglättet; erster Sample snappt, ohne Schritt wird gehalten, Teleport > 24″ snappt. Stufen Aus/Mild/Stark (0 / 30 / 60 ms) im Menü wählbar und im Profil gespeichert. Auf Gerät NOT TESTED |
 | Frame-Zeit-Guard | DONE | `frame_policy.py` verbietet rohe Frame-Zeit außerhalb des Perf-Samplers; Mutation gegengeprüft |
 | Snap-Turn im Overlay (Lua) | DONE | `gquest_playspace.lua` dreht den View-Yaw, damit folgt der gesamte Provider; Controller-Bindung NOT TESTED (keine Aktionnamen ohne Gerät) |
 | Posen-Dekodierung (Snapshot → Position/Winkel) | DONE | direkt host-getestet inkl. 60er-Fake-Source; echtes XR-Input auf Gerät NOT TESTED |
@@ -188,6 +188,8 @@ Handposen-Glättung (`test_hand_smoothing.lua`, `gquest_frame_time.lua` + `gques
 - Frame-Schritt: Start, Messung, gleiche Lesung zweimal hält den vorherigen Schritt, Rückwärtssprung wird verworfen und resynct (der 20-ms-Schritt danach ist wieder messbar), 3-s-Stall wird auf 0,5 s geklemmt, NaN und Unendlich werden verworfen
 - Hände: erster Sample snappt, Faktor 0,3704 bei 1/72 s, **36 Hz und 72 Hz enden am selben Punkt**, ohne Schritt wird gehalten (mit echtem Schritt geprüft, nicht mit 0), Teleport über 24″ snappt, über die Naht geht es den kurzen Weg (170° → 177,4°, nicht gegen 0)
 - Hände haben getrennten Zustand; Reset lässt den nächsten Sample snappen; `Enabled=false` reicht durch; kaputte Eingabe gibt `nil` statt zu werfen
+- Stufen: `off` reicht durch, `strong` (60 ms) läuft bei gleichem Schritt weniger weit als `mild` (30 ms), unbekannter Name wird abgelehnt und lässt die Einstellung stehen
+- Menü: Klick auf den Glättungs-Knopf erreicht das Modul sofort, `smooth=strong` / `smooth=off` landen in der Profildatei; ein gespeichertes `mild` gilt schon vor dem Öffnen des Menüs
 - Mutationen gegengeprüft: Hold-Guard entfernt ⇒ Assertion scheitert; fester Faktor statt Zeitschritt ⇒ Frame-Rate-Gleichheit scheitert
 - **Nicht geprüft:** die Verdrahtung im Provider gegen echte Vector/Angle-Userdata — nur die Syntax ist geladen, das Verhalten auf dem Gerät ist NOT TESTED
 
@@ -215,7 +217,7 @@ Lua-Harnesses (11/11):
 - Waffenkatalog: elf echte Auswahlen, keine ArcVR-Bedienung
 - Pose-Gate und Reload-Client: HLVR-Aliase, linke Hand/Session/Tod-Gates, kein doppeltes Eject
 - Performance-Sampler: konstante Bildrate, Hitch-Erkennung, 1%-Low, Fenster-Klemmen und -Überlauf, Ablehnung von nan/inf/Null, Disable-Gate, CSV-Form und Header-einmalig, Summary- und Overlay-Gates
-- Geräteprofile: getrennte Stufensätze beider Geräte (alle sechs vom Runtime akzeptiert), Defaults deckungsgleich mit dem Runtime-Default, Altformat- und CRLF-Parsing, Fremdstufen-Snap, Rückfall bei ungültigen Werten, gemerkte Presets über Gerätewechsel, Setter-Guards, stabiler Round-Trip, Komfort-Schlüssel `snap=`/`stance=` gegen ungültige und fremde Werte abgesichert, Preset und Komfort-Key nebeneinander, die drei Runtime-Zeilen bleiben die ersten
+- Geräteprofile: getrennte Stufensätze beider Geräte (alle sechs vom Runtime akzeptiert), Defaults deckungsgleich mit dem Runtime-Default, Altformat- und CRLF-Parsing, Fremdstufen-Snap, Rückfall bei ungültigen Werten, gemerkte Presets über Gerätewechsel, Setter-Guards, stabiler Round-Trip, Komfort-Schlüssel `snap=`/`stance=`/`smooth=` gegen ungültige und fremde Werte abgesichert, Preset und Komfort-Key nebeneinander, die drei Runtime-Zeilen bleiben die ersten, Zyklus der Glättungsstufen `mild,strong,off`
 - Geräteerkennung im Menü: Hinweisdatei lesen, Whitespace/CRLF tolerieren, unbekannte ID ignorieren, frische Installation auf dem erkannten Gerät starten, gespeichertes Profil nie überschreiben, Statuszeile für alle drei Zustände inklusive Textbudget je Gerätename, Umstellen auf das erkannte Gerät samt Empfehlung, Menü-Klick auf den Knopf
 - Menü-Navigation: Root → Ausrichtung → Zurück → Schließen → Wiederöffnen → Waffen; Snap-Turn-Knopf dreht die Schrittweite weiter und erreicht das Turn-Modul sofort, Sitzend-Knopf schaltet um, beides wird gespeichert; Rahmenhöhe folgt dem gemeldeten Inhalt statt festen 680 px
 - Playspace: Snap-Turn 30° in beide Richtungen, Pitch/Roll bleiben, eigener Schritt, Wrap über beide Nahtstellen (−200 → +160), ungültige Richtungen/Schritte/Typen und fehlender Spieler abgelehnt, View dabei unverändert

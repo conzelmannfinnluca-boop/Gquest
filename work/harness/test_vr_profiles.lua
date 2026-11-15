@@ -260,6 +260,30 @@ assert(runtimeLines[1] == comfort.tier and runtimeLines[2] == "2" and runtimeLin
 local round = P.Parse(written)
 assert(round.snapStep == 45 and round.stance == "seated", "comfort round trip")
 
+-- Smoothing level: a name the menu stores, validated like the other comfort keys.
+local smooth = P.Defaults()
+assert(smooth.smoothing == "mild", "default smoothing")
+assert(P.SetSmoothing(smooth, "hard").smoothing == "mild", "unknown level accepted")
+assert(P.SetSmoothing(smooth, "strong").smoothing == "strong", "valid level refused")
+assert(P.Parse("1032x1104\n2\n72\nquest3\nsmooth=strong\n").smoothing == "strong",
+    "valid smoothing key must load")
+assert(P.Parse("1032x1104\n2\n72\nquest3\nsmooth=extreme\n").smoothing == "mild",
+    "unknown smoothing must fall back")
+assert(P.Serialize(smooth):find("smooth=strong", 1, true), "smoothing key must be written")
+assert(P.Parse(P.Serialize(smooth)).smoothing == "strong", "smoothing round trip")
+
+-- The menu's cycling button walks mild -> strong -> off and back, whatever the order of
+-- the table, because it is the table that decides.
+local cycleSmooth = P.Defaults()
+local seenSmooth = {}
+for _ = 1, #P.SMOOTHING do
+    seenSmooth[#seenSmooth + 1] = cycleSmooth.smoothing
+    P.CycleSmoothing(cycleSmooth)
+end
+assert(table.concat(seenSmooth, ",") == "mild,strong,off",
+    "cycle order: " .. table.concat(seenSmooth, ","))
+assert(cycleSmooth.smoothing == "mild", "cycle must wrap")
+
 -- 13) The menu's cycling button visits every step and comes back to the start.
 local cycle = P.Defaults()
 local seen = {}
@@ -276,5 +300,5 @@ print("PASS per-device VR profiles: separate tier sets accepted by the runtime, 
     .. "defaults, legacy and CRLF parsing, foreign-tier snap, invalid value fallbacks, preset "
     .. "remembering across device switches, setter guards, stable round trip, detection-aware "
     .. "load, the three-state detection status line, its character budget, adopting the "
-    .. "detected device, and validated player-level snap step and stance keys that keep the "
-    .. "three runtime lines first")
+    .. "detected device, and validated player-level snap step, stance and hand smoothing keys "
+    .. "that keep the three runtime lines first")

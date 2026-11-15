@@ -32,6 +32,12 @@ local function applyComfort()
     if GquestPlayspace and profileState and profileState.snapStep then
         GquestPlayspace.STEP = profileState.snapStep
     end
+    -- The profile stores the name, gquest_hand_smoothing.lua owns what it means; an unknown
+    -- name is refused there and the current setting stays.
+    if GquestHandSmoothing and GquestHandSmoothing.SetLevel and profileState and
+        profileState.smoothing then
+        GquestHandSmoothing.SetLevel(profileState.smoothing)
+    end
 end
 applyComfort()
 local function closeRoot()
@@ -228,6 +234,20 @@ local function settingsPanel(parent)
             stanceButton:SetText(stanceText())
             notification.AddLegacy(profileState.stance=="seated"
                 and "Sitzend gespeichert (wirkt mit dem Core-Umstieg)" or "Stehend gespeichert",NOTIFY_GENERIC,4)
+        end
+        y = y + 58
+        local SMOOTHING_LABELS={ off="Aus", mild="Mild", strong="Stark" }
+        local function smoothingText()
+            return "Handglaettung: "..(SMOOTHING_LABELS[profileState.smoothing] or profileState.smoothing)
+                .." (klicken zum Wechseln)"
+        end
+        local smoothingButton=panel:Add("DButton")
+        smoothingButton:SetText(smoothingText()); smoothingButton:SetPos(16,y); smoothingButton:SetSize(560,46)
+        smoothingButton.DoClick=function()
+            profiles.CycleSmoothing(profileState); saveProfile(); applyComfort()
+            smoothingButton:SetText(smoothingText())
+            notification.AddLegacy("Handglaettung: "
+                ..(SMOOTHING_LABELS[profileState.smoothing] or profileState.smoothing),NOTIFY_GENERIC,3)
         end
         y = y + 58
     end
