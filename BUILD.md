@@ -49,6 +49,7 @@ brauchen:
 | Geräteerfassung | `capture_device.py --test`: Klassifizierung, getprop-Pfad, Logcat-Zeile, Widerspruchs-Urteil — mit Stub-adb, kein Headset |
 | Übersprungene Gruppen | Erscheinen als `UEBERSPRUNGEN` mit Grund und dem Zusatz „nicht geprüft" und werden am Ende zusätzlich aufgelistet; sie zählen nie als bestanden |
 | Schneller Prüflauf | `build.py --units`: nur die 5 C++-Grenztests und die drei Werkzeug-Selbsttests, ohne NDK, Rust und Lua. Exit 0 = alle 4 Gruppen bestanden, Exit 1 = mindestens eine fehlgeschlagen |
+| Playspace (Lua) | `test_playspace.lua`: Snap-Turn 30° in beide Richtungen, Pitch/Roll bleiben, eigener Schritt, Wrap über beide Nahtstellen, ungültige Richtungen/Schritte/Typen und fehlender Spieler abgelehnt, View unverändert |
 | Playspace | `playspace`: Snap-Turn-Schritte inkl. Wrap über ±180, ungültige Richtungen/Schritte abgelehnt, Smooth-Turn pro Frame begrenzt, Recenter setzt Kopf für jeden Steuerkurs auf die Achse (Höhe bleibt), Sitzend/Stehend-Versatz angewendet und zurückgenommen |
 | Posen-Dekodierung | `pose_snapshot`: Meter→Zoll mit Y/Z-Tausch, Gier/Nick-Achsen, nicht-finite und norm-fremde Quaternionen abgelehnt (Ergebnis bleibt unangetastet), 60 Frames aus einer Fake-Quelle mit 58 gültigen |
 | Gepinnte Adressen | `pinned_addresses.py --test`: Bridge-Offsets gegen den Audit-Datensatz, ELF-Programmheader-Leser an synthetischen Headern, Code/Daten-Klassifizierung. Ohne `libclient.so` bleibt die Segmentzugehörigkeit offen (Exit 2 im Normalauf) |
