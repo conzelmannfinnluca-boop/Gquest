@@ -82,7 +82,8 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | `com.oculus.supportedDevices` im Overlay | PARTIALLY IMPLEMENTED | Wert wird zusammengeführt statt verdoppelt und zurückgelesen; nie gegen die echte Basis-APK gelaufen |
 | Playspace-Mathematik (Snap-Turn, Recenter, Sitzend) | DONE | `gquest_playspace.h` host-getestet; erster Aufrufer ist `GquestStepFrame`, auf dem Gerät noch keiner (G2) |
 | Paket 1: Plattform-Interfaces | DONE | `core/platform/` engine-frei, Grenztest `platform`, Gate G1 erfüllt |
-| Gate G2: Fake-Host | DONE | `core/host_fake/`, 60 Frames + Playspace + Content-Install ohne Engine; auf dem Gerät weiterhin NOT TESTED (G3) |
+| Gate G2: Fake-Host | DONE | `core/host_fake/`, 60 Frames + Playspace + Content-Install ohne Engine; dazu Jitter, verlorene Samples, eingefrorene/rückwärts laufende/NaN-Uhr und Stall. Auf dem Gerät weiterhin NOT TESTED (G3) |
+| Frame-Zeit im Core | DONE | `FrameTimer` misst, hält bei ungültigen Samples und resynct; Stall wird auf 0,5 s geklemmt, nicht integriert |
 | Snap-Turn im Overlay (Lua) | DONE | `gquest_playspace.lua` dreht den View-Yaw, damit folgt der gesamte Provider; Controller-Bindung NOT TESTED (keine Aktionnamen ohne Gerät) |
 | Posen-Dekodierung (Snapshot → Position/Winkel) | DONE | direkt host-getestet inkl. 60er-Fake-Source; echtes XR-Input auf Gerät NOT TESTED |
 | Gepinnte Adressen vs. Audit-Datensatz | PARTIALLY IMPLEMENTED | Konstanten, Offsets und Abbildungsverschiebung geprüft; Segmentzugehörigkeit braucht `libclient.so` (NOT TESTED) |
@@ -149,7 +150,7 @@ C++-Grenztests:
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 - `PASS device model classification: 3S beats 3, case/whitespace/near-miss guards, codename fallback, nulls and stable ids`
 - `PASS playspace lua: snap turn steps both ways by 30 degrees with pitch and roll kept, custom step honoured, heading wrapped across both seams, invalid directions, steps, types and a missing player refused without touching the view`
-- `PASS fake host: 60 frames driven without an engine - snap turn, recentre and seated offset visible in the published poses, broken heads and missing frames refused and logged, hands dropped alone, one valid and one refused haptic; content installation judged before writing, idempotent by size, lua/ always rewritten, first bad entry stops the run`
+- `PASS fake host: 60 frames driven without an engine - snap turn, recentre and seated offset visible in the published poses, broken heads and missing frames refused and logged, hands dropped alone, one valid and one refused haptic; content installation judged before writing, idempotent by size, lua/ always rewritten, first bad entry stops the run; under jitter, a dropped sample, a frozen and a backwards clock, a stall and a NaN reading the poses stay finite and the turn only ever moves by measured, clamped steps`
 - `PASS platform interfaces: frame delta clamped and refuses backwards or non-finite samples, log levels ordered, asset paths refused exactly where the content installer refuses them, oversized and missing reads leave the buffer untouched, haptics bounded, and a frame step that publishes head and hands through the playspace or nothing at all`
 - `PASS playspace: yaw wrapped into (-180,180], snap turn steps and wraps, invalid directions and steps refused, smooth turn clamped per frame, recentre puts the head on the axis facing forward at unchanged height for every heading, seated/standing offset applied and removed`
 - `PASS pose snapshot: metre-to-inch mapping with Y/Z swap, yaw/pitch axes, non-finite and out-of-window quaternions refused without a half-written result, 60 fake frames with 58 valid`
@@ -369,7 +370,12 @@ vier beteiligten Header laufen unter `-Wall -Wextra -Werror`.
 **Gate G2 ist ebenfalls erfüllt** (`core/host_fake/gquest_fake_host.h` + `tests/fake_host.cpp`):
 ein Fake-Host treibt 62 Frames (60 mit Daten, zwei ohne), Snap-Turn, Recenter und Sitzend
 mitten im Lauf, mit einem haptischen Aufruf und einem, der abgelehnt wird — und installiert
-Content über dieselben Regeln wie der Geräteloop. Offen bleiben **G3** (Regression auf
+Content über dieselben Regeln wie der Geräteloop. Ein zweiter Lauf prüft die schlechten
+Bedingungen: Jitter, ein verlorenes Sample, eingefrorene und rückwärts laufende Uhr, ein
+Zehn-Sekunden-Sprung, ein Drei-Sekunden-Stall und ein NaN-Zeitstempel. Dafür hat der Core
+jetzt eine **Frame-Zeit** (`FrameTimer`): ein ungültiges Sample wird nicht integriert, sondern
+gehalten, und der Timer resynct, damit ein Aussetzer nicht die folgenden zehn Sekunden
+blockiert. Ein Stall kostet höchstens einen geklemmten Schritt (0,5 s), keine 540°. Offen bleiben **G3** (Regression auf
 Hardware, braucht ein Headset) und **G4** (OpenXR-Host), der ohne Gerät nicht sinnvoll
 begonnen werden kann.
 

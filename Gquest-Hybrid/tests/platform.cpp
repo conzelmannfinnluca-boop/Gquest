@@ -168,21 +168,47 @@ int main() {
     assert(!vr.Haptic(Hand::Right, std::nanf(""), 160.0f, 0.5f));
     assert(vr.hapticCalls == 1);
 
+    // Frame timer: starts on the first sample, measures after it, holds on a frozen or
+    // backwards clock, clamps a stall and resyncs so one glitch does not blind the frames
+    // that follow.
+    FakeClock clock;
+    FrameTimer timer;
+    assert(timer.Advance(clock) == FrameTimer::Result::Started && timer.delta == 0);
+    clock.now = 0.016;
+    assert(timer.Advance(clock) == FrameTimer::Result::Measured && Near(timer.delta, 0.016));
+    clock.now = 0.016;  // frozen: a zero step is not a frame
+    assert(timer.Advance(clock) == FrameTimer::Result::Held && Near(timer.delta, 0.016));
+    clock.now = 0.010;  // backwards
+    assert(timer.Advance(clock) == FrameTimer::Result::Held && Near(timer.delta, 0.016));
+    clock.now = 0.026;  // resynced to 0.010 above, so this is measurable again
+    assert(timer.Advance(clock) == FrameTimer::Result::Measured && Near(timer.delta, 0.016));
+    clock.now = 3.0;  // a three second stall is a clamped step, not three seconds of motion
+    assert(timer.Advance(clock) == FrameTimer::Result::Measured);
+    assert(Near(timer.delta, kMaxFrameSeconds));
+    clock.now = std::nanf("");
+    assert(timer.Advance(clock) == FrameTimer::Result::Held && Near(timer.delta, kMaxFrameSeconds));
+    // A timer that never got a usable reading never claims one.
+    FakeClock brokenClock;
+    brokenClock.now = std::nanf("");
+    FrameTimer unstarted;
+    assert(unstarted.Advance(brokenClock) == FrameTimer::Result::Held);
+
     // The frame step: after a recentre the head sits on the axis and a hand keeps its
     // distance, which is the same contract the playspace test pins without a host.
     FakeHost host;
+    FrameTimer stepTimer;
     GquestPlayspace::State playspace{};
     assert(GquestPlayspace::Recenter(playspace, GquestPose::Vec3{10, 62, -4}, 37));
 
     host.vr.frameAvailable = false;
-    FrameOutput none = GquestStepFrame(host, playspace);
+    FrameOutput none = GquestStepFrame(host, playspace, stepTimer);
     assert(!none.valid && host.log.HasWarning("vr frame unavailable"));
 
     host.vr.frameAvailable = true;
     host.vr.frame.head = Pose(10, 62, -4, 37);
     host.vr.frame.hands[0] = Pose(10, 62, 10, 37);
     host.vr.frame.handValid[0] = true;
-    FrameOutput frame = GquestStepFrame(host, playspace);
+    FrameOutput frame = GquestStepFrame(host, playspace, stepTimer);
     assert(frame.valid);
     assert(Near(frame.head.position.x, 0) && Near(frame.head.position.z, 0));
     assert(Near(frame.head.position.y, 62) && Near(frame.head.yaw, 0));
@@ -194,7 +220,7 @@ int main() {
     host.vr.frame.hands[1].position.x = std::nanf("");
     host.vr.frame.handValid[1] = true;
     host.log.records.clear();
-    FrameOutput partial = GquestStepFrame(host, playspace);
+    FrameOutput partial = GquestStepFrame(host, playspace, stepTimer);
     assert(partial.valid && partial.handValid[0] && !partial.handValid[1]);
     assert(host.log.HasWarning("hand pose refused"));
 
@@ -202,7 +228,7 @@ int main() {
     // meaningful relative to the head they were measured against.
     host.vr.frame.head.position.z = std::nanf("");
     host.log.records.clear();
-    FrameOutput broken = GquestStepFrame(host, playspace);
+    FrameOutput broken = GquestStepFrame(host, playspace, stepTimer);
     assert(!broken.valid && !broken.handValid[0] && !broken.handValid[1]);
     assert(host.log.HasWarning("head pose refused"));
     assert(Near(broken.head.position.x, 0) && Near(broken.head.yaw, 0));

@@ -29,11 +29,14 @@ using GquestPlatform::VrFrame;
 
 struct Clock : GquestPlatform::IClock {
     double now = 0;
-    // A backwards or non-finite step is ignored here so a scenario cannot produce the very
-    // situation the core is meant to survive.
+    // A negative step is applied on purpose: a real host can hand over a clock that went
+    // backwards, and the core has to survive that rather than be protected from it by the
+    // fake. A non-finite step is ignored; use Set() to produce a broken reading.
     void Advance(double seconds) {
-        if (std::isfinite(seconds) && seconds > 0.0) now += seconds;
+        if (std::isfinite(seconds)) now += seconds;
     }
+    // Forces a reading, including NaN and infinity. Only a fault scenario does this.
+    void Set(double seconds) { now = seconds; }
     double NowSeconds() const override { return now; }
 };
 
@@ -125,12 +128,16 @@ struct Assets : GquestPlatform::IAssetSource {
 };
 
 struct VrBackend : GquestPlatform::IVRBackend {
-    std::vector<VrFrame> frames;  // one frame per Poll, then nothing available
+    std::vector<VrFrame> frames;   // one frame per Poll, then nothing available
+    std::vector<char> available;   // optional per-frame flag, empty means every frame is there
     std::size_t next = 0;
     std::vector<Hand> hapticHands;
     bool Poll(VrFrame& out) override {
         if (next >= frames.size()) return false;
-        out = frames[next++];
+        const bool present = available.empty() || available[next] != 0;
+        const std::size_t index = next++;
+        if (!present) return false;  // a sample the device did not have
+        out = frames[index];
         return true;
     }
     bool Haptic(Hand hand, float seconds, float frequencyHz, float amplitude) override {
@@ -170,17 +177,28 @@ struct RunResult {
 
 // Advances the clock, lets the caller act, then runs one core frame - `count` times. The hook
 // runs before the frame so a turn or a recentre takes effect on that frame, the way a button
-// press does.
+// press does; it also receives the previous frame's output, because that is where the last
+// usable time step lives and a continuous turn has to be driven from it.
+//
+// `deltas` scripts the clock instead of a fixed step: one entry per frame, where a negative
+// value jumps the clock backwards, 0 freezes it, a large value is a stall and a non-finite
+// value sets the reading to NaN or infinity. Missing entries fall back to frameSeconds.
 template <typename OnFrame>
 RunResult RunFrames(Host& host, GquestPlayspace::State& playspace, int count,
-                    double frameSeconds, OnFrame onFrame) {
+                    double frameSeconds, OnFrame onFrame,
+                    const std::vector<double>* deltas = nullptr) {
     RunResult result;
+    GquestPlatform::FrameTimer timer;
     if (count > 0) result.outputs.reserve(static_cast<std::size_t>(count));
     for (int index = 0; index < count; ++index) {
-        host.clock.Advance(frameSeconds);
-        onFrame(index);
+        const double step = deltas && index < static_cast<int>(deltas->size())
+                                ? (*deltas)[index]
+                                : frameSeconds;
+        if (std::isfinite(step)) host.clock.Advance(step);
+        else host.clock.Set(step);
+        onFrame(index, index > 0 ? &result.outputs.back() : nullptr);
         const GquestPlatform::FrameOutput output =
-            GquestPlatform::GquestStepFrame(host, playspace);
+            GquestPlatform::GquestStepFrame(host, playspace, timer);
         if (output.valid) {
             ++result.valid;
             if (!FinitePose(output.head)) result.finite = false;

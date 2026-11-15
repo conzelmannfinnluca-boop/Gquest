@@ -22,21 +22,33 @@ struct IPlatformHost {
 };
 
 struct FrameOutput {
-    bool valid = false;  // the head pose was converted and may be published
+    bool valid = false;   // the head pose was converted and may be published
+    bool deltaValid = false;  // this frame's time step was measured, not held
+    double deltaSeconds = 0;  // the step to integrate; the previous one when deltaValid is false
     GquestPlayspace::Pose head{};
     GquestPlayspace::Pose hands[kHandCount]{};
     bool handValid[kHandCount]{false, false};
 };
 
-// One core frame: poll the backend, convert head and both hands through the playspace, and
-// refuse the frame rather than publish a half-converted pose. A refused head invalidates the
-// whole frame, because hands are only meaningful relative to it.
+// One core frame: measure the time step, poll the backend, convert head and both hands
+// through the playspace, and refuse the pose rather than publish a half-converted one. A
+// refused head invalidates the whole frame, because hands are only meaningful relative to it.
 //
-// This is the first caller of GquestPlayspace::Apply. Until now the playspace math was only
-// exercised by its own test; nothing on the device calls this yet - that arrives with the
-// host, which is gate G2.
-inline FrameOutput GquestStepFrame(IPlatformHost& host, GquestPlayspace::State& playspace) {
+// A refused time step does not invalidate the frame: the poses are still good, only the step
+// is unusable, so consumers hold their previous speed instead of integrating a guess.
+//
+// This is the caller of GquestPlayspace::Apply and of FrameTimer; nothing on the device calls
+// it yet - that arrives with the real host (gate G3).
+inline FrameOutput GquestStepFrame(IPlatformHost& host, GquestPlayspace::State& playspace,
+                                  FrameTimer& timer) {
     FrameOutput output{};
+    // Time first: it passes whether or not a pose arrived, and a host that polls slowly must
+    // not hand the next good frame a delta covering the gap as if nothing happened.
+    const FrameTimer::Result timing = timer.Advance(host.Clock());
+    output.deltaSeconds = timer.delta;
+    output.deltaValid = timing == FrameTimer::Result::Measured;
+    if (timing == FrameTimer::Result::Held)
+        host.Log().Write(LogLevel::Warning, "frame clock refused");
     VrFrame frame{};
     if (!host.Vr().Poll(frame)) {
         host.Log().Write(LogLevel::Warning, "vr frame unavailable");

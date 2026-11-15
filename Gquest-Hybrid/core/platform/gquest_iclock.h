@@ -26,4 +26,36 @@ inline bool GquestFrameDelta(double previous, double now, double& out) {
     return true;
 }
 
+// Keeps the previous sample and hands out the frame delta.
+//
+// A refused sample resyncs the timer on a finite reading, so one glitch does not blind every
+// frame after it: without the resync a single backwards jump would keep the delta unusable
+// until the clock caught up with the old value again.
+struct FrameTimer {
+    enum class Result { Started, Measured, Held };
+
+    bool started = false;
+    double last = 0;
+    double delta = 0;  // last accepted delta; 0 until the first measurement
+
+    Result Advance(IClock& clock) {
+        const double now = clock.NowSeconds();
+        if (!started) {
+            if (!std::isfinite(now)) return Result::Held;
+            started = true;
+            last = now;
+            delta = 0;
+            return Result::Started;
+        }
+        double measured = 0;
+        if (!GquestFrameDelta(last, now, measured)) {
+            if (std::isfinite(now)) last = now;
+            return Result::Held;
+        }
+        last = now;
+        delta = measured;
+        return Result::Measured;
+    }
+};
+
 }  // namespace GquestPlatform

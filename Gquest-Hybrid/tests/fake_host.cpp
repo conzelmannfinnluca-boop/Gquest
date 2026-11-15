@@ -32,6 +32,10 @@ GquestPose::Snapshot HeadAt(float x, float z, float yaw, float y = 62.0f) {
     return pose;
 }
 
+bool Near(double actual, double expected, double tolerance = 0.001) {
+    return std::fabs(actual - expected) <= tolerance;
+}
+
 double Distance2D(const GquestPlayspace::Pose& a, const GquestPlayspace::Pose& b) {
     const double dx = static_cast<double>(a.position.x) - b.position.x;
     const double dz = static_cast<double>(a.position.z) - b.position.z;
@@ -108,7 +112,7 @@ int main() {
         if (index == 10 || index == 40) host.vr.frames[index].head.position.x = std::nanf("");
     }
 
-    const RunResult run = RunFrames(host, playspace, 62, frameSeconds, [&](int index) {
+    const RunResult run = RunFrames(host, playspace, 62, frameSeconds, [&](int index, const FrameOutput*) {
         if (index == 5) {
             // One valid haptic and one that must be refused before it reaches the runtime.
             host.vr.Haptic(Hand::Right, 0.1f, 160.0f, 0.5f);
@@ -160,10 +164,64 @@ int main() {
     assert(!run.outputs[10].valid && !run.outputs[40].valid);
     assert(!run.outputs[60].valid && !run.outputs[61].valid);
 
+    // --- Bad conditions -------------------------------------------------------------------
+    // Jitter, a dropped sample, a frozen clock, a ten second jump backwards, a 20 ms step
+    // right after it, a three second stall and a NaN reading — with a continuous turn driven
+    // from the measured step. None of it may reach the playspace as if it were a normal frame.
+    Host rough;
+    GquestPlayspace::State roughSpace{};
+    rough.vr.frames.resize(9);
+    for (int index = 0; index < 9; ++index)
+        rough.vr.frames[index].head = HeadAt(0.0f, 0.0f, 0.0f);
+    rough.vr.available = {1, 1, 0, 1, 1, 1, 1, 1, 1};  // the sample at frame 2 never arrived
+    std::vector<double> deltas = {1.0 / 72.0, 1.0 / 60.0, 1.0 / 90.0, 0.0, -10.0,
+                                  0.02,       3.0,        std::nan(""), 1.0 / 72.0};
+    const RunResult roughRun = RunFrames(
+        rough, roughSpace, 9, 1.0 / 72.0,
+        [&](int index, const FrameOutput* previous) {
+            // 180 deg/s of stick: without the per-frame clamp a three second stall would turn
+            // the player by 540 degrees in a single step.
+            if (previous && previous->deltaValid)
+                GquestPlayspace::Turn(roughSpace, 180.0f,
+                                      static_cast<float>(previous->deltaSeconds), 15.0f);
+            if (index == 8) rough.clock.Set(3.02);  // the clock recovers
+        },
+        &deltas);
+
+    assert(roughRun.outputs.size() == 9);
+    assert(roughRun.valid == 8 && roughRun.rejected == 1);  // one dropped sample
+    assert(roughRun.finite);
+    assert(!roughRun.outputs[0].deltaValid);  // the first sample only starts the timer
+    assert(roughRun.outputs[1].deltaValid);   // jitter is still a measurement
+    assert(!roughRun.outputs[3].deltaValid);  // frozen clock
+    assert(!roughRun.outputs[4].deltaValid);  // ten seconds backwards
+    // The 20 ms step right after the jump is the point of the resync: without it the old,
+    // higher timestamp would make every following frame look backwards for ten seconds.
+    assert(roughRun.outputs[5].deltaValid && Near(roughRun.outputs[5].deltaSeconds, 0.02));
+    assert(roughRun.outputs[6].deltaValid);
+    assert(Near(roughRun.outputs[6].deltaSeconds, GquestPlatform::kMaxFrameSeconds));
+    assert(!roughRun.outputs[7].deltaValid);  // NaN reading
+    assert(roughRun.outputs[8].deltaValid);   // recovered
+    assert(rough.log.Count(LogLevel::Warning) == 4);  // three clocks, one dropped frame
+
+    // A dropped sample publishes no pose at all, so its fields stay zero.
+    assert(!roughRun.outputs[2].valid && roughRun.outputs[2].head.yaw == 0);
+    // The jittered steps move the player by exactly what was measured, the frozen and
+    // backwards frames move nothing, and the stall costs one clamped step instead of 90
+    // degrees. Each turn uses the step measured on the frame before it.
+    assert(Near(roughRun.outputs[3].head.yaw, 5.0));
+    assert(Near(roughRun.outputs[4].head.yaw, 5.0));
+    assert(Near(roughRun.outputs[5].head.yaw, 5.0));
+    assert(Near(roughRun.outputs[6].head.yaw, 8.6));
+    assert(Near(roughRun.outputs[7].head.yaw, 23.6));
+    assert(Near(roughRun.outputs[8].head.yaw, 23.6));
+
     std::puts("PASS fake host: 60 frames driven without an engine - snap turn, recentre and "
               "seated offset visible in the published poses, broken heads and missing frames "
               "refused and logged, hands dropped alone, one valid and one refused haptic; "
               "content installation judged before writing, idempotent by size, lua/ always "
-              "rewritten, first bad entry stops the run");
+              "rewritten, first bad entry stops the run; under jitter, a dropped sample, a "
+              "frozen and a backwards clock, a stall and a NaN reading the poses stay finite "
+              "and the turn only ever moves by measured, clamped steps");
     return 0;
 }
