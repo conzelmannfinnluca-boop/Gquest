@@ -35,7 +35,26 @@ for _,p in ipairs(panels) do
  assert(not string.find(rawget(p,"text") or "","ArcVR",1,true))
 end
 assert(count==11,"HL2 plus Physgun roster")
-assert(not GquestWeapons.IsMenuVisible(),"selection must close menu")
+-- The click is answered before the server is: the line names what is being equipped, and the
+-- panel closes once that weapon is confirmed instead of on the click itself.
+assert(GquestWeapons.IsMenuVisible(),"the panel must stay open until the pick is confirmed")
+local function live()
+ for i=#panels,1,-1 do
+  local p=panels[i]
+  if p.kind=="DLabel" and type(p.text)=="string" and string.sub(p.text,1,6)=="Waffe:" then return p end
+ end
+end
+assert(live().text:find("wird ausgeruestet",1,true),"the line must show the pending pick, got "..tostring(live().text))
+assert(timers.GquestMechPending,"a pick needs a fallback close if the server never answers")
+nextPayload="class=weapon_pistol kind=magazine chamber=1 mag=17 capacity=18 safety=false slide=false inserted=true"
+receivers.GquestMechState()
+assert(live().text:find("wird ausgeruestet",1,true),"an answer about the old gun must not replace the pending pick")
+nextPayload="state=none reason=unsupported class=weapon_physgun code=none"
+receivers.GquestMechState()
+assert(not live().text:find("wird ausgeruestet",1,true),"the confirmed pick must replace the pending line")
+assert(timers.GquestMechClose,"the panel must close after the confirmation")
+timers.GquestMechClose()
+assert(not GquestWeapons.IsMenuVisible(),"the panel must close once the pick is confirmed")
 -- A headset has no keyboard: every mechanics command from docs/UPDATE-CHECKLISTE.md is one
 -- click, and the panel stays open so several actions in a row need no reopened menu.
 commands.gquest_weapons();assert(GquestWeapons.IsMenuVisible())
@@ -57,12 +76,6 @@ local function issued(name)
  return false
 end
 assert(issued("gquest_mech_poll"),"opening the panel must ask for the state once")
-local function live()
- for i=#panels,1,-1 do
-  local p=panels[i]
-  if p.kind=="DLabel" and type(p.text)=="string" and string.sub(p.text,1,6)=="Waffe:" then return p end
- end
-end
 assert(live(),"the panel must carry a state line")
 nextPayload="class=weapon_pistol kind=magazine chamber=1 mag=17 capacity=18 safety=false slide=false inserted=true"
 receivers.GquestMechState()
@@ -101,7 +114,7 @@ end
 assert(not GquestWeapons.IsMenuVisible(),"closing the panel must close it")
 timers.GquestMechPoll()
 assert(timers.GquestMechPoll==nil,"the poll must stop with the panel")
-print("PASS HL2-only catalog: eleven real weapon selections, no ArcVR control, selection closes "
- .."tracked menu, six mechanics buttons that issue their command without closing the panel, "
+print("PASS HL2-only catalog: eleven real weapon selections, no ArcVR control, a selection "
+ .."shows the pending pick and closes the tracked menu once confirmed, six mechanics buttons that issue their command without closing the panel, "
  .."a live chamber/magazine line fed by the server state, and a reason naming the weapon "
  .."whenever that line has no numbers")

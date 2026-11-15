@@ -51,7 +51,8 @@ Steht dort statt Zahlen ein Grund, ist das Absicht und sagt, was gerade los ist:
 Hand`, `Brechstange (weapon_crowbar) - hat keine Mechanik` (nur die sieben Profile haben eine)
 oder `Pistole (hlvr_pistol) - kein lesbares Magazin` (Engine-Wert unbrauchbar). Die Zeile
 folgt der Waffe im selben Tick: nach einem Waffenwechsel steht sie sofort richtig, auch beim
-Neuöffnen des Panels. Steht dort gar nichts oder bleibt der Text auf einem alten Stand, kommt
+Neuöffnen des Panels. Nach einem Klick auf eine Waffe steht dort zuerst `wird ausgeruestet ...`,
+und das Panel schließt sich, sobald die Waffe bestätigt ist. Steht dort gar nichts oder bleibt der Text auf einem alten Stand, kommt
 die Net-Nachricht `GquestMechState` nicht an, dann bitte melden.
 
 Oder in der Konsole:

@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.530.965 Bytes | `c18e25c63eac89af340aae12e4bf1176d2f36d93664d897673f05a0e2d0f25ae` |
-| `verification.json` | 2,4 KB | `6ca0d5aef2c3181fccbd19bce0435c504d50f103d3f787ff1c45c303e7ef3e17` |
+| `Gquest.apk` | 59.530.965 Bytes | `a96196c8b0e6366e27fe8aa6a4e82e429a9add8cf7abf069f0ca3bb25e01bf60` |
+| `verification.json` | 2,4 KB | `00e65d1a03e3aa800e7be61a72508fc122a9efe61aa3afc24513a08e990f092b` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -48,6 +48,9 @@ nicht: es bleibt bei gemessenen 898 px Inhalt in 970 px und 0 px Scrollen.
 17/18, Sicherung aus, Verschluss zu`. Die Zahlen kommen als Net-Nachricht vom Server, der sie
 besitzt; die Abfrage dahinter (`gquest_mech_poll`) schreibt bewusst **keine** Log-Zeile, damit
 die Anzeige den Hardware-Log nicht flutet.
+- **Klick wird sofort quittiert:** nach der Auswahl steht `Waffe: Pistole wird ausgeruestet ...`
+über den Knöpfen, Antworten zur alten Waffe werden so lange verworfen, und das Panel schließt
+erst, wenn genau diese Waffe bestätigt ist (0,3 s Lesezeit, 0,6 s Fallback mit neuer Abfrage).
 - **Anzeige folgt der gewählten Waffe:** eine andere Waffe in der Hand wird im selben Tick
 gepusht, statt bis zum nächsten Poll zu warten. Nur ein Waffenwechsel löst eine Nachricht aus,
 und auch der Wechsel schreibt keine Log-Zeile.

@@ -5,6 +5,14 @@ local frame
 -- poll prints nothing on the server: the log belongs to the hardware evaluator, not to a label.
 GQUEST_MECH_LIVE = GQUEST_MECH_LIVE or "none"
 local liveLabel
+-- Set while a pick is on its way to the server: the line then describes that pick, and the
+-- panel closes as soon as that weapon is really in hand.
+local pendingClass
+
+local function closePanel()
+    if IsValid(frame) then frame:Close() end
+    gui.HideGameUI()
+end
 
 -- Names from this catalog, so a weapon without mechanics is named the way the menu names it.
 local NAMES = {
@@ -38,6 +46,9 @@ local function liveText(payload)
     for key, value in string.gmatch(payload, "(%a+)=([^ ]+)") do field[key] = value end
     if not field.chamber then
         -- No numbers: name the weapon and the reason instead of leaving the line empty.
+        if field.state == "pending" then
+            return string.format("Waffe: %s wird ausgeruestet ...", weaponName(field.class))
+        end
         if field.reason == "nohand" then
             return "Waffe: nichts in der Hand - Mechanik nur fuer " .. SUPPORTED
         end
@@ -67,10 +78,30 @@ local function renderLive()
     if IsValid(liveLabel) then liveLabel:SetText(liveText(GQUEST_MECH_LIVE)) end
 end
 
+--- Does this payload describe the class the player just picked? Native HLVR guns carry a
+--- prefix on the same weapon_catalog name.
+local function namesClass(payload, class)
+    if type(payload) ~= "string" then return false end
+    local found = string.match(payload, "class=([^ ]+)")
+    if not found then return false end
+    if found == class then return true end
+    return "weapon_" .. string.gsub(found, "^hlvr_", "") == class
+end
+
 if net and net.Receive then
     net.Receive("GquestMechState", function()
-        GQUEST_MECH_LIVE = net.ReadString() or "none"
+        local payload = net.ReadString() or "none"
+        -- While a pick is pending, ignore answers about the old gun: the line must not fall back
+        -- to the weapon the player just replaced.
+        if pendingClass and not namesClass(payload, pendingClass) then return end
+        GQUEST_MECH_LIVE = payload
         renderLive()
+        if pendingClass then
+            -- Confirmed: let the line be read for a moment, then back to the game.
+            pendingClass = nil
+            timer.Remove("GquestMechPending")
+            timer.Create("GquestMechClose", 0.3, 1, closePanel)
+        end
     end)
 end
 local groups={
@@ -88,13 +119,17 @@ function GquestWeapons.IsMenuVisible() return IsValid(frame) and frame:IsVisible
 function GquestWeapons.Open()
     if IsValid(frame) then frame:Close() end
     gui.HideGameUI()
+    -- A reopened panel starts from the server's answer, not from an abandoned pick.
+    pendingClass=nil
+    timer.Remove("GquestMechPending")
+    timer.Remove("GquestMechClose")
     frame=vgui.Create("DFrame")
     frame:SetTitle("Gquest Waffen")
     frame:SetSize(math.min(660,ScrW()-48),math.min(650,ScrH()-48))
     frame:Center();frame:SetDeleteOnClose(true);frame:MakePopup()
     frame:SetKeyboardInputEnabled(false)
     local close=vgui.Create("DButton",frame);close:Dock(BOTTOM);close:SetTall(48)
-    close:SetText("Zurueck zum Spiel");close.DoClick=function() frame:Close();gui.HideGameUI() end
+    close:SetText("Zurueck zum Spiel");close.DoClick=closePanel
     local reload=vgui.Create("DButton",frame);reload:Dock(TOP);reload:SetTall(48)
     reload:SetText("Nachladen / HL2-Magazin auswerfen")
     reload.DoClick=function() frame:Close();gui.HideGameUI();RunConsoleCommand("gquest_reload") end
@@ -145,7 +180,17 @@ function GquestWeapons.Open()
             local button=vgui.Create("DButton",list);button:Dock(TOP)
             button:DockMargin(2,3,2,3);button:SetTall(48);button:SetText(entry[1])
             button.DoClick=function()
-                frame:Close();gui.HideGameUI()
+                -- Answer the click before the server does: the line names what is being
+                -- equipped instead of showing the previous weapon while the reply is in
+                -- flight. The panel closes once that weapon is confirmed, or after a second.
+                pendingClass=class
+                GQUEST_MECH_LIVE="state=pending class="..class
+                renderLive()
+                timer.Create("GquestMechPending",0.6,1,function()
+                    pendingClass=nil
+                    closePanel()
+                    RunConsoleCommand("gquest_mech_poll")
+                end)
                 RunConsoleCommand(command,class)
                 print("GQUEST_WEAPON_MENU selected="..class)
             end

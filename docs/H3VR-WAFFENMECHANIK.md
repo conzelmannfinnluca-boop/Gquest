@@ -73,6 +73,11 @@ bisher. Der Fehlerfall ist „Retail-Verhalten", nicht „Waffe tot".
 | Zustand ansehen | `gquest_mech_state` (Log + Anzeige im Waffen-Panel) |
 | Zustand nur für die Anzeige abfragen | `gquest_mech_poll` — schreibt keine Log-Zeile |
 
+Ein Klick auf eine Waffe in der Liste wird sofort quittiert: die Zeile sagt `Waffe: Pistole
+wird ausgeruestet ...`, Antworten über die alte Waffe werden in dieser Zeit verworfen, und das
+Panel schließt erst, wenn genau diese Waffe bestätigt ist (plus 0,3 s Lesezeit). Antwortet der
+Server nicht, schließt ein 0,6-s-Fallback und fragt den Zustand neu ab.
+
 Die Anzeige folgt der Hand: wechselt die aktive Waffe, schickt der Server den neuen Zustand im
 selben Tick (`hook Think` → `watchHand`, nur bei Klassenwechsel, ohne Log-Zeile). Der Poll alle
 0,5 s bleibt für die Zahlen derselben Waffe — Nachladen, Schuss, Sicherung — und als Netz, falls
