@@ -78,6 +78,18 @@ local function renderLive()
     if IsValid(liveLabel) then liveLabel:SetText(liveText(GQUEST_MECH_LIVE)) end
 end
 
+--- How long the confirmed line stays readable: the value the player set in the VR settings,
+--- read per pick so a change applies to the next weapon. A missing profile module falls back
+--- to the default instead of closing instantly.
+local function confirmReadTime()
+    local profiles = GQUEST_PROFILES
+    if profiles and profiles.ReadTimeSeconds then
+        local seconds = profiles.ReadTimeSeconds()
+        if type(seconds) == "number" and seconds >= 0 and seconds <= 5 then return seconds end
+    end
+    return 0.3
+end
+
 --- Does this payload describe the class the player just picked? Native HLVR guns carry a
 --- prefix on the same weapon_catalog name.
 local function namesClass(payload, class)
@@ -100,7 +112,7 @@ if net and net.Receive then
             -- Confirmed: let the line be read for a moment, then back to the game.
             pendingClass = nil
             timer.Remove("GquestMechPending")
-            timer.Create("GquestMechClose", 0.3, 1, closePanel)
+            timer.Create("GquestMechClose", confirmReadTime(), 1, closePanel)
         end
     end)
 end

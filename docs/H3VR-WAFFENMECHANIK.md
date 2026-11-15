@@ -75,8 +75,13 @@ bisher. Der Fehlerfall ist „Retail-Verhalten", nicht „Waffe tot".
 
 Ein Klick auf eine Waffe in der Liste wird sofort quittiert: die Zeile sagt `Waffe: Pistole
 wird ausgeruestet ...`, Antworten über die alte Waffe werden in dieser Zeit verworfen, und das
-Panel schließt erst, wenn genau diese Waffe bestätigt ist (plus 0,3 s Lesezeit). Antwortet der
-Server nicht, schließt ein 0,6-s-Fallback und fragt den Zustand neu ab.
+Panel schließt erst, wenn genau diese Waffe bestätigt ist (plus der eingestellten Lesezeit).
+Antwortet der Server nicht, schließt ein 0,6-s-Fallback und fragt den Zustand neu ab.
+
+Die Lesezeit steht im VR-Menü unter **VR-Einstellungen** als Knopf `Waffen-Lesezeit: 0,30 s`:
+ein Klick schaltet durch 0 s / 0,15 s / 0,30 s / 0,60 s. Der Wert liegt als Komfortschlüssel
+`read=<Millisekunden>` in `data/gquest_vr_profile.txt` und wird bei jeder Auswahl neu gelesen,
+wirkt also ohne Neustart auf die nächste Waffe.
 
 Die Anzeige folgt der Hand: wechselt die aktive Waffe, schickt der Server den neuen Zustand im
 selben Tick (`hook Think` → `watchHand`, nur bei Klassenwechsel, ohne Log-Zeile). Der Poll alle

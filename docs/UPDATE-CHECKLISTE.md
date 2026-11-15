@@ -52,7 +52,9 @@ Hand`, `Brechstange (weapon_crowbar) - hat keine Mechanik` (nur die sieben Profi
 oder `Pistole (hlvr_pistol) - kein lesbares Magazin` (Engine-Wert unbrauchbar). Die Zeile
 folgt der Waffe im selben Tick: nach einem Waffenwechsel steht sie sofort richtig, auch beim
 Neuöffnen des Panels. Nach einem Klick auf eine Waffe steht dort zuerst `wird ausgeruestet ...`,
-und das Panel schließt sich, sobald die Waffe bestätigt ist. Steht dort gar nichts oder bleibt der Text auf einem alten Stand, kommt
+und das Panel schließt sich, sobald die Waffe bestätigt ist. Wie lange die bestätigte Zeile
+noch stehen bleibt, stellst du unter **VR-Einstellungen** → `Waffen-Lesezeit: 0,30 s` ein
+(0 / 0,15 / 0,30 / 0,60 s, gespeichert im Profil). Steht dort gar nichts oder bleibt der Text auf einem alten Stand, kommt
 die Net-Nachricht `GquestMechState` nicht an, dann bitte melden.
 
 Oder in der Konsole:

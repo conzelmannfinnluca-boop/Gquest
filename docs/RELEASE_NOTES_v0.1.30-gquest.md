@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.530.965 Bytes | `a96196c8b0e6366e27fe8aa6a4e82e429a9add8cf7abf069f0ca3bb25e01bf60` |
-| `verification.json` | 2,4 KB | `00e65d1a03e3aa800e7be61a72508fc122a9efe61aa3afc24513a08e990f092b` |
+| `Gquest.apk` | 59.530.965 Bytes | `0dcc78e4d32b1741f0ee2863e48db752c178bf6799a4d3d3698c71f1dba9255e` |
+| `verification.json` | 2,4 KB | `5875e1bb7657950c6354cca462b67494f06147dab70780da01fd2d8d07930420` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -48,6 +48,10 @@ nicht: es bleibt bei gemessenen 898 px Inhalt in 970 px und 0 px Scrollen.
 17/18, Sicherung aus, Verschluss zu`. Die Zahlen kommen als Net-Nachricht vom Server, der sie
 besitzt; die Abfrage dahinter (`gquest_mech_poll`) schreibt bewusst **keine** Log-Zeile, damit
 die Anzeige den Hardware-Log nicht flutet.
+- **Lesezeit einstellbar:** im VR-Menü unter **VR-Einstellungen** schaltet der Knopf
+`Waffen-Lesezeit: 0,30 s` in einem Klick durch 0 s / 0,15 s / 0,30 s / 0,60 s. Der Wert wird
+mit dem Profil gespeichert (`read=<ms>` in `data/gquest_vr_profile.txt`) und bei jeder Auswahl
+neu gelesen — die nächste Waffe nutzt ihn ohne Neustart.
 - **Klick wird sofort quittiert:** nach der Auswahl steht `Waffe: Pistole wird ausgeruestet ...`
 über den Knöpfen, Antworten zur alten Waffe werden so lange verworfen, und das Panel schließt
 erst, wenn genau diese Waffe bestätigt ist (0,3 s Lesezeit, 0,6 s Fallback mit neuer Abfrage).

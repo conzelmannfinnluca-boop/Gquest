@@ -265,6 +265,21 @@ local function settingsPanel(parent)
             notification.AddLegacy("Handglaettung: "
                 ..(SMOOTHING_LABELS[profileState.smoothing] or profileState.smoothing),NOTIFY_GENERIC,3)
         end
+        -- The weapon panel keeps a confirmed pick readable for this long before it closes.
+        -- It only changes how long the line stays up, never what the pick does.
+        local function readText()
+            local seconds = string.format("%.2f", (profileState.readMs or profiles.DEFAULT_READ_MS) / 1000)
+            return "Waffen-Lesezeit: " .. string.gsub(seconds, "%.", ",") .. " s (klicken)"
+        end
+        local readButton=button()
+        readButton:SetText(readText())
+        readButton.DoClick=function()
+            profiles.CycleReadTime(profileState); saveProfile()
+            readButton:SetText(readText())
+            notification.AddLegacy("Lesezeit nach Waffenwahl "
+                ..string.gsub(string.format("%.2f", (profileState.readMs or 0) / 1000), "%.", ",")
+                .." s",NOTIFY_GENERIC,3)
+        end
     end
     -- Right column: the weapon tools, independent of the profile keys on the left.
     column = 2

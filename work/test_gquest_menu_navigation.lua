@@ -76,6 +76,12 @@ assert(files["gquest_vr_profile.txt"]:find("smooth=strong",1,true),"level must b
 click("Handglaettung: Stark (klicken zum Wechseln)")
 assert(not GquestHandSmoothing.Enabled,"off must disable the filter")
 assert(files["gquest_vr_profile.txt"]:find("smooth=off",1,true),"off must be saved")
+-- How long the weapon panel keeps a confirmed pick is a comfort key as well: one button
+-- cycles it, the file keeps it, and the weapon panel reads it on the next pick.
+click("Waffen-Lesezeit: 0,30 s (klicken)")
+assert(files["gquest_vr_profile.txt"]:find("read=600",1,true),"read time must be saved")
+click("Waffen-Lesezeit: 0,60 s (klicken)")
+assert(files["gquest_vr_profile.txt"]:find("read=0",1,true),"read time must wrap to zero")
 -- The weapon mechanics tools live in the weapon catalog (gquest_weapon_catalog.lua), because
 -- the settings panel has no room left: measured content is 898 px of 970 px usable. That
 -- file's own harness clicks them.

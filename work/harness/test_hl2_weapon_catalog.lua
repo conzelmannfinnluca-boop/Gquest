@@ -13,11 +13,11 @@ gui={HideGameUI=function() end}
 concommand={Add=function(k,fn) commands[k]=fn end}
 function RunConsoleCommand(cmd,arg) selected[#selected+1]={cmd,arg} end
 -- The live state comes over the wire and is polled on a timer.
-local receivers,nextPayload,timers={},"none",{}
+local receivers,nextPayload,timers,rates={},"none",{},{}
 net={Receive=function(name,fn) receivers[name]=fn end,
      ReadString=function() return nextPayload end}
-timer={Create=function(name,rate,reps,fn) timers[name]=fn end,
-       Remove=function(name) timers[name]=nil end}
+timer={Create=function(name,rate,reps,fn) timers[name]=fn;rates[name]=rate end,
+       Remove=function(name) timers[name]=nil;rates[name]=nil end}
 assert(loadfile("work/gquest-ui/lua/autorun/client/gquest_weapon_catalog.lua"))()
 -- The mechanics buttons are not weapon selections and must not be counted as such.
 local mechanics={{"Magazin","gquest_mech_mag"},{"Durchladen","gquest_mech_rack"},
@@ -49,8 +49,11 @@ assert(timers.GquestMechPending,"a pick needs a fallback close if the server nev
 nextPayload="class=weapon_pistol kind=magazine chamber=1 mag=17 capacity=18 safety=false slide=false inserted=true"
 receivers.GquestMechState()
 assert(live().text:find("wird ausgeruestet",1,true),"an answer about the old gun must not replace the pending pick")
+-- The read time comes from the VR settings, so the panel waits as long as the player chose.
+GQUEST_PROFILES={ReadTimeSeconds=function() return 0.45 end}
 nextPayload="state=none reason=unsupported class=weapon_physgun code=none"
 receivers.GquestMechState()
+assert(rates.GquestMechClose==0.45,"the close delay must come from the saved read time, got "..tostring(rates.GquestMechClose))
 assert(not live().text:find("wird ausgeruestet",1,true),"the confirmed pick must replace the pending line")
 assert(timers.GquestMechClose,"the panel must close after the confirmation")
 timers.GquestMechClose()
@@ -117,4 +120,4 @@ assert(timers.GquestMechPoll==nil,"the poll must stop with the panel")
 print("PASS HL2-only catalog: eleven real weapon selections, no ArcVR control, a selection "
  .."shows the pending pick and closes the tracked menu once confirmed, six mechanics buttons that issue their command without closing the panel, "
  .."a live chamber/magazine line fed by the server state, and a reason naming the weapon "
- .."whenever that line has no numbers")
+ .."whenever that line has no numbers, and a close delay taken from the saved read time")

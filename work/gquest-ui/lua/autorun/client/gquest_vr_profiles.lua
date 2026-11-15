@@ -11,7 +11,8 @@
 --   line 3  refresh rate 72|90    read by the Rust runtime
 --   line 4  device id             menu bookkeeping, ignored by the runtime
 --   line 5+ remembered preset per device: quest3=<tier>,<foveation>,<rate>
---           comfort keys: snap=<degrees>, stance=stand|seated, smooth=off|mild|strong
+--           comfort keys: snap=<degrees>, stance=stand|seated, smooth=off|mild|strong,
+--                         read=<milliseconds> how long the confirmed weapon stays readable
 --
 -- The runtime reads only the first three lines, so a profile written before this
 -- split keeps working and an older build ignores the extra lines instead of failing.
@@ -39,6 +40,10 @@ P.SMOOTHING = { "off", "mild", "strong" }
 P.DEFAULT_SNAP_STEP = 30
 P.DEFAULT_STANCE = "stand"
 P.DEFAULT_SMOOTHING = "mild"
+-- How long the weapon panel keeps the confirmed line before it closes itself. 0 closes on
+-- the next frame; the list is short because it cycles with one button in a headset.
+P.READ_TIMES = { 0, 150, 300, 600 }
+P.DEFAULT_READ_MS = 300
 
 P.DEVICES = {
     quest3 = {
@@ -71,6 +76,14 @@ end
 function P.IsSmoothing(value)
     for _, level in ipairs(P.SMOOTHING) do
         if level == value then return true end
+    end
+    return false
+end
+
+function P.IsReadTime(value)
+    if type(value) ~= "number" then return false end
+    for _, ms in ipairs(P.READ_TIMES) do
+        if ms == value then return true end
     end
     return false
 end
@@ -109,6 +122,7 @@ function P.Defaults()
         snapStep = P.DEFAULT_SNAP_STEP,
         stance = P.DEFAULT_STANCE,
         smoothing = P.DEFAULT_SMOOTHING,
+        readMs = P.DEFAULT_READ_MS,
         saved = {},
         deviceTiers = device.tiers,
     }
@@ -156,6 +170,8 @@ function P.Parse(text)
             if stance and P.IsStance(stance) then state.stance = stance end
             local smoothing = string.match(lines[index], "^smooth=(%w+)$")
             if smoothing and P.IsSmoothing(smoothing) then state.smoothing = smoothing end
+            local read = string.match(lines[index], "^read=(%d+)$")
+            if read and P.IsReadTime(tonumber(read)) then state.readMs = tonumber(read) end
         end
     end
     return state
@@ -173,6 +189,8 @@ function P.Serialize(state)
     lines[#lines + 1] = "stance=" .. (P.IsStance(state.stance) and state.stance or P.DEFAULT_STANCE)
     lines[#lines + 1] = "smooth=" ..
         (P.IsSmoothing(state.smoothing) and state.smoothing or P.DEFAULT_SMOOTHING)
+    lines[#lines + 1] = "read=" ..
+        (P.IsReadTime(state.readMs) and tostring(state.readMs) or tostring(P.DEFAULT_READ_MS))
     return table.concat(lines, "\n") .. "\n"
 end
 
@@ -322,6 +340,31 @@ function P.CycleSmoothing(state)
     end
     state.smoothing = P.SMOOTHING[current % #P.SMOOTHING + 1]
     return state
+end
+
+function P.SetReadTime(state, value)
+    if state and P.IsReadTime(value) then state.readMs = value end
+    return state
+end
+
+--- Next read time in the list, wrapping. Same one-button rule as the step size.
+function P.CycleReadTime(state)
+    if not state then return state end
+    local current = 0
+    for index, ms in ipairs(P.READ_TIMES) do
+        if ms == state.readMs then current = index end
+    end
+    state.readMs = P.READ_TIMES[current % #P.READ_TIMES + 1]
+    return state
+end
+
+--- Seconds the weapon panel may keep a confirmed pick on screen. Read from the saved
+--- profile on every pick, so a change in the menu applies to the next weapon without a
+--- restart; UI-only, it never touches the runtime's first three lines.
+function P.ReadTimeSeconds()
+    local state = P.Load()
+    local ms = state and state.readMs or P.DEFAULT_READ_MS
+    return ms / 1000
 end
 
 function P.ToggleStance(state)
