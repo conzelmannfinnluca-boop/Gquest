@@ -49,9 +49,10 @@ VR-Menü → **Waffen** → Knöpfe `Magazin`, `Durchladen`, `Nachladen`, `Siche
 über den Knöpfen live `Waffe: … - Kammer 1, Magazin 17/18, Sicherung aus, Verschluss zu`.
 Steht dort statt Zahlen ein Grund, ist das Absicht und sagt, was gerade los ist: `nichts in der
 Hand`, `Brechstange (weapon_crowbar) - hat keine Mechanik` (nur die sieben Profile haben eine)
-oder `Pistole (hlvr_pistol) - kein lesbares Magazin` (Engine-Wert unbrauchbar). Steht dort
-gar nichts oder bleibt der Text auf einem alten Stand, kommt die Net-Nachricht
-`GquestMechState` nicht an, dann bitte melden.
+oder `Pistole (hlvr_pistol) - kein lesbares Magazin` (Engine-Wert unbrauchbar). Die Zeile
+folgt der Waffe im selben Tick: nach einem Waffenwechsel steht sie sofort richtig, auch beim
+Neuöffnen des Panels. Steht dort gar nichts oder bleibt der Text auf einem alten Stand, kommt
+die Net-Nachricht `GquestMechState` nicht an, dann bitte melden.
 
 Oder in der Konsole:
 

@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.530.965 Bytes | `74c834441e9eddf1fb926ca76c3d3634caa6fbe60595e52093c4591f46e27e48` |
-| `verification.json` | 2,4 KB | `d04542ae8add296e53bc55703968577659d99fc175670f82e257aba282274b30` |
+| `Gquest.apk` | 59.530.965 Bytes | `c18e25c63eac89af340aae12e4bf1176d2f36d93664d897673f05a0e2d0f25ae` |
+| `verification.json` | 2,4 KB | `6ca0d5aef2c3181fccbd19bce0435c504d50f103d3f787ff1c45c303e7ef3e17` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -48,6 +48,9 @@ nicht: es bleibt bei gemessenen 898 px Inhalt in 970 px und 0 px Scrollen.
 17/18, Sicherung aus, Verschluss zu`. Die Zahlen kommen als Net-Nachricht vom Server, der sie
 besitzt; die Abfrage dahinter (`gquest_mech_poll`) schreibt bewusst **keine** Log-Zeile, damit
 die Anzeige den Hardware-Log nicht flutet.
+- **Anzeige folgt der gewählten Waffe:** eine andere Waffe in der Hand wird im selben Tick
+gepusht, statt bis zum nächsten Poll zu warten. Nur ein Waffenwechsel löst eine Nachricht aus,
+und auch der Wechsel schreibt keine Log-Zeile.
 - **Leere Zeile erklärt sich:** Statt nur zu schweigen nennt dieselbe Zeile die Waffe und den
 Grund — `Waffe: Brechstange (weapon_crowbar) - hat keine Mechanik, nur Pistole, .357, SMG, AR2,
 Schrotflinte, Armbrust, RPG`, `Waffe: nichts in der Hand - …` oder `Waffe: Pistole

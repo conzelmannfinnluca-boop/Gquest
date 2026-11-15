@@ -73,6 +73,11 @@ bisher. Der Fehlerfall ist „Retail-Verhalten", nicht „Waffe tot".
 | Zustand ansehen | `gquest_mech_state` (Log + Anzeige im Waffen-Panel) |
 | Zustand nur für die Anzeige abfragen | `gquest_mech_poll` — schreibt keine Log-Zeile |
 
+Die Anzeige folgt der Hand: wechselt die aktive Waffe, schickt der Server den neuen Zustand im
+selben Tick (`hook Think` → `watchHand`, nur bei Klassenwechsel, ohne Log-Zeile). Der Poll alle
+0,5 s bleibt für die Zahlen derselben Waffe — Nachladen, Schuss, Sicherung — und als Netz, falls
+eine Push-Nachricht verloren geht.
+
 `gquest_mech_poll` antwortet immer: entweder mit dem Zustand oder mit dem Grund, warum es
 keinen gibt — `reason=nohand` (nichts in der Hand), `reason=dead`, `reason=unsupported
 class=weapon_crowbar` (Klasse ohne Profil, z. B. Brechstange, Gravity Gun) oder `reason=engine

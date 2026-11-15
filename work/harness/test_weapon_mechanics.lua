@@ -256,7 +256,34 @@ local dead = {IsPlayer = function() return true end, Alive = function() return f
 commands.gquest_mech_poll(dead)
 assert(string.find(sent.text, "reason=dead", 1, true), "a dead player must be reported")
 
+-- The panel follows the hand: another weapon is pushed as soon as it is active, so picking one
+-- in the menu does not wait for the next poll. Holding the same weapon sends nothing.
+local pushes = 0
+local writeString = net.WriteString
+net.WriteString = function(text) pushes = pushes + 1; writeString(text) end
+local watched = fakePlayer(clipWeapon("weapon_pistol", 18, 18), 0)
+hooks.Think()
+assert(pushes == 1 and sent.player == watched, "a newly held weapon must be pushed at once")
+local pushed = sent.text
+assert(string.find(pushed, "class=weapon_pistol", 1, true) and string.find(pushed, "chamber=1", 1, true),
+    "the pushed state must be the full state, got " .. tostring(pushed))
+commands.gquest_mech_poll(watched)
+assert(sent.text == pushed, "push and poll must describe the same weapon the same way")
+pushes = 0
+hooks.Think()
+assert(pushes == 0, "holding the same weapon must not send anything")
+before = #printed
+fakePlayer(clipWeapon("weapon_crowbar", 0, 0), 0)
+hooks.Think()
+assert(pushes == 1, "switching the weapon must push exactly once")
+assert(string.find(sent.text, "reason=unsupported", 1, true)
+    and string.find(sent.text, "class=weapon_crowbar", 1, true),
+    "the switch must push the same explanation the poll gives, got " .. tostring(sent.text))
+assert(#printed == before, "a weapon switch must not write a log line")
+net.WriteString = writeString
+
 realPrint("PASS weapon mechanics: chamber split, auto cycle, empty-chamber click, slide lock, safety, "
     .. "live-round ejection to reserve, retaining magazine, reserve cap, no free chambering, "
     .. "revolver cylinder, pump action, tube reload, native magazine write, write rollback, "
-    .. "resync, disabled gate and a silent state poll that explains a missing state")
+    .. "resync, disabled gate, a silent state poll that explains a missing state and a weapon "
+    .. "switch pushed to the panel without waiting for a poll")

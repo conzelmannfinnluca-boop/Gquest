@@ -410,16 +410,24 @@ hook.Add("EntityFireBullets", "GquestMechFire", function(entity, _)
     if allowed == false then return false end
 end)
 
+-- Assigned once the panel section below exists; the think hook runs long after that.
+local watchHand
+
 -- Keep the model in step when the engine changes the clip behind our back (native insertion,
 -- pickup, admin command). A mismatch drops the local state, it never "corrects" the engine.
+-- The same pass lets the panel follow the hand: a new active weapon is pushed at once, so
+-- picking one in the menu does not wait for the next poll.
 hook.Add("Think", "GquestMechResync", function()
-    if not enabled() then return end
+    local active = enabled()
     for _, player in ipairs(player.GetAll and player.GetAll() or {}) do
-        local weapon, profile = regularWeapon(player)
-        if weapon and profile and states[weapon] then
-            local total = states[weapon].binding.readTotal()
-            if total == nil or total ~= states[weapon].chamber + states[weapon].magazine then
-                states[weapon] = nil
+        if watchHand then watchHand(player) end
+        if active then
+            local weapon, profile = regularWeapon(player)
+            if weapon and profile and states[weapon] then
+                local total = states[weapon].binding.readTotal()
+                if total == nil or total ~= states[weapon].chamber + states[weapon].magazine then
+                    states[weapon] = nil
+                end
             end
         end
     end
@@ -476,6 +484,19 @@ end
 concommand.Add("gquest_mech_poll", function(player)
     pushState(player, pollPayload(player))
 end)
+
+--- The panel follows the hand, not the poll clock: as soon as another weapon is active the new
+--- state is pushed, so picking a gun in the menu shows up in the same tick instead of up to half
+--- a second later. Only a class change sends anything, and a switch writes no log line.
+local lastSeen = setmetatable({}, {__mode = "k"})
+function watchHand(player)
+    if not IsValid(player) then return end
+    local weapon = player.GetActiveWeapon and player:GetActiveWeapon()
+    local class = IsValid(weapon) and tostring(weapon:GetClass()) or "none"
+    if lastSeen[player] == class then return end
+    lastSeen[player] = class
+    pushState(player, pollPayload(player))
+end
 
 concommand.Add("gquest_mech_state", function(player)
     local weapon = IsValid(player) and player.GetActiveWeapon and player:GetActiveWeapon() or nil
