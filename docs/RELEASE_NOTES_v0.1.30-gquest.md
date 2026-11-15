@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.530.965 Bytes | `244b19d203d647ab42ff7d43b063652a72f30672e42f2ad933cd512c8b7f927d` |
-| `verification.json` | 2,4 KB | `40651802a4fcfa9f38e0f99d6edc4ff2ce03c9e8da158d0e951a98ea71309120` |
+| `Gquest.apk` | 283.456.755 Bytes | `c43b44a2d9ef54cdbb9a4354e9449e07ca4976d3cc3fd2ba010bb6223b90cc60` |
+| `verification.json` | 31.4 KB | `f098acebfb50b75a19b350a25f0e9055f0802c00632a75552fb9b21e3d6a5925` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Dieselbe Datei liegt zusätzlich mit Versionsnummer im Namen: `Gquest-0.1.30-gquest.2.apk`
@@ -150,9 +150,11 @@ Daraus folgt für die Installation:
 
 Voraussetzungen: Quest 3/3S oder ein anderes arm64-Gerät, Android 8+ (minSdk 26).
 
-**Es ist kein Content-Paket.** Enthalten sind 16 Lua-Dateien des Overlays. Karten und
-Waffenmodelle fehlen; der Installer schreibt beim Start nur diese Lua-Dateien und lässt
-vorhandenen Content unangetastet.
+**Enthält jetzt den Content.** 18 Lua-Dateien des Overlays plus 358 Content-Dateien
+(218 Modelle, 128 Materialien, 12 Waffenscripts) — zusammen 283.456.755 Bytes. Der Content
+stammt aus dem eigenen Release `test-von-Gqeust` dieses Projekts und wurde byteweise
+übernommen (358 von 358 Dateien geprüft); er liegt nur im APK und im lokalen Arbeitsordner
+`work/quest-vr-content/`, nicht im Git. Karten sind weiterhin nicht enthalten.
 
 ## Was im Paket steckt
 

@@ -1,3 +1,1794 @@
 {
-  "files": []
+  "files": [
+    {
+      "path": "materials/models/gfreakman/gordon/eyeball_l.vmt",
+      "bytes": 123,
+      "sha256": "53f2204279a47fb6750830e9c9db32f1fc77de7c90c74aba2e91429acc26e727"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/eyeball_r.vmt",
+      "bytes": 123,
+      "sha256": "7862bda90b898965edb44239746a65e30118980992315c09c886a960ead8620c"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/glass2.vmt",
+      "bytes": 212,
+      "sha256": "8cd2d20ac130542b89b0907dfceb883c0b7808c7e1e04d2d2d217387a102ed4a"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/glasses_gordon.vmt",
+      "bytes": 104,
+      "sha256": "ebfe12ca959fdba5f3d1b8dcf97bb819d62f7b57968acf6b7f78378ca2afc88f"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/glasses_gordon.vtf",
+      "bytes": 87544,
+      "sha256": "a19887cc35443d475b0cfe918d70beaf27b04b9a8d92639369ad314f23c5bc55"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/gordon_cylmap.vtf",
+      "bytes": 1398264,
+      "sha256": "4b4a36e70e93de463ff19d2722b5782773021a93a61029fad6a8f40affe32e03"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/gordon_facemap.vmt",
+      "bytes": 103,
+      "sha256": "4d48347360ff9a0c962b3d426c061ca95cfc0216092805cc191d5d1cf8fa79c7"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/gordon_facemap_g01.vmt",
+      "bytes": 107,
+      "sha256": "cf74a2e4bf77ebd421c16105cabcb20383ad70d6746f33430f220a59cb4b2601"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/gordon_facemap_g01.vtf",
+      "bytes": 87544,
+      "sha256": "b1cc1fdb0ada4078072432d78b4566b9eb57fea43a7a7d0869c59cae730adc30"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/mouth.vmt",
+      "bytes": 128,
+      "sha256": "d1be412aa30c7706745f8b0cbdd0014a1b4c59f0689493d49da883b3697f5d55"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/mouth.vtf",
+      "bytes": 87616,
+      "sha256": "04b47a892de9c5eba64e4a44dbe0314d5b959e9093f95ab459b538a86bcd8f85"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon/pupil.vtf",
+      "bytes": 5696,
+      "sha256": "7d4d8d0d2243dbdecddf151411ce71dad39ec0d4e20ac50d9979754dd23fa4a0"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon_lq/glasses_gordon.vmt",
+      "bytes": 107,
+      "sha256": "65777ca2b49f5a47d39b94833db14e5410f0f0172f4cfbed9191011353da4f66"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon_lq/glasses_gordon.vtf",
+      "bytes": 5624,
+      "sha256": "230743e5c2f90664674cbbe87078c5fc63602b94449dc9ab852d826398c24c9f"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon_lq/gordon_facemap.vmt",
+      "bytes": 107,
+      "sha256": "61ad7da957a63c19c7f4e5686896945dfddb9b849abeb0e719280e7f42efa796"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon_lq/gordon_facemap.vtf",
+      "bytes": 87544,
+      "sha256": "2d3d2df8d6bbcfa43523a85c2a209c4b3a7c56573e39f4f06201b578192c0115"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon_lq/hev_sheet.vmt",
+      "bytes": 101,
+      "sha256": "af49250d9ba91feea84f78307b17b9d9696b5ca1cf1e90daa4013796e8b9e95a"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon_lq/hev_sheet.vtf",
+      "bytes": 349688,
+      "sha256": "f075d19c21cbc255ba4ff3da625314745726ae18840987e84c62a415583689b3"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon_lq/hev_sheet_2003.vmt",
+      "bytes": 106,
+      "sha256": "33a378d19a0ecefbaa5d12f2b4591ffe85e564964d70dc0869394dd27dd8a27a"
+    },
+    {
+      "path": "materials/models/gfreakman/gordon_lq/hev_sheet_2003.vtf",
+      "bytes": 349688,
+      "sha256": "8a6954f7bd9e492ca931b9a25e0e5ef267a917bbc8c095e83bd1341558d77846"
+    },
+    {
+      "path": "materials/models/weapons/interactive_highlight.vtf",
+      "bytes": 43928,
+      "sha256": "395da8344ee23c1ad24f66e28f1f6693f734f5a87ead129f65859819a186afaf"
+    },
+    {
+      "path": "materials/models/weapons/vr_357/vr_357.vmt",
+      "bytes": 244,
+      "sha256": "10381fd96f66bac979f3a4f334fb94ae4db33a8f57940e1b6be47a8b4d10ca7c"
+    },
+    {
+      "path": "materials/models/weapons/vr_357/vr_357.vtf",
+      "bytes": 5592656,
+      "sha256": "e0e647120303512f2349b2cecf5a35c50ec5b0da1a97f2a8e2f9436b06151f91"
+    },
+    {
+      "path": "materials/models/weapons/vr_357/vr_357_alt.vmt",
+      "bytes": 204,
+      "sha256": "ab2980d5597873ce1e08a1bcbe867a96271a840173ab733a9077e74953060af9"
+    },
+    {
+      "path": "materials/models/weapons/vr_357/vr_357_alt.vtf",
+      "bytes": 5592656,
+      "sha256": "e3f5ba6ebfc3c416c94810ed041ef0cc4ffca8c7e412b6e65cfc3aa50647b026"
+    },
+    {
+      "path": "materials/models/weapons/vr_357/vr_357_mask.vtf",
+      "bytes": 2796440,
+      "sha256": "1e8e5ad048fc7f7e7bd05eacc661aa897b776dce105fd4cb0fac986dec7f9696"
+    },
+    {
+      "path": "materials/models/weapons/vr_357/vr_357_shell.vmt",
+      "bytes": 211,
+      "sha256": "307af1c012bb82d611681c93014bfe4908f59d2ffb2a8feb74a3eee92d84f241"
+    },
+    {
+      "path": "materials/models/weapons/vr_357/vr_357_shell.vtf",
+      "bytes": 699196,
+      "sha256": "cf1e84eb0ec3097ae6703a9590ad3047842260473a670f00f5a84f493422b335"
+    },
+    {
+      "path": "materials/models/weapons/vr_bugbait/vr_bugbait.vmt",
+      "bytes": 435,
+      "sha256": "ba78080b030f6e264d18d764b4251c285fd3388f424ccdc08d95dbd40291524a"
+    },
+    {
+      "path": "materials/models/weapons/vr_bugbait/vr_bugbait.vtf",
+      "bytes": 5592656,
+      "sha256": "dfebdf28b119992b20fdb917919fbc15eca6b0f31cf817942fa40273039497ae"
+    },
+    {
+      "path": "materials/models/weapons/vr_bugbait/vr_bugbait_inside.vmt",
+      "bytes": 356,
+      "sha256": "276f9a5340c4794f1bf8048e245ef72e5089f17fdd948c082480a09f623b3623"
+    },
+    {
+      "path": "materials/models/weapons/vr_bugbait/vr_bugbait_inside.vtf",
+      "bytes": 2796440,
+      "sha256": "94b8d7b138e903e49284916ff6040c8a10f85991a1f89fc5f041c70fe037a796"
+    },
+    {
+      "path": "materials/models/weapons/vr_bugbait/vr_bugbait_inside_normal.vtf",
+      "bytes": 5592612,
+      "sha256": "254ca39f49b0d22694e3f726f9c032bac834184d5b0f56acedcdb6d8950f58e6"
+    },
+    {
+      "path": "materials/models/weapons/vr_bugbait/vr_bugbait_normal.vtf",
+      "bytes": 5592612,
+      "sha256": "0b90040c43d42baeee118a9c98e00f9e6776a7302922a14ed940adf86f92a672"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow.vmt",
+      "bytes": 347,
+      "sha256": "3fe2de0a9a455f3a63f81937f65324a82c5b3abcc3bb9ddf4987c8aec9d62ddd"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow.vtf",
+      "bytes": 2796440,
+      "sha256": "aaac8798824823a0d7f066ee17c7187e0c018ed117d33abaa46533d2f3f2cfae"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_battery.vmt",
+      "bytes": 290,
+      "sha256": "a156464fc9e049a674854156536c36ca565a61b4f1d72bbd5e7e736e18af9e23"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_battery.vtf",
+      "bytes": 175000,
+      "sha256": "3cb7fb5a3798c00104e13315187c8efc54efac3db53db776f437f978fa30ea49"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_body.vmt",
+      "bytes": 357,
+      "sha256": "0cf2c6caf963cd99bc51340fa83495e10e3862f595bde293ad78718d2933f9d7"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_body.vtf",
+      "bytes": 1398280,
+      "sha256": "a101c11f926d39d17c0c46f56ef89346134ebd3c356f8b99aef5f7e8ebe132bb"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_body_glow.vmt",
+      "bytes": 362,
+      "sha256": "b4e9c6142b0bda6f9c5b10b66e0e77b5223b7e7881487fce0777f057d5a24f09"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_body_glow.vtf",
+      "bytes": 2796400,
+      "sha256": "23348de44af209bec11511a4042119a58dbc09e2bc79fd9bbf3e37c6bb8fe4bd"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_body_normal.vtf",
+      "bytes": 2796400,
+      "sha256": "22326198988ecd30ca9137aab0944967ee5e4475efc980b863be8d8ca7205a5c"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_decals.vmt",
+      "bytes": 126,
+      "sha256": "f6bc006689a75d1efc1d087fa1e8ad8e816298f2709af81427491c191db40f22"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_decals.vtf",
+      "bytes": 262352,
+      "sha256": "afad11569d7821898f0d3a8e7f1f06d0786eb567409979ccb132013edaba0973"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_glow.vmt",
+      "bytes": 373,
+      "sha256": "3f41a890a4a21a039f2fae705a83a60d36999bcb225a134541af517ddf2a0718"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_glow.vtf",
+      "bytes": 5592656,
+      "sha256": "b5e220880a9af39a919535f699975fd5b1d84c3615e1e518a82cd486ca571305"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_lens.vmt",
+      "bytes": 126,
+      "sha256": "aa5c452791d6b7eceb199dc02926322d898f56b14b97125b6421c6f746d12e77"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_lens.vtf",
+      "bytes": 349776,
+      "sha256": "6e2e4959ac9d7392b1ccbacb9b005a43b87beb9efe8782ec7fd5e70b0a6e774b"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_normal.vtf",
+      "bytes": 5592656,
+      "sha256": "32b41b5f41e877c2c2eaf502f44df056ba83b3a4da2dd202e73becd623c4a2f9"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_rebar.vmt",
+      "bytes": 222,
+      "sha256": "84a81e58831ec2ab72534744348dafc08e1050f616511d1dcfdde7ea10f589fa"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_rebar.vtf",
+      "bytes": 349712,
+      "sha256": "ec3efdfdba8f2022801e021ca11e900b4fb8b0afd3b13bf026b1f5c2b12f3db5"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_rebar_glow.vmt",
+      "bytes": 204,
+      "sha256": "dada338e55afd68f0f2b28d56a41dd972a7eeaf23fde64639aa49d20647aa69b"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_rebar_glow.vtf",
+      "bytes": 349712,
+      "sha256": "5ff79de148ff8d99331105e45f508b23cb679ab7ea0428bd54dc35f05cc4339c"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_rebar_normal.vtf",
+      "bytes": 349712,
+      "sha256": "9a081ca9b2fbb6773e77a3ca42539bc7f4fe5a8c55db19931baa97db6f49aae7"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_rtscope.vmt",
+      "bytes": 63,
+      "sha256": "b3b6047d38c56a571a68089796875b6cc92f7568ee8d752364ac25f0b2a938dc"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_string.vmt",
+      "bytes": 328,
+      "sha256": "4fcdea78a939b57d6a27cb693ddcbd95ab1e96fd5002b13886b261dd0ffdd22b"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_string.vtf",
+      "bytes": 43848,
+      "sha256": "3edf91751698dc15b4007873a25f01594610711d2f0c20899e21601d25aee72f"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_string_normal.vtf",
+      "bytes": 87568,
+      "sha256": "60a3db8e4849eb14737d432fd59b2bf0a52f6417122c65e50b7dcc7d5bcf9335"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_wires.vmt",
+      "bytes": 286,
+      "sha256": "33c1bbc2b3c1d1c364b70102332b8583be4b0c6f79f93913538b68faa780d328"
+    },
+    {
+      "path": "materials/models/weapons/vr_crossbow/vr_crossbow_wires.vtf",
+      "bytes": 1398308,
+      "sha256": "d4203120119e4e98a58cba5680314ea9f319decb96a811a1ce72e9200494e773"
+    },
+    {
+      "path": "materials/models/weapons/vr_crowbar/vr_crowbar.vmt",
+      "bytes": 506,
+      "sha256": "78fa1b24009d805bc8c0d358911896b87282840b4d99879dbe9aabf659002831"
+    },
+    {
+      "path": "materials/models/weapons/vr_crowbar/vr_crowbar_d.vtf",
+      "bytes": 11184940,
+      "sha256": "e61eb625ae48c5c3e5e8a733e22a9a3628a8b13b629fe01d5639406952647d49"
+    },
+    {
+      "path": "materials/models/weapons/vr_crowbar/vr_crowbar_exp.vtf",
+      "bytes": 11184940,
+      "sha256": "cddb0704184204673585cc94f8fafaeb6ba47520061c0ff86b3d4dadd14fede4"
+    },
+    {
+      "path": "materials/models/weapons/vr_crowbar/vr_crowbar_nrm.vtf",
+      "bytes": 11184940,
+      "sha256": "7b36ee96a737d967a75c8c5c3e0ac40be0db30a9116afb52f715a270c9b59a23"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_blackseal.vmt",
+      "bytes": 284,
+      "sha256": "74c97746867e58ad1bf693e6f77419321761dd4482fcf81c1e246a07d620cd74"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_blackseal.vtf",
+      "bytes": 22052,
+      "sha256": "99de7a24086642c076ebeb86b7192a378f1f098931bbd72395e84a035b76b0c0"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_blackseal_normal.vtf",
+      "bytes": 87588,
+      "sha256": "504b43b2be3d7e9d43e49640c03e3532413c196edf57e884abe4fcfc0a093f4f"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_body.vmt",
+      "bytes": 272,
+      "sha256": "f50f07a6e10b6e4a69c7fa8f95b511fe0e765394b23d6d7ee80616d38e2c9686"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_body.vtf",
+      "bytes": 1398308,
+      "sha256": "b027770167d4194a840e6d7e4e6003deaf561da4cca02ba2345d4b7f00039e11"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_body_normal.vtf",
+      "bytes": 1398308,
+      "sha256": "64ae0b57bf16b82fb5ba5ec278c09e28b8312a388b9760d86f8b8f3bb372a073"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_handle.vmt",
+      "bytes": 278,
+      "sha256": "c49d9e1845f786fe9eb6ed2977f3de87c21103985cb9cbbec9c30351634ecbaa"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_handle.vtf",
+      "bytes": 699196,
+      "sha256": "d3ddcfe06c6fa38f56536b03af9060fee3355b55d25bd1b56d7e68ffecb3c1ca"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_handle_normal.vtf",
+      "bytes": 699196,
+      "sha256": "63905039944306543f2ab8a6f7f28792b8130e137a71f9edddbf1d648726ebe4"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_rim.vmt",
+      "bytes": 274,
+      "sha256": "b378b128fa86947aa5815c3eaeef166074e7838a0eadba0b7820e5a2f4b2fe46"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_rim.vtf",
+      "bytes": 349644,
+      "sha256": "799e867c3086dfa6ae499b1810aee72f2028874495a3ea3a5e89a0cc69b9a8d7"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_rim_normal.vtf",
+      "bytes": 87500,
+      "sha256": "33d201b409180bd4b91fa67e82e6a9c2d0bbb4ce36b6b9ad2b4e817a3ce9868b"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_top.vmt",
+      "bytes": 272,
+      "sha256": "67f63c37231fac749ebecfaff458097a3fc9e7c29cfa99735cf3042300c9a2a3"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_top.vtf",
+      "bytes": 87616,
+      "sha256": "3ae675783f338433bab92799990fd6ae7a6eb4d202c3c961518077e60434f5ec"
+    },
+    {
+      "path": "materials/models/weapons/vr_grenade/vr_grenade_top_normal.vtf",
+      "bytes": 349732,
+      "sha256": "5a15e441c38025a8570160a59a0cc38e98c72dcee0c88385f1dd563fc277ff61"
+    },
+    {
+      "path": "materials/models/weapons/vr_irifle/vr_irifle.vmt",
+      "bytes": 269,
+      "sha256": "2c7692d270d8703e5109effe878af6b1c1909397390e4d32c4192fa84ec4fc77"
+    },
+    {
+      "path": "materials/models/weapons/vr_irifle/vr_irifle.vtf",
+      "bytes": 5592656,
+      "sha256": "abeba3db607b3b095279434b780ae9c4ecfb7e137cb22dbffe8ac26d91e5ba7e"
+    },
+    {
+      "path": "materials/models/weapons/vr_irifle/vr_irifle2.vmt",
+      "bytes": 269,
+      "sha256": "643996c3f2ff0c84fd8f2f9d66e27a58162259a0f8d2ca9885581c3ffcd05742"
+    },
+    {
+      "path": "materials/models/weapons/vr_irifle/vr_irifle2.vtf",
+      "bytes": 22369872,
+      "sha256": "2841fe5617b3b2f73fe6f40d2fcdd80fc995001f38d489ae5b71c62969150db8"
+    },
+    {
+      "path": "materials/models/weapons/vr_irifle/vr_irifle2_normal.vtf",
+      "bytes": 22369872,
+      "sha256": "c8f2fd0488a6bb86537bcc2e5b9c9018545126a52e706cacaae27817043c129f"
+    },
+    {
+      "path": "materials/models/weapons/vr_irifle/vr_irifle_core.vmt",
+      "bytes": 101,
+      "sha256": "af45036b627aa241a03fa6b2abca5b26e78d8b0e8e4f7925b9fbcbccfd2c9bfb"
+    },
+    {
+      "path": "materials/models/weapons/vr_irifle/vr_irifle_normal.vtf",
+      "bytes": 5592656,
+      "sha256": "e2123f3403a68753d579766d473a4150c3beca2b4bb09c428a7ac46addcb0ab4"
+    },
+    {
+      "path": "materials/models/weapons/vr_irifle/vr_irifle_shell.vtf",
+      "bytes": 22064,
+      "sha256": "13c147af721dd17d3b8eb2cecc4dc92ba3305d9759b7d7f86a74d4cdded65db8"
+    },
+    {
+      "path": "materials/models/weapons/vr_physcannon/vr_physcannon.vmt",
+      "bytes": 419,
+      "sha256": "ca1520164dbbe73f6c46a5d7445a40834fd77cc3474fddfbca403e25bf46ce03"
+    },
+    {
+      "path": "materials/models/weapons/vr_physcannon/vr_physcannon.vtf",
+      "bytes": 22369872,
+      "sha256": "4df5679ff3c4b2b2d905fac79adb5c172bf9433718328d8b26455d2211fa04b7"
+    },
+    {
+      "path": "materials/models/weapons/vr_physcannon/vr_physcannon_normal.vtf",
+      "bytes": 5592656,
+      "sha256": "23c53c87f095f312f9fada983c699125de43e354505684a983f6ac7346360356"
+    },
+    {
+      "path": "materials/models/weapons/vr_physcannon/vr_superphyscannon.vmt",
+      "bytes": 422,
+      "sha256": "bf1a83ffa01df83609ae007b3baf0ccc599dfd462f8169d83acd56568fa6fb09"
+    },
+    {
+      "path": "materials/models/weapons/vr_physcannon/vr_superphyscannon.vtf",
+      "bytes": 5592656,
+      "sha256": "348d59bbcaea7d3a9207ec91aca36e09ae37c88f13430fdf6eec0dcb9a5779e6"
+    },
+    {
+      "path": "materials/models/weapons/vr_pistol/vr_pistol.vmt",
+      "bytes": 396,
+      "sha256": "2257298cd25a1b38c99a498ff8517af10c8b78c9388778b1fae08e3af3c3e3e1"
+    },
+    {
+      "path": "materials/models/weapons/vr_pistol/vr_pistol.vtf",
+      "bytes": 22369872,
+      "sha256": "52624029ea05c7ddf9e04c0f67668e555150bed3b76f609eadc35d6a7419ec6e"
+    },
+    {
+      "path": "materials/models/weapons/vr_pistol/vr_pistol_clip.vmt",
+      "bytes": 390,
+      "sha256": "3fc5a4933d46fa6c8b3818732fb1433baf18a1c54ad7a526cefdcbbc42707023"
+    },
+    {
+      "path": "materials/models/weapons/vr_pistol/vr_pistol_clip.vtf",
+      "bytes": 175000,
+      "sha256": "3fc3983829c8ec4c6c287167ba263dcf2a449f7d09d19676307831950a2de272"
+    },
+    {
+      "path": "materials/models/weapons/vr_pistol/vr_pistol_clip_normal.vtf",
+      "bytes": 349776,
+      "sha256": "17f9a14ecc5e7c58b1bebff2f77568039deadc2b1a898f432049b0ebf0b0b36f"
+    },
+    {
+      "path": "materials/models/weapons/vr_pistol/vr_pistol_interactive.vmt",
+      "bytes": 947,
+      "sha256": "c104a46183a35de33cf36d0612ecf239c0a1168f67f7a1f1ef3ffc39445196e3"
+    },
+    {
+      "path": "materials/models/weapons/vr_pistol/vr_pistol_normal.vtf",
+      "bytes": 22369872,
+      "sha256": "d45bef071c39c3dca4fba1c7dcea0023df62d24a498e590f319862ae3508d493"
+    },
+    {
+      "path": "materials/models/weapons/vr_pistol/vr_pistol_shell.vmt",
+      "bytes": 209,
+      "sha256": "cb6846a4719c10825f1411fb7a82c8a1967c61012004b132da5c175162a01cf2"
+    },
+    {
+      "path": "materials/models/weapons/vr_pistol/vr_pistol_shell.vtf",
+      "bytes": 699196,
+      "sha256": "72f461d6a82a19b1221f84fe27653e057e202ec3f9edd0fd9ce9d2b5e8ee9a86"
+    },
+    {
+      "path": "materials/models/weapons/vr_rocket_launcher/vr_rocket_launcher.vmt",
+      "bytes": 319,
+      "sha256": "2e796863ae1ae7d613ce223276523af037d2a8d5d2bae068018d355bebb5c31c"
+    },
+    {
+      "path": "materials/models/weapons/vr_rocket_launcher/vr_rocket_launcher.vtf",
+      "bytes": 11185048,
+      "sha256": "54f2fc309c89819ac7a0aa7bf3864bec1aa5da7f562156cccae115ea59a79ca0"
+    },
+    {
+      "path": "materials/models/weapons/vr_rocket_launcher/vr_rocket_launcher_missile.vmt",
+      "bytes": 129,
+      "sha256": "429956d62fd0463f9d3c5c139e19f6bdaf36c51265f282b854eba8f4e91dc9f4"
+    },
+    {
+      "path": "materials/models/weapons/vr_rocket_launcher/vr_rocket_launcher_missile.vtf",
+      "bytes": 699288,
+      "sha256": "41a983a94d694a1cd702b97ec3a2dcb7beaafd78f3e98539602a9f5d855e294e"
+    },
+    {
+      "path": "materials/models/weapons/vr_rocket_launcher/vr_rocket_launcher_normal.vtf",
+      "bytes": 22369872,
+      "sha256": "fe51b449cce3c756adb67a8c70ee430911168111d422cb56e88f8463e60e84b8"
+    },
+    {
+      "path": "materials/models/weapons/vr_shotgun/vr_shotgun.vmt",
+      "bytes": 308,
+      "sha256": "a62e04e7132402d0120ba95d77a7d40ae4611acc8dc024c97daa508704efebb0"
+    },
+    {
+      "path": "materials/models/weapons/vr_shotgun/vr_shotgun.vtf",
+      "bytes": 16777304,
+      "sha256": "18ec7fbbdf231e1353b4fda54a4c7ffe92b730588327a919a9c168ccc91caccd"
+    },
+    {
+      "path": "materials/models/weapons/vr_shotgun/vr_shotgun2.vmt",
+      "bytes": 312,
+      "sha256": "8bb3af8da8a5d29f4ee7613d76bc0d95524a255d44a2a4a8109b37ba6d7cadc2"
+    },
+    {
+      "path": "materials/models/weapons/vr_shotgun/vr_shotgun2.vtf",
+      "bytes": 8388696,
+      "sha256": "6a4d06e97583adbc9205296d733219c76a0b0f12e00c1b9c9d452ec91ccfb791"
+    },
+    {
+      "path": "materials/models/weapons/vr_shotgun/vr_shotgun2_normal.vtf",
+      "bytes": 8388696,
+      "sha256": "39663762e1e420bffba37f4642726dd4b4fa423521f494b6510a0c82bda5fd40"
+    },
+    {
+      "path": "materials/models/weapons/vr_shotgun/vr_shotgun_normal.vtf",
+      "bytes": 16777304,
+      "sha256": "7254c19d67a693d943d2272c07322775742f71357a12b332651e0fd0757e0418"
+    },
+    {
+      "path": "materials/models/weapons/vr_shotgun/vr_shotgun_shell.vmt",
+      "bytes": 115,
+      "sha256": "0f77b4d241b76c8afb8f9ef50d8b62e9cb948ada50005ed2eea771d3d4d99f8b"
+    },
+    {
+      "path": "materials/models/weapons/vr_shotgun/vr_shotgun_shell.vtf",
+      "bytes": 11104,
+      "sha256": "553bf610062294086422fe5b022d16d1a10f7c28fccfb09d17f7fa03f569e272"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg.vmt",
+      "bytes": 269,
+      "sha256": "8572e5ea8fc11b0b05cf57a7d2fcf699641fc28f694c548b65224b41a03df7fc"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg.vtf",
+      "bytes": 22369872,
+      "sha256": "01a33a060ca90470896212c3248f4a9bff3881797b463e009744cabadd5e7ebf"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_clip.vmt",
+      "bytes": 202,
+      "sha256": "46985ad35736c00807861e0aea26fe58778b1c3a1b0f7fcf90d93248e714fb3b"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_clip.vtf",
+      "bytes": 175000,
+      "sha256": "04c34b6c43650e0d7424f91391577f647b47c4221da47d052fe0c370defed79c"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_grenade.vmt",
+      "bytes": 105,
+      "sha256": "54d51f41f882b40c0e37bd7bb3cf30ab2183ed28982d676f97ce397ad0dd00d5"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_grenade.vtf",
+      "bytes": 349732,
+      "sha256": "5c83b1a36928f21fcd4eee9f1c00a009c199b4dcc48856a97d7841609c65213f"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_interactive.vmt",
+      "bytes": 819,
+      "sha256": "81e754f486708ba2fc1d3387d1ad9a4940d5089a17d06c4559b21fd42699748f"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_normal.vtf",
+      "bytes": 22369872,
+      "sha256": "b928f1926ffe360ffb58ab85978c4374e4810c4f894d74333a4431d0476ea781"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_reflexsight.vmt",
+      "bytes": 357,
+      "sha256": "4adfb69924e70964e8b495f15503bebf4856898b82f15c88abe28c365a4f2a1c"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_reflexsight.vtf",
+      "bytes": 5712,
+      "sha256": "a64bf8a04fc060b2284415cd079a1c5c47483c5e28121b3967019585d2271f53"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_reflexsight_noise.vtf",
+      "bytes": 22052,
+      "sha256": "fe4a7d8749a3861afb4e0d99b22823c38272afb2cf187c13397624a8a36ebf90"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_scopelabel.vmt",
+      "bytes": 132,
+      "sha256": "65304d6f72bf1c83f239ea11b5ff615f2e79ab7388e25dbb1d4008019e0fd2a5"
+    },
+    {
+      "path": "materials/models/weapons/vr_smg/vr_smg_scopelabel.vtf",
+      "bytes": 349644,
+      "sha256": "4757d8339b76f0aa0a64e0f340134dbbe020bfadd92a671b6d4f800d2ac289a8"
+    },
+    {
+      "path": "models/gfreakman/gordonf.dx90.vtx",
+      "bytes": 349178,
+      "sha256": "23b3d25522210c49c1638bcc138520057312715d5073b2e9044678d50ef46fde"
+    },
+    {
+      "path": "models/gfreakman/gordonf.mdl",
+      "bytes": 202940,
+      "sha256": "1fbe0226394079eab561bd3eb4249ff76f2140c8f7709584d8b3db0d41c5e590"
+    },
+    {
+      "path": "models/gfreakman/gordonf.phy",
+      "bytes": 28849,
+      "sha256": "860d4c53bb50471ffca8e757e3e672f83ea58c5ead2ba69cb3c7d7cbfa772162"
+    },
+    {
+      "path": "models/gfreakman/gordonf.vvd",
+      "bytes": 921904,
+      "sha256": "eae4ebfe0ed3b2d5971a9c4f6f952027aec124832d0d85a16338783cdeb276e5"
+    },
+    {
+      "path": "models/gfreakman/gordonf_cit.dx90.vtx",
+      "bytes": 71048,
+      "sha256": "d4f1d844471edf1d9c2037f76dfa60b35de733dc15aaba6ee9c51f035cd2d18f"
+    },
+    {
+      "path": "models/gfreakman/gordonf_cit.mdl",
+      "bytes": 196432,
+      "sha256": "75bd657bdd21e3888b58892fa2e83d3f3d7bce07d61412f3f68766a4588fe03c"
+    },
+    {
+      "path": "models/gfreakman/gordonf_cit.phy",
+      "bytes": 28801,
+      "sha256": "08a22d4fe9d4b15f75e527af3466cf5618858990211af9d4a3fd2ef2fab9a527"
+    },
+    {
+      "path": "models/gfreakman/gordonf_cit.vvd",
+      "bytes": 238848,
+      "sha256": "a72dc35a80b85a858232184e3d1f2911f76afe402a00b1df6feb82ad3f0c0a42"
+    },
+    {
+      "path": "models/gfreakman/gordonf_cit_vrhands.dx90.vtx",
+      "bytes": 208684,
+      "sha256": "cae5c682e457680d448d9803f06de0d165d2904e7eb471c0b8f249185b518de9"
+    },
+    {
+      "path": "models/gfreakman/gordonf_cit_vrhands.mdl",
+      "bytes": 198024,
+      "sha256": "76b3a886b2e72ed69e3ee99ecd3a33fa76dd82de62169910d941fb010128d16e"
+    },
+    {
+      "path": "models/gfreakman/gordonf_cit_vrhands.phy",
+      "bytes": 28801,
+      "sha256": "80b0ed5ec2aca67d12a8da8b09c2cd600de3f15d955c7edc4f4f29f520e88134"
+    },
+    {
+      "path": "models/gfreakman/gordonf_cit_vrhands.vvd",
+      "bytes": 710272,
+      "sha256": "2704c8d38004cf34fe24c026fa96df4a1550202ed2eb6582e9c666d676fb058a"
+    },
+    {
+      "path": "models/gfreakman/gordonf_vrhands.dx90.vtx",
+      "bytes": 716987,
+      "sha256": "c9fbd2f6da26016a0aeb4fbd4d3ccce45f5c01692fc93eae85e32bef14baf3e7"
+    },
+    {
+      "path": "models/gfreakman/gordonf_vrhands.mdl",
+      "bytes": 204976,
+      "sha256": "81ebc1ba83920cdd137d07c57e3b1f57288947a9d0d271b09db40f1890a14d11"
+    },
+    {
+      "path": "models/gfreakman/gordonf_vrhands.phy",
+      "bytes": 28849,
+      "sha256": "73102f23b2b06a8d12bd6d944f95027217a5cb449b7acc69c4f26fcb2cacf7a1"
+    },
+    {
+      "path": "models/gfreakman/gordonf_vrhands.vvd",
+      "bytes": 1444480,
+      "sha256": "57b63dcf29921fa6585139f35f87207dba006871713832cc0182a715cd747f23"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_357_l.dx90.vtx",
+      "bytes": 142518,
+      "sha256": "3a0ee3aa3e14a1bf292d14e588552afecdc20f8d1ea1d723d0a3f2922ae0ec6a"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_357_l.mdl",
+      "bytes": 56972,
+      "sha256": "4b8fdbcbf8720573de15496cc12e8c476d2d3af9c46906eaf0431ab6ffa8be0d"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_357_l.phy",
+      "bytes": 2886,
+      "sha256": "ccdb2b87c8698490fc14a5fe3f665fb3000394c81f87487fb33c4a372666b4f4"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_357_l.vvd",
+      "bytes": 591872,
+      "sha256": "4570e2bbe8074f51bd2650b4515d627af6b186f4f69c3cc4fc13e80a43771ba9"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_357_reloader_l.dx90.vtx",
+      "bytes": 41807,
+      "sha256": "c5bc071e7c83356b65f37443a597662cc16701198e179af54e929527fda9186c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_357_reloader_l.mdl",
+      "bytes": 18788,
+      "sha256": "cc22c429a02c0087d4d66af304da71dadcea9c49ee37cf33b9b058923a2d3b7c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_357_reloader_l.phy",
+      "bytes": 2660,
+      "sha256": "c94ba7071bb2a06f6b822aa18af8c755bb3a2ac3ef940d0f03995ed8e547e6a8"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_357_reloader_l.vvd",
+      "bytes": 175232,
+      "sha256": "fa7ee71e91b56159e716ee9011c08ec1a3827f003f0c3592fb4eb6b80983bfe1"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_bugbait_l.dx90.vtx",
+      "bytes": 26734,
+      "sha256": "bfbd8bcb260d6a699b6ef2b70883f80d0a58d98b9ce4b721f2724bcf7f1752e6"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_bugbait_l.mdl",
+      "bytes": 83732,
+      "sha256": "81801f28ef91665b38cc7d13bd6caf81231bc6e8a645dc8c8d78a23e12430cfa"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_bugbait_l.phy",
+      "bytes": 2372,
+      "sha256": "af423abea2a34e390724d2b6db9df8a985d43cf99b64719f5b077a82dbceb06c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_bugbait_l.vvd",
+      "bytes": 84800,
+      "sha256": "104d0a116cbd842ee0f2ffeccf35f2f4fac27b81a1fd8baa85d80925a77ffa2c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crossbow_l.dx90.vtx",
+      "bytes": 239509,
+      "sha256": "d8512bb8bd93b4cf808d9811afcd640f6f91a992d46b8b69a2518eb5ee7de968"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crossbow_l.mdl",
+      "bytes": 56040,
+      "sha256": "a65585af83e6c225a742198e9e49d80882c4f9d2978c259b1d9ed40e15a49fd4"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crossbow_l.phy",
+      "bytes": 7884,
+      "sha256": "0d1c93aceebd31fc55e12ae8c08df5a613023876cec50511aad6169dd368f91d"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crossbow_l.vvd",
+      "bytes": 1023936,
+      "sha256": "6df6087185562380335abacd2edc8ba279b57cdd804cfdb798a8952242593360"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crossbow_rebar_l.dx90.vtx",
+      "bytes": 1095,
+      "sha256": "87e26f7561d834ebf8ac9930b27eab76f47f9afb50ec82b475e3c238ef2184ed"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crossbow_rebar_l.mdl",
+      "bytes": 17116,
+      "sha256": "28891a76beddee90331b5ea89c91095f73cbc56c45f3408ed83e8953deb38172"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crossbow_rebar_l.phy",
+      "bytes": 888,
+      "sha256": "b58f11387e102cd9023fd7be85a1b44bc94e810fb3178caa9c2c1f3a999f4a7d"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crossbow_rebar_l.vvd",
+      "bytes": 4288,
+      "sha256": "0236a6ff7ce03d6690799dc1692ecf812e3d9abd112cd44d6058127b10360f1a"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crowbar_l.dx90.vtx",
+      "bytes": 9831,
+      "sha256": "09be1565d2e8dd3e9da3f7700b71f5469574b2e07ddc7253c6085955da23a512"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crowbar_l.mdl",
+      "bytes": 17960,
+      "sha256": "1c50e4d4f29adfd65f5eb53e3ce04d99ea4d99db66c0f32eb3eabd4aca4473a5"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crowbar_l.phy",
+      "bytes": 4211,
+      "sha256": "36ddb7a4557f2275b650ebbb4b202ad05e78fdd29e5833db320b9748f3dc429c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_crowbar_l.vvd",
+      "bytes": 43456,
+      "sha256": "de169704978ca90a87a459a609e064197581aa27a088b281d421d36702ac4697"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_grenade_l.dx90.vtx",
+      "bytes": 52769,
+      "sha256": "90fe1ee616910d1a2c8870c10d34e85dbdbc7045e6ea22b5b9994d631b8ffa29"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_grenade_l.mdl",
+      "bytes": 25072,
+      "sha256": "dbc945c79d35fdc59f87c3479cc9a611551fe4656b1758dc0cdf4180d4a99e0e"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_grenade_l.phy",
+      "bytes": 2530,
+      "sha256": "482896f07d82d5c4d3179d68b9a75ebbeb7000afb0b751036f9f6025b1d72371"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_grenade_l.vvd",
+      "bytes": 193472,
+      "sha256": "86206a0576efa931d0895de2099ebc7503bc7692aa17d4567f5aaf77bc8e3297"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_irifle_clip_l.dx90.vtx",
+      "bytes": 12293,
+      "sha256": "9e2889ec3f19522b876f3cd5671b3c9f88cf9e0d5ad8f67401aab2396149ffc1"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_irifle_clip_l.mdl",
+      "bytes": 21760,
+      "sha256": "1d3f2a111ab1ef92f7b29fe136367f9f5058255d70d9846323f1d4031dca6fe3"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_irifle_clip_l.phy",
+      "bytes": 1997,
+      "sha256": "5440269281c285f28aa2f4a217a3e0fc99e3711a88f79528f96c0f8a19a69ad9"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_irifle_clip_l.vvd",
+      "bytes": 55296,
+      "sha256": "57d157ba68a578fc5acc40815fd02ade3c772faa81df96d98039fd17b23bd177"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_irifle_l.dx90.vtx",
+      "bytes": 92202,
+      "sha256": "5110ecd801a4c5565b64f2d0deb86532e6fbfcef53fdca541ac32729d5a62a78"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_irifle_l.mdl",
+      "bytes": 34528,
+      "sha256": "dda1cf60ed9d42c4fd71926a29c8dfc96d7e71c63f01572e1d84ffe4231944d6"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_irifle_l.phy",
+      "bytes": 4322,
+      "sha256": "2a66236849e0ace0c6bd44e1d33ef7c165d74d587a5f2e80d16491a17a0d6e25"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_irifle_l.vvd",
+      "bytes": 404672,
+      "sha256": "ab884802c81d5b46dbc53cf53fbd0b30af3136d5c96f9a69730197cbb181cf1c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_physcannon_l.dx90.vtx",
+      "bytes": 93150,
+      "sha256": "ccba05ad773fcb73bf18ab3964ebe314793cc54f6b8cd80ce734ea7fe203bfbc"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_physcannon_l.mdl",
+      "bytes": 36092,
+      "sha256": "d7cc34877fb8034f9b369307635aee96ede6462d706fa9c76c26574c8198c5f1"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_physcannon_l.phy",
+      "bytes": 5386,
+      "sha256": "1042fa6b89c9c583787db4d429fbf01e1424b301a497b9d38fbc46ee60023e6f"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_physcannon_l.vvd",
+      "bytes": 411776,
+      "sha256": "98c7d32957b7026b36b30da3f2b65cfd893a1c4ca90d7cb0ef3d659d17b1fccb"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_clip_l.dx90.vtx",
+      "bytes": 1239,
+      "sha256": "660a907fda0834018a3da3f46f876630ea9ab26e67c27762a33cba22fdb52ae7"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_clip_l.mdl",
+      "bytes": 19992,
+      "sha256": "f7bc5bf97b62469d7638e1e51a34c957d4c047d3a0e91e44746eead0be77e749"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_clip_l.phy",
+      "bytes": 733,
+      "sha256": "461201cfc53c676fba86559e136d26ae3b135ac9b775276ea0e26593332565fb"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_clip_l.vvd",
+      "bytes": 5312,
+      "sha256": "dd54c32aafd283f7b978552d7382cc3c779b0a2014dfd80fdaef4b47c7d61b58"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_l.dx90.vtx",
+      "bytes": 27976,
+      "sha256": "8d33e0a6e119bccda999bb3fefbf70445889cdacce1f1e578613b3352bc06221"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_l.mdl",
+      "bytes": 81128,
+      "sha256": "2bccb783b7b5e389f54b82b7c9777e1acd7bff0d147f838cd1aa62f995524a87"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_l.phy",
+      "bytes": 1761,
+      "sha256": "d46767a1b72f61e2bd04abb4a37f35fe39f66e50e2f49049e96b4c266dbc7de8"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_l.vvd",
+      "bytes": 125056,
+      "sha256": "1366fb5c0b80a6ee833532af0b60d6206c897ce5b6c104dfd61e2b8033c1e6df"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_slide_l.dx90.vtx",
+      "bytes": 12429,
+      "sha256": "2a6f38bc890b0b5e2307b4b18dde1d230fe92e92322f9eb59878a2a5d911cf1f"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_slide_l.mdl",
+      "bytes": 1904,
+      "sha256": "6eb6beb07ae3e67e1ca017649c77706eb7965e3d6303b38567e5609e894aa8a3"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_slide_l.phy",
+      "bytes": 695,
+      "sha256": "9454205cf106e67d7e4034fbb4f7d874873a093b9132edaa2848958dd894131f"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_pistol_slide_l.vvd",
+      "bytes": 61120,
+      "sha256": "49ea58df7da8f6f8bfa496e77df20c761dfa0110243e849d4ecfc136c03f10fb"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_rocket_launcher_l.dx90.vtx",
+      "bytes": 88142,
+      "sha256": "e9bd37a687e0782d8a9fd5bf3f8c930cd1e439813c54bcd19fc6f2979b83db1c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_rocket_launcher_l.mdl",
+      "bytes": 21816,
+      "sha256": "97541103c200159d4098d0d0d3db1ed34b2d9ebd050d8cdfb369dc4155ad8529"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_rocket_launcher_l.phy",
+      "bytes": 5352,
+      "sha256": "cb4b700bc5998041f26ca806c32887b4ed09e2e8de4ed9564798f54f6a1de4e2"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_rocket_launcher_l.vvd",
+      "bytes": 348800,
+      "sha256": "ba965b24cdd56d1409b288e67ae0aa290bec5960be35599c2e5878b3c0a350e1"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_rocket_launcher_missile_l.dx90.vtx",
+      "bytes": 4374,
+      "sha256": "1d2acdbc6b159abef9014f006149ecadfb931f807402a74c3c477378dddc59bb"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_rocket_launcher_missile_l.mdl",
+      "bytes": 17320,
+      "sha256": "3353206205c4ba4cf3c8f5b65f9de701f580500733886387753309cc5c8890df"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_rocket_launcher_missile_l.phy",
+      "bytes": 2856,
+      "sha256": "9c624eb589003c4ba2cd73e07d72c22ecceb826f717126562c91194f5f616d5a"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_rocket_launcher_missile_l.vvd",
+      "bytes": 18816,
+      "sha256": "389101d05f79bab4bc36635dd49d6eacc4d53985908559b5092d7da56fce3f49"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_foregrip_l.dx90.vtx",
+      "bytes": 5511,
+      "sha256": "3c628d41bd512b39f363a1d5c6e1c91f3c036b46cbf4e061d769512d19f2013d"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_foregrip_l.mdl",
+      "bytes": 1820,
+      "sha256": "d1eeb382d0cff8b2b53595c9e0492b51aaac2c66f0d11bd97287892a6859446c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_foregrip_l.phy",
+      "bytes": 891,
+      "sha256": "820aff7ad7872d60d4ef0abb4545bc8aed867f101a066ca727c822213d2691c3"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_foregrip_l.vvd",
+      "bytes": 18368,
+      "sha256": "6832db81be672e9376418f2e2ce870c52e0fc8371f0300288208b00f579f6294"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_l.dx90.vtx",
+      "bytes": 57447,
+      "sha256": "958d8e0d7493933409ce7395c0bd5f5e6b286a9586d881b46c8a548915fe720f"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_l.mdl",
+      "bytes": 30856,
+      "sha256": "e51d9dd58ce107cced541bb3e0a88e4bd404f8ab27c2c6d6699e82f89323ab79"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_l.phy",
+      "bytes": 3363,
+      "sha256": "03ef279eac215a3a171c48afddebe1b167ab0c8fb0000472320902be8aa18526"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_l.vvd",
+      "bytes": 233216,
+      "sha256": "bef10e0bf278cbf0a142070610af265d2c80e90d0786348c28217a91461ac562"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_shell_l.dx90.vtx",
+      "bytes": 4149,
+      "sha256": "95944296c565ea7f8f67166d011d11e3aeffe9bac26f8fef1caf602d32681db3"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_shell_l.mdl",
+      "bytes": 17984,
+      "sha256": "99ae3588e62a6a3addbac8c1f1b30badcb15c4ceeb14f33ae399ed043c47ad8d"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_shell_l.phy",
+      "bytes": 811,
+      "sha256": "52e17a69c994d9927849e7f271a9b1cedf867631291628f71f7d23104c7bfc7c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_shotgun_shell_l.vvd",
+      "bytes": 16960,
+      "sha256": "b98ce8120de884c232e9c9f70278cb8e7b155f461ad68d6b94517fd9a47608d5"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_charginghandle_l.dx90.vtx",
+      "bytes": 2472,
+      "sha256": "222c6154037b65862af469b5284cc51c251375e294b6e01ee7b7099e5276317a"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_charginghandle_l.mdl",
+      "bytes": 1840,
+      "sha256": "f6e3ead2840b7f65197dde237816532e52e20e1c89e2f1be70fc0e3f46db8fff"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_charginghandle_l.vvd",
+      "bytes": 12032,
+      "sha256": "385ae5c7ac90a495ca078b4c43334eded5cb1232f18e7fb405022b660027f048"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_clip_l.dx90.vtx",
+      "bytes": 8013,
+      "sha256": "b6f460c22f3b5dccf46fc462e025a57f2e309da8b656a63be024cc98d5582a27"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_clip_l.mdl",
+      "bytes": 18132,
+      "sha256": "422bb736809f41f1003ac9f20725a2c33aa1c742f71461f1022099a6f43a8732"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_clip_l.phy",
+      "bytes": 1251,
+      "sha256": "d162a119b3f45c028d551c95225ca6e739b12096b43f66d139cc9f3d96771900"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_clip_l.vvd",
+      "bytes": 35392,
+      "sha256": "eee0497086527990941613a72d812295def542ad8d5ebdbb75d7e2320c8f6e29"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_foregrip_l.dx90.vtx",
+      "bytes": 15801,
+      "sha256": "e4ddd8b8a8d5bbe92ff6e4de169ca75847dcdb5f22301a868fbf7964af72026c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_foregrip_l.mdl",
+      "bytes": 1800,
+      "sha256": "41012bd9d88f2bcec8351f0ddf688349fe8d2ef7a67c035cbfee3cd9ed647247"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_foregrip_l.phy",
+      "bytes": 686,
+      "sha256": "b58d568e9bd1d371314fbe96f6cb648f69bdbb40a73b80ff23d921833885aff8"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_foregrip_l.vvd",
+      "bytes": 67520,
+      "sha256": "3a3ff1c8ddb771a2042710df0f9be37a83bd30533975fcee0e73ca36ccf4304d"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_l.dx90.vtx",
+      "bytes": 83909,
+      "sha256": "2222c6418f2202caa8d9c5b734f008c369e80b05b6683ff28b133e9ac253775a"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_l.mdl",
+      "bytes": 57876,
+      "sha256": "3fca93b36413758b512592538a5cf2f2e0f625a1f16d4069b5676f51824d55ae"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_l.phy",
+      "bytes": 2230,
+      "sha256": "1163437c274f14fbedccc579e83a7ae8e2f127acd10e3b402b204b215a350ef9"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_smg_l.vvd",
+      "bytes": 370368,
+      "sha256": "c15c9fc5e1e98a92de5aaa1fca8bb5d5f784c5bca4154f4dc0e8fefa60778a52"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_superphyscannon_l.dx90.vtx",
+      "bytes": 93150,
+      "sha256": "5f20d929f9577033ea5e09ef6e991ed247dec154a842ccbfbcb18011f013615d"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_superphyscannon_l.mdl",
+      "bytes": 39976,
+      "sha256": "af09a2d820f019f8c2cd005bac54c7c5fbfc5c895b31a483ccf296ab630d2d1c"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_superphyscannon_l.phy",
+      "bytes": 5386,
+      "sha256": "d482de4f51108fedfef6bdb60e237ee23720f2a6f76a670b93908417aa95f808"
+    },
+    {
+      "path": "models/weapons/left_handed/vr_superphyscannon_l.vvd",
+      "bytes": 411776,
+      "sha256": "443575e22999079089afeca774fa95c4c14a37699bba55ac67a1bdca08eee1bc"
+    },
+    {
+      "path": "models/weapons/vr_357.dx90.vtx",
+      "bytes": 142518,
+      "sha256": "1c1c5b3a82cb3ba7c35b0df37e80e032cff27775e1805758159eb67ff92778c1"
+    },
+    {
+      "path": "models/weapons/vr_357.mdl",
+      "bytes": 56944,
+      "sha256": "96b2efa5eacdfb41287186587b6d37776673d0613fa6a79ea01816447049ad3f"
+    },
+    {
+      "path": "models/weapons/vr_357.phy",
+      "bytes": 2884,
+      "sha256": "7bff4de181f528548a3146e704047049ba1f30058414ffc3d9b67eb96cdc7725"
+    },
+    {
+      "path": "models/weapons/vr_357.vvd",
+      "bytes": 591872,
+      "sha256": "5e571d4cf5ec473de37788ff77db85a1960b0067cfc65630301357f760d9c93d"
+    },
+    {
+      "path": "models/weapons/vr_357_reloader.dx90.vtx",
+      "bytes": 41807,
+      "sha256": "362bbb8444eac30a2ff264be515080816c09cc01b08144ffd5086600c454e3d4"
+    },
+    {
+      "path": "models/weapons/vr_357_reloader.mdl",
+      "bytes": 18772,
+      "sha256": "5e9484430285b96fff92e42946267c8406539b633ab29c3ad6aec58b4e5f6384"
+    },
+    {
+      "path": "models/weapons/vr_357_reloader.phy",
+      "bytes": 2658,
+      "sha256": "4a3e602c7ef12b8253647a0feccf925f111fed3e747c288cf7aef85624430f37"
+    },
+    {
+      "path": "models/weapons/vr_357_reloader.vvd",
+      "bytes": 175232,
+      "sha256": "6918131275691a7bebc3a67042b4e7ef89ef6d024362ec72059653be98414ec7"
+    },
+    {
+      "path": "models/weapons/vr_357_shellcase.dx90.vtx",
+      "bytes": 4232,
+      "sha256": "179c5b4c6599e6889f1c98d84cd4c12dbd939b187180aeb8f1ac78939a6dad21"
+    },
+    {
+      "path": "models/weapons/vr_357_shellcase.mdl",
+      "bytes": 1744,
+      "sha256": "b670ebe9061bcc73eb08d7dd36ba52b8cfe828119f9e08ecc6b30f0652081389"
+    },
+    {
+      "path": "models/weapons/vr_357_shellcase.vvd",
+      "bytes": 15168,
+      "sha256": "1385026ff9bf622b279454faa560577dac997d6855da8120102b3e461e155613"
+    },
+    {
+      "path": "models/weapons/vr_bugbait.dx90.vtx",
+      "bytes": 26734,
+      "sha256": "9e70aed0416784075ae540dcd309f016b0a41c8628b77b1d876e679f3055484b"
+    },
+    {
+      "path": "models/weapons/vr_bugbait.mdl",
+      "bytes": 83752,
+      "sha256": "dc517d4db5926b7871b3cd85615e7f9370d35a873b082865576bad0d34d49a48"
+    },
+    {
+      "path": "models/weapons/vr_bugbait.phy",
+      "bytes": 2372,
+      "sha256": "575344e21f77303cb4aa8f4cae4c8097e1a5e73c2d7bf98b373aa47883bebb40"
+    },
+    {
+      "path": "models/weapons/vr_bugbait.vvd",
+      "bytes": 84800,
+      "sha256": "efb820aef441c16f8541ba5aa36456f35dbbe11908bbb1f6b845ee62b7ad6bcf"
+    },
+    {
+      "path": "models/weapons/vr_crossbow.dx90.vtx",
+      "bytes": 239509,
+      "sha256": "80c8893efa894b88ab76982e31cf03a0060c17d1adf24f9eaab705b2fe596be8"
+    },
+    {
+      "path": "models/weapons/vr_crossbow.mdl",
+      "bytes": 56008,
+      "sha256": "52933e1ff5a7d7ee826cb2278b1f79db8a9efe10ef7659c1195f28b71c9b806c"
+    },
+    {
+      "path": "models/weapons/vr_crossbow.phy",
+      "bytes": 7882,
+      "sha256": "c3db8538a631b054ff4a0ceb8cbebc0f171b4b03d08a9bc530b87d23f880063b"
+    },
+    {
+      "path": "models/weapons/vr_crossbow.vvd",
+      "bytes": 1023936,
+      "sha256": "10cdae7c4069e66bcda81b05c855f6f3730982414a26c44adf1a4d08c83522d0"
+    },
+    {
+      "path": "models/weapons/vr_crossbow_rebar.dx90.vtx",
+      "bytes": 1095,
+      "sha256": "99a70a950331701f08b7cb040bf92bc578483efce610a83d86f75719dd0525f5"
+    },
+    {
+      "path": "models/weapons/vr_crossbow_rebar.mdl",
+      "bytes": 17100,
+      "sha256": "134878e569340c013a222189d8b9d6734ce7a85dd94d7fbe8095164bd4a4ec1e"
+    },
+    {
+      "path": "models/weapons/vr_crossbow_rebar.phy",
+      "bytes": 886,
+      "sha256": "98190844d5f8833dfbf584a1b6f8f8fcae3eb18617e359a6edc9f72618250d95"
+    },
+    {
+      "path": "models/weapons/vr_crossbow_rebar.vvd",
+      "bytes": 4288,
+      "sha256": "de5d40f3480f016e5a6da0d8877f0904c25392c0015b7c59ffd9381678dff318"
+    },
+    {
+      "path": "models/weapons/vr_crowbar.dx90.vtx",
+      "bytes": 9831,
+      "sha256": "ed8ccde597e9568b23ca33b313d3592c816aad7163d8eafa6c0280287db9a02e"
+    },
+    {
+      "path": "models/weapons/vr_crowbar.mdl",
+      "bytes": 17944,
+      "sha256": "18f34bff41122a3252781a663f11ff543decc3bc5b8ad7005ca1a68874828a3c"
+    },
+    {
+      "path": "models/weapons/vr_crowbar.phy",
+      "bytes": 4465,
+      "sha256": "1812408c92a2b300ceda07bb6722b97699bfb1f51d0efe92285038aa7ac5c90d"
+    },
+    {
+      "path": "models/weapons/vr_crowbar.vvd",
+      "bytes": 43456,
+      "sha256": "005335f4a3ec6da79916383f83d9956c0baaa53a96a6108969b6edc50220aea7"
+    },
+    {
+      "path": "models/weapons/vr_grenade.dx90.vtx",
+      "bytes": 52769,
+      "sha256": "d323befb1d28cc93fdb76d51c6840623229b5c9dcdb13245ab6c0b2656163e60"
+    },
+    {
+      "path": "models/weapons/vr_grenade.mdl",
+      "bytes": 25040,
+      "sha256": "5bcff5678d0db19798d49f3d75f457cb49d003198337da56b2351d78626bd681"
+    },
+    {
+      "path": "models/weapons/vr_grenade.phy",
+      "bytes": 2608,
+      "sha256": "6f96e3b5a761a5bcfe0f8a2f27f1335e54e7ef5a8376cb2060e9fc72d45a1b45"
+    },
+    {
+      "path": "models/weapons/vr_grenade.vvd",
+      "bytes": 193472,
+      "sha256": "8732c6912cd80c42a02df8c9d8632185e89ed1d2bf0ea32ef09a77d207a04a86"
+    },
+    {
+      "path": "models/weapons/vr_grenade_handle.dx90.vtx",
+      "bytes": 6976,
+      "sha256": "d602b748a1a406463347c1d9dbae759d148e0a60670216589a5e95c1856954a2"
+    },
+    {
+      "path": "models/weapons/vr_grenade_handle.mdl",
+      "bytes": 2868,
+      "sha256": "939b109e6aa2e9eb101a0be6c28d1cd9035884b2b4ef27592842a6c04e77cc72"
+    },
+    {
+      "path": "models/weapons/vr_grenade_handle.phy",
+      "bytes": 1154,
+      "sha256": "d6ec15f1c36636c28dd133419a1a8866da041b96690066eecf895ce66eb2e541"
+    },
+    {
+      "path": "models/weapons/vr_grenade_handle.vvd",
+      "bytes": 32768,
+      "sha256": "ae2692f77458c88d78e06a75b9b59254417d297ea686228d8beeedcceb011a63"
+    },
+    {
+      "path": "models/weapons/vr_grenade_pin.dx90.vtx",
+      "bytes": 11409,
+      "sha256": "33e77c7e35a105fcab0bdea043643a20625d0d8ff39bda1d9639552bb0666d68"
+    },
+    {
+      "path": "models/weapons/vr_grenade_pin.mdl",
+      "bytes": 2432,
+      "sha256": "a0456b63d7117c22f700476d530f56fbe877d67326aea74eed1360936e515e4d"
+    },
+    {
+      "path": "models/weapons/vr_grenade_pin.vvd",
+      "bytes": 38464,
+      "sha256": "9b3b0e3628afb89a72e1eac5d7dcee86f5a5257e443f5f43128e752cfb812ef2"
+    },
+    {
+      "path": "models/weapons/vr_irifle.dx90.vtx",
+      "bytes": 92202,
+      "sha256": "facb32854e64ea6d256228cc7902c1d3e4797cd5a0e181ce206bc79d8c6e0316"
+    },
+    {
+      "path": "models/weapons/vr_irifle.mdl",
+      "bytes": 34496,
+      "sha256": "5bb861d6dbbf391341f90e71aadfc1456113aad7e562d82aa4b759f6c62f7dc9"
+    },
+    {
+      "path": "models/weapons/vr_irifle.phy",
+      "bytes": 4320,
+      "sha256": "7e70adb129a4fb221ec3af93ce5bc0cf1729953799f225562c17a2e153e7f1e8"
+    },
+    {
+      "path": "models/weapons/vr_irifle.vvd",
+      "bytes": 404672,
+      "sha256": "ef8b007fbcfdc641479be74a7a9559043054633f106a6e6c370f6c4707b148f5"
+    },
+    {
+      "path": "models/weapons/vr_irifle_clip.dx90.vtx",
+      "bytes": 12293,
+      "sha256": "370567c92f8c34ca277966b137e225d69c50ac105d015fe1dda82d98b5a8be75"
+    },
+    {
+      "path": "models/weapons/vr_irifle_clip.mdl",
+      "bytes": 21748,
+      "sha256": "45a863a3d535db0f0649fbf8813d5d8e898f4b30fc5d7dd520716e77acb0e7c3"
+    },
+    {
+      "path": "models/weapons/vr_irifle_clip.phy",
+      "bytes": 1995,
+      "sha256": "2bf457bd37c1798bc54d268adfcc93f3d62c36dd8960f9121873bf27665adfb5"
+    },
+    {
+      "path": "models/weapons/vr_irifle_clip.vvd",
+      "bytes": 55296,
+      "sha256": "6b45f8093b1aa41da5e6ebcf69e5a5021e371431a6524f1570d76f5ea519430e"
+    },
+    {
+      "path": "models/weapons/vr_irifle_shell.dx90.vtx",
+      "bytes": 7249,
+      "sha256": "77be8780b0bbb39959b8cc095a8a6fe9e175928ff83cadec5f4412b29f30ace1"
+    },
+    {
+      "path": "models/weapons/vr_irifle_shell.mdl",
+      "bytes": 2864,
+      "sha256": "c4b89f0b859857ce2b25a8e27f9955963dace81053a91fd167e93d0a17de169d"
+    },
+    {
+      "path": "models/weapons/vr_irifle_shell.phy",
+      "bytes": 746,
+      "sha256": "4735f434b174e7db6cc4cd5255e377dfa9af56ddda0f3a6f6d6c4b0e085152ec"
+    },
+    {
+      "path": "models/weapons/vr_irifle_shell.vvd",
+      "bytes": 30784,
+      "sha256": "53bb2fc0ac935eba83acfce6e331e5a5f774f8688ba711e6dd6ae064b42cf9ab"
+    },
+    {
+      "path": "models/weapons/vr_physcannon.dx90.vtx",
+      "bytes": 93150,
+      "sha256": "027401383628b108af895c6abc76c173974eb3aace7ba60f2a371fef2d6945a7"
+    },
+    {
+      "path": "models/weapons/vr_physcannon.mdl",
+      "bytes": 36060,
+      "sha256": "723c8882577f070cb6f8a5bb8f93fafdb53794eecf2e806f0f571fce380215a5"
+    },
+    {
+      "path": "models/weapons/vr_physcannon.phy",
+      "bytes": 5352,
+      "sha256": "64169a97f7ce1b9fbb4e59e24fccfd0b66474dac1d0c7e98ceda46eab353119e"
+    },
+    {
+      "path": "models/weapons/vr_physcannon.vvd",
+      "bytes": 411776,
+      "sha256": "a7cf8037929b9b21544c7582b4787a31372b08f4f5de8a0378e176f27dcf2081"
+    },
+    {
+      "path": "models/weapons/vr_pistol.dx90.vtx",
+      "bytes": 27976,
+      "sha256": "222f2a689c815f16d0ca6cb05278023df86e42d96e08d85b363c8a29def2b076"
+    },
+    {
+      "path": "models/weapons/vr_pistol.mdl",
+      "bytes": 80956,
+      "sha256": "3355436de62196b912c395045f5cb77edb68903a911143334403fe5a112381ba"
+    },
+    {
+      "path": "models/weapons/vr_pistol.phy",
+      "bytes": 1759,
+      "sha256": "57814c37deb10861876166b30cc0af1513eeb8981d144c32ffbf6cf530ed86f4"
+    },
+    {
+      "path": "models/weapons/vr_pistol.vvd",
+      "bytes": 125056,
+      "sha256": "5ab0c7a660f7f451dd27d8fc7ee23dbdbdc2acd758b58930aa7665de53b9d07b"
+    },
+    {
+      "path": "models/weapons/vr_pistol_clip.dx90.vtx",
+      "bytes": 1239,
+      "sha256": "b3dd34f90367c608eac2e0307dba9f96dd2bf25f8e1fcc637248df48db420ed6"
+    },
+    {
+      "path": "models/weapons/vr_pistol_clip.mdl",
+      "bytes": 19980,
+      "sha256": "8c2da8bd0c75954a28fe7d7a72829dfd03b553a908c9bd85d0b31c4982e4160b"
+    },
+    {
+      "path": "models/weapons/vr_pistol_clip.phy",
+      "bytes": 731,
+      "sha256": "7ea631f673410f7b3def8e6abe1974bc0447efc4dfe8e001ef405035643df4d9"
+    },
+    {
+      "path": "models/weapons/vr_pistol_clip.vvd",
+      "bytes": 5312,
+      "sha256": "20099bc9eddc20ea98dc1739400b0874c7cf554f9b229d515d8a85e8f080b08c"
+    },
+    {
+      "path": "models/weapons/vr_pistol_shell.dx90.vtx",
+      "bytes": 4754,
+      "sha256": "0d4b0727214014bf10dc5a2e1f5888946e99a112900c687c75a8801d7be4b059"
+    },
+    {
+      "path": "models/weapons/vr_pistol_shell.mdl",
+      "bytes": 1736,
+      "sha256": "6a84108e6b457ca0f4b28be64f4723f946f5b725e898fba051f990d52ab7f5da"
+    },
+    {
+      "path": "models/weapons/vr_pistol_shell.vvd",
+      "bytes": 19776,
+      "sha256": "b36ef9596f6aa0dd2606564f4ccaa3403190b34cc5a4f5ebe493fc2b9d02134a"
+    },
+    {
+      "path": "models/weapons/vr_pistol_slide.dx90.vtx",
+      "bytes": 12429,
+      "sha256": "d1cc2b46bc7c99104a3305243a5ff179f22559f4455cd5bfc60904b15ecb61e9"
+    },
+    {
+      "path": "models/weapons/vr_pistol_slide.mdl",
+      "bytes": 1892,
+      "sha256": "d6bbc1af98232a3543157fd54ec3070a174b563375858695e10ebb57628a53d3"
+    },
+    {
+      "path": "models/weapons/vr_pistol_slide.phy",
+      "bytes": 693,
+      "sha256": "c32423a706df4970f883251fe42d5f2bf93ddd2f51adb4a311a9b9bd8a5f875d"
+    },
+    {
+      "path": "models/weapons/vr_pistol_slide.vvd",
+      "bytes": 61120,
+      "sha256": "5c6eb3d987fe712dcf224bd2323df988d6d040af80b47d654f94e140f2d1485f"
+    },
+    {
+      "path": "models/weapons/vr_rocket_launcher.dx90.vtx",
+      "bytes": 88142,
+      "sha256": "82d46db63bfb3477894e8f506a7918ff11544757589fd491403c71fbd71d20a6"
+    },
+    {
+      "path": "models/weapons/vr_rocket_launcher.mdl",
+      "bytes": 21804,
+      "sha256": "e18db44f6648f6ba61f7e9b2b438039592257560c58403d6dbdb25164f9bb8d1"
+    },
+    {
+      "path": "models/weapons/vr_rocket_launcher.phy",
+      "bytes": 5352,
+      "sha256": "be585b9aa9d5f7efbd4d2d462aadc84f27d5755e38ed2e633108f31af208d6ba"
+    },
+    {
+      "path": "models/weapons/vr_rocket_launcher.vvd",
+      "bytes": 348800,
+      "sha256": "7055892eb1d2abc8e12a8a0bc7e1e961595b3cc0e088310666425aef1cd59e42"
+    },
+    {
+      "path": "models/weapons/vr_rocket_launcher_missile.dx90.vtx",
+      "bytes": 4374,
+      "sha256": "63ffb07e21c27ecc526b2287856a76611256ed0d9dcb97e7965a30d816797cf9"
+    },
+    {
+      "path": "models/weapons/vr_rocket_launcher_missile.mdl",
+      "bytes": 17308,
+      "sha256": "c3d24d30e989dd0ab4a460b10fe0296d971045d0752a5f29057bde346fa7e9d2"
+    },
+    {
+      "path": "models/weapons/vr_rocket_launcher_missile.phy",
+      "bytes": 2854,
+      "sha256": "f0fb9b17b04337b41b81c5d8e3661f71fdba9b2d6623ed141f25b4e1406b3463"
+    },
+    {
+      "path": "models/weapons/vr_rocket_launcher_missile.vvd",
+      "bytes": 18816,
+      "sha256": "6bdb8c2b621526dc5aa67c64c02d9254e95c68523ef49233f505500f7bba27b3"
+    },
+    {
+      "path": "models/weapons/vr_shotgun.dx90.vtx",
+      "bytes": 57447,
+      "sha256": "22abddbaa6b480ff19f73ddef8c89816a8d0509ae3f14fbc50f0cb4cbd30cf08"
+    },
+    {
+      "path": "models/weapons/vr_shotgun.mdl",
+      "bytes": 30872,
+      "sha256": "d200bcc39bbe7b277b66019334d200294402a7212eb73a77d21d400c18d3fb5b"
+    },
+    {
+      "path": "models/weapons/vr_shotgun.phy",
+      "bytes": 3361,
+      "sha256": "5aebf0b075c1ba37020b1633c47db66591ab77636257c209936ed2494b6d535d"
+    },
+    {
+      "path": "models/weapons/vr_shotgun.vvd",
+      "bytes": 233216,
+      "sha256": "3b93ed6c17014328616603ee0083acc67a932a785a0bae2945f1c4830efb9f17"
+    },
+    {
+      "path": "models/weapons/vr_shotgun_foregrip.dx90.vtx",
+      "bytes": 5511,
+      "sha256": "ef417f4dd249337cd939e7b18a8e0ac721500b20cf7abc37f9d2ebc72c3b1c5d"
+    },
+    {
+      "path": "models/weapons/vr_shotgun_foregrip.mdl",
+      "bytes": 1808,
+      "sha256": "585773ef399e6c73e66f2005d5648ff04d70a982fc16038bec4458e869e0b882"
+    },
+    {
+      "path": "models/weapons/vr_shotgun_foregrip.phy",
+      "bytes": 889,
+      "sha256": "8e2e9f4cb9775bb25b689debb5abe28a89e0bfd987b3fdc744c60cf2c5c3fbb2"
+    },
+    {
+      "path": "models/weapons/vr_shotgun_foregrip.vvd",
+      "bytes": 18368,
+      "sha256": "36d8fcde3fb9740ebd52259caa88f0d3503394fb3a87f86500861dfa7e0c8510"
+    },
+    {
+      "path": "models/weapons/vr_shotgun_shell.dx90.vtx",
+      "bytes": 4149,
+      "sha256": "d2bb33934b5559f117fdb7b66f503f30623da9a34ca8656043991683052ff9a4"
+    },
+    {
+      "path": "models/weapons/vr_shotgun_shell.mdl",
+      "bytes": 17980,
+      "sha256": "46a9c22a098a5829a9e0b6cdb91cb363841d1b38c2d09b781b6eefddc1c359d8"
+    },
+    {
+      "path": "models/weapons/vr_shotgun_shell.phy",
+      "bytes": 809,
+      "sha256": "5d822ab8b3fe6bde74a99c3cf27c90bfaae0099434a36cd8cc2007038300f1df"
+    },
+    {
+      "path": "models/weapons/vr_shotgun_shell.vvd",
+      "bytes": 16960,
+      "sha256": "69e2ec75fb9f769715bf34760b6dd92b2bdb890908c9c1b4e11b90157a153e18"
+    },
+    {
+      "path": "models/weapons/vr_smg.dx90.vtx",
+      "bytes": 83909,
+      "sha256": "bc4f8a066655ed327a7f3f874cc29fb31f28fd9ea7f94f74850c5074466e226e"
+    },
+    {
+      "path": "models/weapons/vr_smg.mdl",
+      "bytes": 57748,
+      "sha256": "25bef7288bd4f8ceb5a983b90b9d2091163a6f600cddf6370fd7dc9abefb43ac"
+    },
+    {
+      "path": "models/weapons/vr_smg.phy",
+      "bytes": 2228,
+      "sha256": "5f4ec7824edf31d89f2822cca10bde80141679314a5d5c010d13b177c99bbd33"
+    },
+    {
+      "path": "models/weapons/vr_smg.vvd",
+      "bytes": 370368,
+      "sha256": "074ea5ce2cd22453565b68b40f118108daa5f9c4f8b2b28b76229e2e547a045e"
+    },
+    {
+      "path": "models/weapons/vr_smg_charginghandle.dx90.vtx",
+      "bytes": 2472,
+      "sha256": "6cfcfe2a5683448e6efeb9c5f5a1b1117717d9b2d3731e0c5be779f4d81ede73"
+    },
+    {
+      "path": "models/weapons/vr_smg_charginghandle.mdl",
+      "bytes": 1828,
+      "sha256": "da630092ae7c54bb97691f1387263f03ed4d59f9436fade3655c2fcbdbd83259"
+    },
+    {
+      "path": "models/weapons/vr_smg_charginghandle.vvd",
+      "bytes": 12032,
+      "sha256": "6bebb329031bb9ade5ae21d6c55f8a81f6e671477c1c5a9c4aa1129ee4df6f55"
+    },
+    {
+      "path": "models/weapons/vr_smg_clip.dx90.vtx",
+      "bytes": 8013,
+      "sha256": "c4bddfa6000d3d86d9fa2ac1fa5a64a4f0e7794158a98903675c4c0dde905bd1"
+    },
+    {
+      "path": "models/weapons/vr_smg_clip.mdl",
+      "bytes": 18116,
+      "sha256": "bc56ddb126251e6e4cb2079b47579d42210ab8d931d499430e0c6b06a7789c1f"
+    },
+    {
+      "path": "models/weapons/vr_smg_clip.phy",
+      "bytes": 1251,
+      "sha256": "6e8d53b7496da204582831c8e5e4b2ae38f9dc55121d211c920cb81611b7c911"
+    },
+    {
+      "path": "models/weapons/vr_smg_clip.vvd",
+      "bytes": 35392,
+      "sha256": "c251aa77bf7e7894504ba82898cf05b66801bbabccf5f31463bb8fe262e862bd"
+    },
+    {
+      "path": "models/weapons/vr_smg_foregrip.dx90.vtx",
+      "bytes": 15801,
+      "sha256": "400856e09b6c71e82a3da5cc887e1e32e6e6b6f0f05684bb5f95b114b5dd98e3"
+    },
+    {
+      "path": "models/weapons/vr_smg_foregrip.mdl",
+      "bytes": 1788,
+      "sha256": "e72d6915cfa84365ad4a3a9a75f8f3ab6fcc96cc184ac4d1311753f553424617"
+    },
+    {
+      "path": "models/weapons/vr_smg_foregrip.phy",
+      "bytes": 686,
+      "sha256": "6f9ccc5caa688f6e75227b3c15451d34c19ff7a9ee30bc44af1c6de97192e490"
+    },
+    {
+      "path": "models/weapons/vr_smg_foregrip.vvd",
+      "bytes": 67520,
+      "sha256": "5e63b0c9296e522730ba4ed09573269efdcbb72515294ecfffa5ef696a435fd4"
+    },
+    {
+      "path": "models/weapons/vr_smg_grenade.dx90.vtx",
+      "bytes": 1624,
+      "sha256": "60f79b7b56f86d01ae7e2bb9cd3162918b1f19f3ed9a1a245af82625904feeaf"
+    },
+    {
+      "path": "models/weapons/vr_smg_grenade.mdl",
+      "bytes": 1828,
+      "sha256": "22687563a85fd508bc18f7261e945ae77720ddc4e3c6d7b57530f3826f3191c5"
+    },
+    {
+      "path": "models/weapons/vr_smg_grenade.vvd",
+      "bytes": 6400,
+      "sha256": "67ad67738f65de374f76652cc67485e6cb8c965e44030fc04a7784cf4f2f159f"
+    },
+    {
+      "path": "models/weapons/vr_superphyscannon.dx90.vtx",
+      "bytes": 93150,
+      "sha256": "29a5545de9e05e35baee4642e480d3dafaec890df1ec8a726d10c20874b0633f"
+    },
+    {
+      "path": "models/weapons/vr_superphyscannon.mdl",
+      "bytes": 40260,
+      "sha256": "aff2974454cc6620fb35eecaf65a04c26950be6f6027d4df0ec061a17f70df5d"
+    },
+    {
+      "path": "models/weapons/vr_superphyscannon.phy",
+      "bytes": 5352,
+      "sha256": "42b0725d844269d365e7a90d94b73db076b08f2f0e288b703ecba668b572363b"
+    },
+    {
+      "path": "models/weapons/vr_superphyscannon.vvd",
+      "bytes": 411776,
+      "sha256": "ddd0e857912ba428db1feb94ea2c58e6303fc6fc7c1d091c969d3080b908acfa"
+    },
+    {
+      "path": "scripts/weapon_357.txt",
+      "bytes": 1414,
+      "sha256": "014d4eaef77c0742203bc25444ac1c495b3b897da1b3ffa9f4c35df203310ace"
+    },
+    {
+      "path": "scripts/weapon_ar2.txt",
+      "bytes": 1851,
+      "sha256": "af3c95738e8593a28ced3d8abc934d251b6157fb665d6a29209431cf096b2c29"
+    },
+    {
+      "path": "scripts/weapon_bugbait.txt",
+      "bytes": 1238,
+      "sha256": "44060025efc266eccd7ca0ed8bf4b1fb5aab9d7fe921831ac4af5fe05d0015e0"
+    },
+    {
+      "path": "scripts/weapon_crossbow.txt",
+      "bytes": 1703,
+      "sha256": "c0128915f59e4b231605d2a3f34ebbec7b873012ef3e6034c0564d7a2038f19e"
+    },
+    {
+      "path": "scripts/weapon_crowbar.txt",
+      "bytes": 1384,
+      "sha256": "fa4f299d215d30f3e00d2cd6c9a2204b75338c767fff47dac70b123abdabdec7"
+    },
+    {
+      "path": "scripts/weapon_frag.txt",
+      "bytes": 1551,
+      "sha256": "8d54629a4be1b5d953083f2068d270b99cd55344ac093ca4e7a4c9a7926cc99b"
+    },
+    {
+      "path": "scripts/weapon_physcannon.txt",
+      "bytes": 1732,
+      "sha256": "457c189fc1bcaa70fd12b3e57523f3431e1c42534af03188a689d9476a415a77"
+    },
+    {
+      "path": "scripts/weapon_physgun.txt",
+      "bytes": 1332,
+      "sha256": "d7b759fa144ab75641ed000b60d0622e86be5f97a899d1064fa9f5adaa43d969"
+    },
+    {
+      "path": "scripts/weapon_pistol.txt",
+      "bytes": 1653,
+      "sha256": "a393abb597e43c44ed5e80c875c7a517437377e381fa8747dac72cfedc769312"
+    },
+    {
+      "path": "scripts/weapon_rpg.txt",
+      "bytes": 1714,
+      "sha256": "4f22bb66ee61a46f7fe4e6f915bbb391d2f920e3661e19c351a068b346a57e1a"
+    },
+    {
+      "path": "scripts/weapon_shotgun.txt",
+      "bytes": 1675,
+      "sha256": "dd38c2606d13add87e9dbca869d7b2740cd83a4975f1d45b08b33e93384d18ec"
+    },
+    {
+      "path": "scripts/weapon_smg1.txt",
+      "bytes": 1857,
+      "sha256": "758bddd0c446213c0f9d359a104e656333a5b89a81bc814728817f526b77f718"
+    }
+  ]
 }
