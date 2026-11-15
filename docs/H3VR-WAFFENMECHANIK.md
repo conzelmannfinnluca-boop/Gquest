@@ -78,7 +78,8 @@ wird ausgeruestet ...`, Antworten über die alte Waffe werden in dieser Zeit ver
 Panel schließt erst, wenn genau diese Waffe bestätigt ist (plus der eingestellten Lesezeit).
 Antwortet der Server nicht, schließt ein 0,6-s-Fallback und fragt den Zustand neu ab.
 
-Die Lesezeit steht im VR-Menü unter **VR-Einstellungen** als Knopf `Waffen-Lesezeit: 0,30 s`:
+Die Lesezeit steht im VR-Menü unter **VR-Einstellungen** in der rechten Spalte bei den
+Waffenwerkzeugen als Knopf `Waffen-Lesezeit: 0,30 s`:
 ein Klick schaltet durch 0 s / 0,15 s / 0,30 s / 0,60 s. Der Wert liegt als Komfortschlüssel
 `read=<Millisekunden>` in `data/gquest_vr_profile.txt` und wird bei jeder Auswahl neu gelesen,
 wirkt also ohne Neustart auf die nächste Waffe.

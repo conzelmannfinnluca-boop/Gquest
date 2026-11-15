@@ -265,8 +265,21 @@ local function settingsPanel(parent)
             notification.AddLegacy("Handglaettung: "
                 ..(SMOOTHING_LABELS[profileState.smoothing] or profileState.smoothing),NOTIFY_GENERIC,3)
         end
-        -- The weapon panel keeps a confirmed pick readable for this long before it closes.
-        -- It only changes how long the line stays up, never what the pick does.
+    end
+    -- Right column: the weapon tools, independent of the profile keys on the left.
+    column = 2
+    para("Waffenmodelle")
+    para("Prueft im laufenden Spiel, welches Handmodell jede Waffe tatsaechlich benutzt und ob alle Modelle geladen werden. Das Ergebnis steht im Log und in data/gquest/weapon_models.json.")
+    local modelCheck=button(); modelCheck:SetText("Waffenmodelle pruefen")
+    modelCheck.DoClick=weaponModelCheck
+    para("Ausrichtung")
+    para("Waffenhaltung pro Modell pruefen und feinjustieren. Die native Quest-Darstellung wird nicht von jeder VRMod-Einstellung beeinflusst.")
+    local alignButton=button(); alignButton:SetText("Waffe ausrichten")
+    alignButton.DoClick=openAlign
+    -- The read time belongs to the weapon tools, and the right column has the room: as a fifth
+    -- control under the left one the settings pane grew to 956 px against 970 px usable, which a
+    -- 1032-px panel (898 px usable) would have clipped behind a scrollbar.
+    if profiles and profileState then
         local function readText()
             local seconds = string.format("%.2f", (profileState.readMs or profiles.DEFAULT_READ_MS) / 1000)
             return "Waffen-Lesezeit: " .. string.gsub(seconds, "%.", ",") .. " s (klicken)"
@@ -281,16 +294,6 @@ local function settingsPanel(parent)
                 .." s",NOTIFY_GENERIC,3)
         end
     end
-    -- Right column: the weapon tools, independent of the profile keys on the left.
-    column = 2
-    para("Waffenmodelle")
-    para("Prueft im laufenden Spiel, welches Handmodell jede Waffe tatsaechlich benutzt und ob alle Modelle geladen werden. Das Ergebnis steht im Log und in data/gquest/weapon_models.json.")
-    local modelCheck=button(); modelCheck:SetText("Waffenmodelle pruefen")
-    modelCheck.DoClick=weaponModelCheck
-    para("Ausrichtung")
-    para("Waffenhaltung pro Modell pruefen und feinjustieren. Die native Quest-Darstellung wird nicht von jeder VRMod-Einstellung beeinflusst.")
-    local alignButton=button(); alignButton:SetText("Waffe ausrichten")
-    alignButton.DoClick=openAlign
     para("Leistung liefert ein weicheres Bild. Ausgewogen und Schaerfer kosten mehr GPU-Zeit. Jedes Geraet hat eigene Stufen und merkt sich seine letzte Wahl. Das Bildprofil wird beim naechsten Start angewendet.")
     if profiles and profileState then
         local resetLabel = profiles.DEVICES[profileState.device].label

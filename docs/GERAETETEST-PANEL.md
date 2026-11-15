@@ -98,8 +98,8 @@ Panel schließen, im Spiel die Waffe wechseln (andere Waffe nehmen), Panel sofor
 
 ## 7. Lesezeit
 
-VR-Einstellungen → `Waffen-Lesezeit: 0,30 s (klicken)` einmal auf `0,00 s` und einmal auf
-`0,60 s` stellen, dazwischen je eine Waffe wählen.
+VR-Einstellungen → rechte Spalte, bei den Waffenwerkzeugen → `Waffen-Lesezeit: 0,30 s
+(klicken)` einmal auf `0,00 s` und einmal auf `0,60 s` stellen, dazwischen je eine Waffe wählen.
 
 | | erwartet |
 |---|---|
