@@ -47,12 +47,13 @@ Baut und startet die C++-Grenztests, die nur einen Host-Compiler und die Header 
 | Performance-Auswertung | `perf_report.py --test`: Urteile, Rauschgrenze, Abbruch bei gemischten Raten — synthetische Daten, keine Hardware |
 | Geräteerfassung | `capture_device.py --test`: Klassifizierung, getprop-Pfad, Logcat-Zeile, Widerspruchs-Urteil — mit Stub-adb, kein Headset |
 | Übersprungene Gruppen | Erscheinen als `UEBERSPRUNGEN` mit Grund und dem Zusatz „nicht geprüft" und werden am Ende zusätzlich aufgelistet; sie zählen nie als bestanden |
-| Schneller Prüflauf | `build.py --units`: nur die C++-Grenztests und die fünf Werkzeug-Selbsttests, ohne NDK, Rust und Lua. Exit 0 = alle 6 Gruppen bestanden, Exit 1 = mindestens eine fehlgeschlagen |
+| Schneller Prüflauf | `build.py --units`: nur die C++-Grenztests und die sechs Werkzeug-Selbsttests, ohne NDK, Rust und Lua. Exit 0 = alle 7 Gruppen bestanden, Exit 1 = mindestens eine fehlgeschlagen |
 | Playspace (Lua) | `test_playspace.lua`: Snap-Turn 30° in beide Richtungen, Pitch/Roll bleiben, eigener Schritt, Wrap über beide Nahtstellen, ungültige Richtungen/Schritte/Typen und fehlender Spieler abgelehnt, View unverändert |
 | Fake-Host (G2) | `fake_host`: 60 Frames mit Snap-Turn, Recenter und Sitzend mitten im Lauf, kaputte Köpfe und fehlende Frames abgelehnt und geloggt, Hände einzeln verworfen, gültige und abgelehnte Haptik; Content-Installation wird vor dem Schreiben beurteilt, ist per Größe idempotent, `lua/` wird immer neu geschrieben, der erste schlechte Eintrag stoppt den Lauf. Zweiter Lauf unter schlechten Bedingungen: Jitter, verlorenes Sample, eingefrorene und rückwärts laufende Uhr, Zehn-Sekunden-Sprung mit 20-ms-Schritt danach (pinnt den Resync), Drei-Sekunden-Stall (geklemmt) und NaN-Zeitstempel. Ohne Engine |
 | Plattform-Interfaces | `platform`: Frame-Delta geklemmt und gegen rückwärts laufende oder nicht-finite Werte abgelehnt, Log-Stufen geordnet, Asset-Pfade genau dort abgelehnt, wo der Content-Installer sie ablehnt, zu große und fehlende Reads lassen den Puffer unangetastet, Haptik-Grenzen, Frame-Step veröffentlicht Kopf und Hände oder nichts. Übersetzt ohne Engine-Header (Gate G1) |
 | Playspace | `playspace`: Snap-Turn-Schritte inkl. Wrap über ±180, ungültige Richtungen/Schritte abgelehnt, Smooth-Turn pro Frame begrenzt, Recenter setzt Kopf für jeden Steuerkurs auf die Achse (Höhe bleibt), Sitzend/Stehend-Versatz angewendet und zurückgenommen |
 | Posen-Dekodierung | `pose_snapshot`: Meter→Zoll mit Y/Z-Tausch, Gier/Nick-Achsen, nicht-finite und norm-fremde Quaternionen abgelehnt (Ergebnis bleibt unangetastet), 60 Frames aus einer Fake-Quelle mit 58 gültigen |
+| Basis-APK-Prüfung | `verify_base_apk.py --test`: Fixture-APKs, die sich in genau einer Stelle unterscheiden — verändertes Signaturbyte, bereits gepatchte Stelle, Blend-Aufruf mit falschem Ziel, veränderte und fehlende native Bibliothek, kein ZIP, fehlende Datei. Jeder Fall muss mit dem passenden Befund scheitern, sonst taugt die Prüfung nichts |
 | Frame-Zeit-Politik | `frame_policy.py --test`: prüft zuerst den Scanner selbst (rohe Frame-Zeit in Waffen-/Handcode wird gefunden, ein Kommentar nicht, der Perf-Sampler ist erlaubt) und scannt dann den echten Lua-Baum. Grund: die Handposen-Glättung nimmt ihren Schritt aus `gquest_frame_time.lua`, und wer eine weitere Glättung schreibt, darf nicht `FrameTime()` integrieren |
 | Handposen-Glättung | `test_hand_smoothing.lua`: Frame-Schritt (Start, Messung, wiederholte/kaputte Lesung, 0,5-s-Klemmung) und Glättung (erster Sample snappt, 36 Hz = 72 Hz, ohne Schritt gehalten, Teleport snappt, kurzer Weg über die Naht, getrennter Zustand je Hand, Stufen Aus/Mild/Stark und Ablehnung unbekannter Namen) |
 | Gepinnte Adressen | `pinned_addresses.py --test`: Bridge-Offsets gegen den Audit-Datensatz, ELF-Programmheader-Leser an synthetischen Headern, Code/Daten-Klassifizierung. Ohne `libclient.so` bleibt die Segmentzugehörigkeit offen (Exit 2 im Normalauf) |
@@ -114,6 +115,18 @@ und brechen sonst das Linken der Shared Library. `work/toolchains/` ist in
 `.gitignore`; die Bibliothek wird pro Umgebung neu gebaut.
 
 ## 3. Voller Build (braucht alle privaten Abhängigkeiten)
+
+Vor dem ersten Build lohnt die Vorabprüfung der Basis-APK. Sie sammelt **alle** Abweichungen
+statt beim ersten Fehler abzubrechen, und nennt zu jedem erwarteten Wert den gefundenen:
+
+```sh
+python3 Gquest-Hybrid/tools/verify_base_apk.py            # outputs/GDroid-0.1.30.apk
+python3 Gquest-Hybrid/tools/verify_base_apk.py /pfad/base.apk
+```
+
+Geprüft werden Digest, ZIP-Integrität, alle 34 gepinnten Bibliotheken, die VR-Init-Patchstelle,
+die vier exakten Funktionssignaturen und der Blend-Aufruf. Exit 0 = alles passt, 1 = Abweichung,
+2 = keine Datei. Der volle Build:
 
 ```sh
 python3 Gquest-Hybrid/tools/build.py
@@ -290,6 +303,7 @@ Ergebnis: `Gquest-Hybrid/dist/Gquest-Rust-GDroid.apk` + `verification.json`.
 |---|---|
 | `Gquest-Hybrid/tools/cargo.py` | cargo mit privater oder System-Toolchain, klare Fehlermeldung wenn keine da ist |
 | `work/package_gdroid_source.py` | Quellarchiv des eigenen Codes erneut erstellen |
+| `Gquest-Hybrid/tools/verify_base_apk.py` | lieferte Basis-APK gegen alle Pins prüfen, alle Abweichungen auf einmal |
 | `work/run_lua_checks.py` | Lua-Harnesses über System-Lua 5.4 ausführen |
 | `work/prepare_weapon_model_overrides.py` | Waffenmodell-Metadaten, braucht `GQUEST_GAME_DIR` |
 

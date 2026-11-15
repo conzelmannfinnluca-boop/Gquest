@@ -416,6 +416,18 @@ def run_frame_policy_selftest() -> str:
     return "passed" if result.returncode == 0 else "failed"
 
 
+def run_base_apk_selftest() -> str:
+    """Check the preflight checker against fixtures that differ in exactly one place."""
+    log("\n=== Basis-APK-Pruefung (Selbsttest) ===")
+    result = subprocess.run(
+        [sys.executable, str(PROJECT / "tools/verify_base_apk.py"), "--test"],
+        cwd=BASE, capture_output=True, text=True)
+    output = (result.stdout + result.stderr).strip()
+    if output:
+        log("\n".join(output.splitlines()[-6:]))
+    return "passed" if result.returncode == 0 else "failed"
+
+
 def run_lua_harnesses() -> str:
     """Run the Lua harnesses. Returns 'passed', 'skipped' or 'failed'."""
     log("\n=== Lua-Harnesses ===")
@@ -532,6 +544,7 @@ def run_host_cpp_tests() -> int:
          check_detail(pinned_state, "Selbsttest bestanden", "nicht gelaufen")),
         ("Frame-Zeit-Politik", frame_state,
          check_detail(frame_state, "Selbsttest bestanden", "nicht gelaufen")),
+        ("Basis-APK-Pruefung", run_base_apk_selftest(), "Selbsttest"),
         (f"Lua-Harnesses ({len(LUA_HARNESSES)})", lua_state,
          check_detail(lua_state, "bestanden", "liblua5.4 fehlt")),
     ]
@@ -669,6 +682,7 @@ def run_units() -> int:
         ("Ueberlagerungs-Manifest", run_manifest_selftest(), "Selbsttest"),
         ("Gepinnte Adressen", run_pinned_selftest(), "Selbsttest"),
         ("Frame-Zeit-Politik", run_frame_policy_selftest(), "Selbsttest"),
+        ("Basis-APK-Pruefung", run_base_apk_selftest(), "Selbsttest"),
     ]
     broken = [label for label, state, _ in groups if state == "failed"]
     log("\n=== Zusammenfassung ===")

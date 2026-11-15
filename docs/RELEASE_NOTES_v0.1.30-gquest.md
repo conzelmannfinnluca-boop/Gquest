@@ -44,9 +44,9 @@ Spielordners gesichert, im Paket ist keine ArcVR-Klasse mehr enthalten.
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-40 Prüfungen, 10 Gruppen, Exit 0: 12 C++-Grenztests, 9 Rust-Unit-Tests, C++/Rust-ABI-Smoke,
+41 Prüfungen, 11 Gruppen, Exit 0: 12 C++-Grenztests, 9 Rust-Unit-Tests, C++/Rust-ABI-Smoke,
 Bridge-Cross-Compile für `aarch64-linux-android29` mit `-Wall -Wextra -Werror`,
-5 Werkzeug-Selbsttests, 12 Lua-Harnesses.
+6 Werkzeug-Selbsttests, 12 Lua-Harnesses.
 
 Neu in dieser Version:
 
@@ -78,8 +78,9 @@ kompiliert.
 ## Selbst bauen
 
 ```sh
-python3 Gquest-Hybrid/tools/build.py --check   # was fehlt, mit Beschaffungsweg
-python3 Gquest-Hybrid/tools/build.py --tests   # 40 Prüfungen, ohne private Daten
+python3 Gquest-Hybrid/tools/build.py --check            # was fehlt, mit Beschaffungsweg
+python3 Gquest-Hybrid/tools/verify_base_apk.py         # lieferte Basis-APK gegen alle Pins
+python3 Gquest-Hybrid/tools/build.py --tests   # 41 Prüfungen, ohne private Daten
 python3 Gquest-Hybrid/tools/build.py           # volles APK
 ```
 
