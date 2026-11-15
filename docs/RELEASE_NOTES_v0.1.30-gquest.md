@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.518.440 Bytes | `0fa5d288c7020f16519ef33a266580a26ce0a55d40835f1771529196ac29d7a7` |
-| `verification.json` | 2,2 KB | `b2488cefba8a84828402d684e33ebc6033d4b26108739bb47050115bd3ae54bc` |
+| `Gquest.apk` | 59.518.440 Bytes | `518612fe45186e5c0847ace0b5e9b24825a0c465267a5e1b39be6539ab1c08e6` |
+| `verification.json` | 2,2 KB | `7a3d8ebec4bbf9b55973a7aa7274f340562e248f2458b2e804516fd8f4318951` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -108,6 +108,20 @@ Von dir im Headset bestätigt, Belege in `docs/Gquest-HL2-*-verification.json`:
 Die vollständige native Kette aus Magazin, Reserve, Kammer und Zustand ist als Log **nur für die
 Pistole** hinterlegt. Die anderen sechs sind Trägerberichte ohne Mitschnitt.
 
+## Log des ersten Starts
+
+Der Hardwaretest lässt sich protokollieren, statt ihn zu erinnern:
+
+```sh
+adb logcat -d > quest-start.log
+python3 Gquest-Hybrid/tools/evaluate_hardware_log.py quest-start.log
+```
+
+Beurteilt werden vier Bereiche: Launcher-Start (`GQUEST_RUST READY`/`STOP`), Content-Installation
+(`CONTENT ready=… installed=… existing=…`), Geräteerkennung (`DEVICE detected=…`) und die
+Glättungsstufe, die den Filter wirklich erreicht hat (`GQUEST_HANDSMOOTH level=… tau=…`). Fehlt
+eine Zeile, steht dort **UNBEKANNT** — nicht „in Ordnung".
+
 ## Automatisch geprüft — ohne Headset
 
 ```
@@ -115,7 +129,7 @@ python3 Gquest-Hybrid/tools/build.py --tests     # 41 Prüfungen, 11 Gruppen, Ex
 ```
 
 12 C++-Grenztests, 9 Rust-Unit-Tests, C++/Rust-ABI-Smoke, Bridge-Cross-Compile für
-`aarch64-linux-android29` mit `-Werror`, 6 Werkzeug-Selbsttests, 12 Lua-Harnesses.
+`aarch64-linux-android29` mit `-Werror`, 7 Werkzeug-Selbsttests, 12 Lua-Harnesses.
 `verification.json` hält zusätzlich Signaturprüfung, ZIP-CRC und Payload-Identität fest.
 
 ## Ausdrücklich nicht bestätigt
@@ -136,7 +150,7 @@ python3 Gquest-Hybrid/tools/build.py --tests     # 41 Prüfungen, 11 Gruppen, Ex
 ```sh
 python3 Gquest-Hybrid/tools/build.py --check            # was fehlt, mit Beschaffungsweg
 python3 Gquest-Hybrid/tools/verify_base_apk.py         # gelieferte Basis-APK gegen alle Pins
-python3 Gquest-Hybrid/tools/build.py --tests            # 41 Prüfungen, ohne private Daten
+python3 Gquest-Hybrid/tools/build.py --tests            # 42 Prüfungen, ohne private Daten
 python3 Gquest-Hybrid/tools/build.py                    # volles APK
 ```
 

@@ -41,6 +41,10 @@ function GquestHandSmoothing.SetLevel(level)
     if tau == nil then return false end
     GquestHandSmoothing.Enabled = tau > 0
     GquestHandSmoothing.TAU = tau
+    -- One line when the setting is applied, so a hardware log can show which level actually
+    -- reached the filter instead of only which one the profile mentions.
+    print("GQUEST_HANDSMOOTH level=" .. level .. " tau=" .. string.format("%.3f", tau)
+        .. " enabled=" .. tostring(GquestHandSmoothing.Enabled))
     return true
 end
 

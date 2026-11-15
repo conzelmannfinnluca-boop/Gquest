@@ -100,8 +100,8 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Build- und 4 Test-Voraussetzungen + Spiegel-Drift, ohne Traceback; Fallbacks wie in den Läufen |
-| `build.py --tests` | **DONE** | 12 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 6 Werkzeug-Selbsttests + 12 Lua |
-| `build.py --units` | **DONE** | 12 C++ + 6 Werkzeug-Selbsttests in 7 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
+| `build.py --tests` | **DONE** | 12 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 7 Werkzeug-Selbsttests + 12 Lua |
+| `build.py --units` | **DONE** | 12 C++ + 7 Werkzeug-Selbsttests in 8 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
 | C++-Grenztests | **DONE** (12 von 12) | siehe Abschnitt 4 |
@@ -137,7 +137,7 @@ python3 Gquest-Hybrid/tools/build.py --tests
 
 Ergebnis: **12 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
 Auswertungs-, Erfassungs-, Manifest-, Adress- und Frame-Zeit-Selbsttest sowie 12 Lua-Harnesses
-bestanden**, Exit-Code 0 — 41 Prüfungen.
+bestanden**, Exit-Code 0 — 42 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -358,7 +358,7 @@ Konkret als erstes Paket:
 4. Ein Fake-Host, der 60 Frames Posen liefert, ohne OpenXR, Android oder Engine.
 
 Warum nicht „Build fertig“: Phase 3 ist bis auf die optionale Zusammenführung der
-Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (41 Prüfungen grün),
+Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (42 Prüfungen grün),
 damit ist der nächste sinnvolle Schritt der Core-Schnitt.
 
 **Stand:** Paket 2 (PoseSnapshot + `isfinite`/Norm-Gates) und Paket 4 (Fake-Source mit 60
@@ -450,7 +450,7 @@ Playspace und Content-Install laufen schon ohne Engine grün.
 - **G1** Der Core baut und testet ohne Engine-Header — **erfüllt** (`platform`-Test übersetzt ohne Engine).
 - **G2** Ein Fake-Host treibt 60 Frames, Playspace und Content-Install ohne OpenXR/Android —
   **erfüllt** (`core/host_fake/`, `fake_host`-Test).
-- **G3** Das Overlay bleibt auf GDroid unverändert grün (Regression der 41 Prüfungen).
+- **G3** Das Overlay bleibt auf GDroid unverändert grün (Regression der 42 Prüfungen).
 - **G4** Erst dann ein OpenXR-Host, der nur Kopf, Hände und ein Testobjekt zeigt.
 
 **Abbruchkriterien:** Das Overlay bricht ≥2× pro GDroid-Release, oder das Interface lässt
