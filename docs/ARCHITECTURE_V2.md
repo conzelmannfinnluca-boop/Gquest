@@ -23,9 +23,16 @@ Daraus folgen genau zwei realistische Wege:
 | **A: Overlay** | GQuest bleibt gepatchtes GDroid-Overlay | Wochen | bricht bei jedem GDroid-Update |
 | **B: Eigene Runtime** | eigener Renderer + Physik + Netcode | Jahre | Größe des Projekts |
 
-**Empfehlung: Weg C — geteilter Core, zwei Hosts.** Nicht weil es elegant klingt,
-sondern weil es der einzige Weg ist, bei dem heute etwas läuft **und** langfristig
-Eigenständigkeit entsteht.
+**Entschieden am 15. November 2026: Weg C — geteilter Core, zwei Hosts.** Nicht weil es
+elegant klingt, sondern weil es der einzige Weg ist, bei dem heute etwas läuft **und**
+langfristig Eigenständigkeit entsteht.
+
+Der zweite Host wird **nicht** sofort gebaut. Reihenfolge: Fake-Host, der den Core ohne
+Engine treibt, dann das bestehende Overlay unverändert, dann erst ein OpenXR-Host. Die
+Gates G1–G4 und die Abbruchkriterien stehen in `PROJECT_STATUS.md` §12. Ohne diese Gates
+wäre „zwei Hosts“ nur ein Versprechen: der Nutzen der Teilung entsteht erst, wenn ein
+zweiter Host wirklich läuft — bis dahin ist Weg C eine Testdisziplin, keine Unabhängigkeit.
+Das ist der Preis, und er ist bewusst gewählt.
 
 ```
                     ┌──────────────────────────┐

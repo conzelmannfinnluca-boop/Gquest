@@ -305,9 +305,11 @@ ein Frame auf einem echten Headset erschienen ist.
 Diese Entscheidungen ändern den Projektcharakter und sind nicht rückholbar ohne
 Substanzverlust. Ich treffe sie nicht allein:
 
-**E1 — Grundstrategie.** Geteilter Core mit zwei Hosts (Empfehlung), nur Overlay
-(schnell, aber nie eigenständig), oder nur Neubau (eigenständig, aber Jahre ohne
-spielbares Ergebnis)?
+**E1 — Grundstrategie.** ~~Geteilter Core mit zwei Hosts, nur Overlay oder nur Neubau?~~
+**Entschieden am 15. November 2026: geteilter Core, zwei Hosts** — der zweite Host erst
+nach den Gates G1–G4 in `PROJECT_STATUS.md` §12, mit Abbruchkriterien. Nur Overlay wäre der
+Ist-Zustand (bricht mit jedem GDroid-Update), Nur-Neubau hätte keinen belegten Pfad zu
+Renderer, Physik und Netcode.
 
 **E2 — Inhalte.** GQuest V2 bleibt auf Retail-GMod-Inhalte angewiesen. Soll ein eigenes
 Asset-Paket (eigene Maps, Props, Waffenmodelle) parallel entstehen, damit das Spiel

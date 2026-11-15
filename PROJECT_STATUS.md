@@ -320,8 +320,9 @@ bestanden ist, wird Crossplay als nicht verfügbar dokumentiert.
 
 ## 10. Nächste Aufgabe
 
-**Phase 4 — Core-Skelett und Plattformabstraktion.** Voraussetzung: Entscheidung E1
-(geteilter Core / nur Overlay / nur Neubau), weil sie den Schnitt festlegt.
+**Phase 4 — Core-Skelett und Plattformabstraktion.** Voraussetzung war Entscheidung E1
+(geteilter Core / nur Overlay / nur Neubau). **E1 ist entschieden: Weg C**, siehe §12 —
+damit ist Paket 1 freigegeben, die Gates G1–G4 gelten.
 
 Konkret als erstes Paket:
 
@@ -388,7 +389,29 @@ Phase 24 Release-Builds ...................... NOT STARTED
 
 ## 12. Offene Entscheidungen (Nutzer)
 
-**E1** Grundstrategie: geteilter Core mit zwei Hosts / nur Overlay / nur Neubau.
+**E1** ~~Grundstrategie: geteilter Core mit zwei Hosts / nur Overlay / nur Neubau.~~
+**Entschieden (15. November 2026): Weg C — geteilter Core, zwei Hosts.** Der zweite Host wird
+aber nicht sofort gebaut; er kommt erst nach den Gates unten. Details in
+`docs/ARCHITECTURE_V2.md` §1.
+
+Begründung in einem Satz je Variante: **Nur-Overlay** ist der Ist-Zustand — es ist die
+Entscheidung, nichts zu entscheiden, und bricht mit jedem GDroid-Update (der
+Adress-Sprung 0x3fc4 → 0x4000 war der erste Beleg). **Nur-Neubau** wirft den laufenden
+Stand weg und hat keinen belegten Pfad zu Renderer, Physik und Netcode — nichts davon ist
+begonnen, und „Jahre ohne spielbares Ergebnis“ ist kein Plan, sondern ein Risiko.
+**Geteilter Core** ist der einzige Weg, bei dem heute etwas läuft **und** Unabhängigkeit
+entsteht — und der einzige, dessen Kern sich host-frei beweisen lässt: Pose-Dekodierung,
+Playspace und Content-Install laufen schon ohne Engine grün.
+
+**Gates, bevor ein zweiter echter Host beginnt:**
+- **G1** Der Core baut und testet ohne Engine-Header (heute erfüllt für die Bridge-Header).
+- **G2** Ein Fake-Host treibt 60 Frames, Playspace und Content-Install ohne OpenXR/Android.
+- **G3** Das Overlay bleibt auf GDroid unverändert grün (Regression der 36 Prüfungen).
+- **G4** Erst dann ein OpenXR-Host, der nur Kopf, Hände und ein Testobjekt zeigt.
+
+**Abbruchkriterien:** Das Overlay bricht ≥2× pro GDroid-Release, oder das Interface lässt
+Engine-Typen durchsickern, oder es gibt drei Monate nach G3 keinen Gerätelauf. Dann ist
+Weg C ehrlicherweise Nur-Overlay mit Core-Testdisziplin — und das muss dann auch so dastehen.
 **E2** Eigene Assets parallel aufbauen, damit das Spiel irgendwann ohne Retail-Inhalte
 installierbar ist?
 **E3** ~~Lizenz für den eigenen Code wählen~~ — **erledigt**: MIT (`LICENSE`), Herkunft und
@@ -396,4 +419,6 @@ zlib-Kennzeichnungspflicht in `THIRD_PARTY_NOTICES.md`. Offen bleibt nur die Bes
 dass „shiftmann“ als Rechteinhaber-Name im Copyright-Header gewünscht ist.
 **E4** GDroid 0.1.30 einfrieren oder neuen Versionen aktiv folgen?
 
-Ohne E1 ist Phase 4 nicht sinnvoll beginnbar, weil sie den Schnitt festlegt.
+Ohne E1 war Phase 4 nicht sinnvoll beginnbar, weil sie den Schnitt festlegt. E1 ist
+entschieden (Weg C), damit ist Paket 1 (`IPlatformHost`, `IVRBackend`, `IAssetSource`,
+`IClock`, `ILog`) freigegeben — Gate G1 ist die Abnahmebedingung dafür.
