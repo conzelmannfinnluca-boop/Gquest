@@ -89,7 +89,7 @@ BRIDGE_MIRRORS: list[str] = [
 
 # Boundary tests that only need a host C++ compiler and the headers.
 HOST_CPP_TESTS = ["native_fingers", "vr_lua", "retired_content", "device_model",
-                  "device_jni", "content_install", "platform", "playspace",
+                  "device_jni", "content_install", "fake_host", "platform", "playspace",
                   "pose_snapshot", "readable_memory",
                   "signature_scan"]
 
@@ -430,7 +430,8 @@ def run_cpp_boundary_tests() -> list[str]:
         log(f"\n=== {name} ===")
         compile_command = [
             "c++", "-std=c++17", "-O2", f"-I{bridge}",
-            f"-I{PROJECT / 'core/platform'}", str(source), "-ldl", "-o", str(binary)
+            f"-I{PROJECT / 'core/platform'}", f"-I{PROJECT / 'core/host_fake'}",
+            str(source), "-ldl", "-o", str(binary)
         ]
         if name == "retired_content":
             compile_command = [
