@@ -159,10 +159,19 @@ adb logcat -d > quest-start.log
 python3 Gquest-Hybrid/tools/evaluate_hardware_log.py quest-start.log
 ```
 
-Beurteilt werden vier Bereiche: Launcher-Start (`GQUEST_RUST READY`/`STOP`), Content-Installation
-(`CONTENT ready=… installed=… existing=…`), Geräteerkennung (`DEVICE detected=…`) und die
-Glättungsstufe, die den Filter wirklich erreicht hat (`GQUEST_HANDSMOOTH level=… tau=…`). Fehlt
-eine Zeile, steht dort **UNBEKANNT** — nicht „in Ordnung".
+Beurteilt werden sieben Bereiche: Launcher-Start (`GQUEST_RUST READY`/`STOP`), Content-Installation
+(`CONTENT ready=… installed=… existing=…`), Geräteerkennung (`DEVICE detected=…`), die
+Glättungsstufe, die den Filter wirklich erreicht hat (`GQUEST_HANDSMOOTH level=… tau=…`), die
+Hand-Pipeline (`GQUEST_HANDS hand=… state=ok|held drops=…`), die Waffenmechanik
+(`GQUEST_MECH action=… chamber=… mag=… total=…`) und die Gesten (`GQUEST_MECHGESTURE mag|rack`).
+Fehlt eine Zeile, steht dort **UNBEKANNT** — nicht „in Ordnung".
+
+Die Mechanik wird nicht nur gezählt, sondern geprüft: `Kammer + Magazin` muss die Summe ergeben,
+ein Schuss muss die Summe um genau eins senken, und sie darf nur bei Magazinwechsel oder
+Nachladen wieder steigen. Ein `GQUEST_MECH write refused` ist ein Fehler, keine Warnung: dann
+folgt die Waffe der Engine und nicht dem Modell. Eine fehlende VR-Aktion
+(`GQUEST_MECHGESTURE action_inactive=…`) ist eine Warnung — die Taste löst dann nichts aus, die
+Konsolenbefehle `gquest_mech_*` bleiben der Weg.
 
 ## Automatisch geprüft — ohne Headset
 

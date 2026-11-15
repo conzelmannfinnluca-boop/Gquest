@@ -71,6 +71,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Map-System / Map-Editor | NOT STARTED | – |
 | Performance-HUD (Anzeige) | DONE | Overlay im `gquest_perf_hud.lua`; auf Hardware nicht gesichtet |
 | Automatisierte Gerätetests | NOT STARTED | nur manuelle Trägerbestätigung |
+| Hardware-Log-Auswerter (Start, Content, Gerät, Glättung, Hände, Mechanik, Gesten) | DONE | `evaluate_hardware_log.py`: prüft die Munitions-Invariante (Kammer + Magazin = Summe, Schuss senkt um eins), den verweigerten Waffenschreibvorgang und hängende Hände statt nur Zeilen zu zählen. Selbsttest mit zwölf Fällen, in `--units` verdrahtet. Gegen ein echtes Headset-Log NOT TESTED |
 | Performance-Sampler + CSV | DONE | `gquest_perf_hud.lua`, 9. Lua-Harness deckt Statistik und Ausgabe ab |
 | Performance-Messung auf Quest 3 | NOT TESTED | Instrumentierung fertig, Hardware-Lauf steht aus |
 | Geräteprofile Quest 3 / 3S | DONE | eigene Stufensätze, vom Runtime akzeptiert, im Menü wählbar |
@@ -215,6 +216,15 @@ Waffenmechanik (`test_weapon_mechanics.lua`, `gquest_weapon_mechanics.lua`):
 - abgenommenes Magazin behält Restmunition, Wiedereinsetzen lädt nicht durch, frische Magazine sind durch die Reserve gedeckelt
 - Trommel, Pumpe, Rohr-Nachladen, natives Magazin (nur verknüpftes Magazin, Basisfeld unberührt), Schreib-Rollback, Resync, Abschalt-Gate
 - **Nicht geprüft:** ob `EntityFireBullets` für native HLVR-Waffen überhaupt aufgerufen wird und ob die Support-Hand-Geste auf dem Gerät auslöst — beides NOT TESTED, siehe `docs/H3VR-WAFFENMECHANIK.md`
+
+Hardware-Log (`evaluate_hardware_log.py --test`, synthetische Logs):
+- vollständiges Log besteht in sieben Bereichen (Start, Content, Gerät, Glättung, Hände, Mechanik, Gesten)
+- Mechanik wird nachgerechnet: `Kammer + Magazin` muss die Summe ergeben, ein Schuss die Summe um
+genau eins senken, und sie darf nur bei `init`/`mag-in`/`reload` wieder steigen — erfundene Munition
+und ein Schuss ohne Verbrauch scheitern
+- ein `GQUEST_MECH write refused` ist ein Fehlschlag, eine fehlende VR-Aktion nur eine Warnung
+- eine Hand, die am Ende `held` ist, ist eine Warnung; UNBEKANNT bleibt UNBEKANNT, wenn Zeilen fehlen
+- Mutationen gegengeprüft: Summe verfälscht ⇒ Fehler; verweigerter Schreibvorgang ⇒ Fehler
 
 Gepinnte Adressen (`pinned_addresses.py --test`, Audit-Datensatz + synthetische ELF-Header):
 - relative Offsets der Bridge (`+0x224`, `+0x564`) stimmen mit den Audit-Adressen überein
