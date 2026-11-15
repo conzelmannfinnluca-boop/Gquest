@@ -48,7 +48,7 @@ struct Pose {
 
 // (-180, 180]. Non-finite input becomes 0 rather than propagating: nothing below can act on
 // a NaN yaw.
-static float NormalizeDegrees(float degrees) {
+inline float NormalizeDegrees(float degrees) {
     if (!std::isfinite(degrees)) return 0.0f;
     float value = std::fmod(degrees, 360.0f);
     if (value <= -180.0f) value += 360.0f;
@@ -56,12 +56,12 @@ static float NormalizeDegrees(float degrees) {
     return value;
 }
 
-static bool Finite(const Vec3& value) {
+inline bool Finite(const Vec3& value) {
     return std::isfinite(value.x) && std::isfinite(value.y) && std::isfinite(value.z);
 }
 
 // Rotate in the horizontal plane, Y unchanged.
-static Vec3 RotateYaw(const Vec3& position, float degrees) {
+inline Vec3 RotateYaw(const Vec3& position, float degrees) {
     if (!Finite(position) || !std::isfinite(degrees)) return position;
     const float radians = degrees * 0.017453292519943295f;
     const float cosine = std::cos(radians);
@@ -72,7 +72,7 @@ static Vec3 RotateYaw(const Vec3& position, float degrees) {
 
 // A discrete turn, as used by a controller button. direction is -1, 0 or 1; anything else is
 // rejected instead of being clamped, because a stray value there means a broken binding.
-static bool SnapTurn(State& state, int direction, float step = kSnapStepDegrees) {
+inline bool SnapTurn(State& state, int direction, float step = kSnapStepDegrees) {
     if (direction < -1 || direction > 1) return false;
     if (!std::isfinite(step) || step <= 0.0f || step > 180.0f) return false;
     state.yaw = NormalizeDegrees(state.yaw + static_cast<float>(direction) * step);
@@ -81,7 +81,7 @@ static bool SnapTurn(State& state, int direction, float step = kSnapStepDegrees)
 
 // Continuous turn from a stick. Clamped per frame so a long stall cannot spin the player by
 // an unbounded angle when the frame time finally arrives.
-static bool Turn(State& state, float degreesPerSecond, float deltaSeconds,
+inline bool Turn(State& state, float degreesPerSecond, float deltaSeconds,
                  float maxDegreesPerFrame = 15.0f) {
     if (!std::isfinite(degreesPerSecond) || !std::isfinite(deltaSeconds) ||
         !std::isfinite(maxDegreesPerFrame)) return false;
@@ -94,7 +94,7 @@ static bool Turn(State& state, float degreesPerSecond, float deltaSeconds,
 
 // Put the player at the origin facing world-forward: remember where they stand and which way
 // they look, and drop any accumulated turn. Their height is untouched.
-static bool Recenter(State& state, const Vec3& head, float headYawDegrees) {
+inline bool Recenter(State& state, const Vec3& head, float headYawDegrees) {
     if (!Finite(head) || !std::isfinite(headYawDegrees)) return false;
     state.anchor = {head.x, 0.0f, head.z};
     state.heading = NormalizeDegrees(headYawDegrees);
@@ -104,7 +104,7 @@ static bool Recenter(State& state, const Vec3& head, float headYawDegrees) {
 
 // Seated maps the eye height the user has now onto the seated target, so the avatar sits at
 // table height instead of standing up. Standing removes the offset again.
-static bool SetStance(State& state, bool seated, float currentEyeInches,
+inline bool SetStance(State& state, bool seated, float currentEyeInches,
                       float standingEyeInches = kStandingEyeInches,
                       float seatedEyeInches = kSeatedEyeInches) {
     if (!std::isfinite(currentEyeInches) || !std::isfinite(standingEyeInches) ||
@@ -118,7 +118,7 @@ static bool SetStance(State& state, bool seated, float currentEyeInches,
 // Head pose in tracking space -> pose in the playspace. Turning rotates the player about the
 // recentre anchor, so walking around after a recentre keeps its scale. False leaves `out`
 // untouched.
-static bool Apply(const State& state, const Snapshot& head, Pose& out) {
+inline bool Apply(const State& state, const Snapshot& head, Pose& out) {
     if (!Finite(head.position) || !std::isfinite(head.angle.yaw) ||
         !std::isfinite(state.yaw) || !std::isfinite(state.verticalOffset) ||
         !std::isfinite(state.heading) || !Finite(state.anchor))

@@ -147,6 +147,14 @@ struct IVRBackend {
 };
 ```
 
+**Stand (15. November 2026):** Paket 1 ist als engine-freier Teil umgesetzt und getestet
+(`Gquest-Hybrid/core/platform/`): `IPlatformHost` mit `Clock()`, `Log()`, `Assets()`, `VR()`,
+dazu `IClock`, `ILog`, `IAssetSource`, `IVRBackend` und `GquestStepFrame` als Frame-Schritt.
+Der Block oben beschreibt die **Ziel**form. Physik- und Render-Handles fehlen bewusst: sie
+jetzt zu deklarieren hieße, ihren Zuschnitt zu raten, bevor ein Host sie benutzt. Ebenso
+fehlen `action_state`, `action_edge`, `display` und `recenter` im `IVRBackend` — sie kommen
+mit dem Host, der sie tatsächlich aufruft, nicht davor.
+
 Regeln, die im Code erzwungen werden (nicht nur dokumentiert):
 
 1. **Der Core öffnet niemals eine OpenXR-Session.** Nur der Host besitzt die Session.

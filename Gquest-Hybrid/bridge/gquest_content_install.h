@@ -27,7 +27,7 @@ enum class GquestManifestError {
     CarriageReturn,
 };
 
-static const char* GquestManifestErrorText(GquestManifestError error) {
+inline const char* GquestManifestErrorText(GquestManifestError error) {
     switch (error) {
         case GquestManifestError::None: return "ok";
         case GquestManifestError::UnterminatedLine: return "last line has no newline";
@@ -47,7 +47,7 @@ static const char* GquestManifestErrorText(GquestManifestError error) {
 // The size must be plain digits: std::strtoull alone also accepts "-5" (wrapping it to a
 // huge value) and silently saturates on overflow, so both are rejected here rather than
 // compared against a file size that can never match.
-static bool GquestParseContentManifest(const std::string& listing,
+inline bool GquestParseContentManifest(const std::string& listing,
                                       std::vector<GquestContentEntry>& entries,
                                       GquestManifestError& error) {
     entries.clear();
@@ -103,7 +103,7 @@ static bool GquestParseContentManifest(const std::string& listing,
 // path would silently create directories in the process working directory, which on the
 // device is not where any caller means to write. Every caller passes a path below the
 // app's own data directory.
-static bool GquestEnsureDirectory(const std::string& path) {
+inline bool GquestEnsureDirectory(const std::string& path) {
     if (path.empty() || path[0] != '/') return false;
     for (size_t i = 1; i <= path.size(); ++i) {
         if (i != path.size() && path[i] != '/') continue;

@@ -80,7 +80,8 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Geräteerkennung (JNI auf Gerät) | PARTIALLY IMPLEMENTED | Aufrufpfad, Fehlerpfade und Referenzzählung gegen Mock-JNI geprüft (`tests/device_jni.cpp`); echtes `PackageManager`-Verhalten NOT TESTED |
 | Reale `Build.MODEL`-Werte Quest 3/3S | NOT TESTED | Erfassungswerkzeug + Protokoll fertig, kein Gerät (`docs/measurements/device-identity.md`) |
 | `com.oculus.supportedDevices` im Overlay | PARTIALLY IMPLEMENTED | Wert wird zusammengeführt statt verdoppelt und zurückgelesen; nie gegen die echte Basis-APK gelaufen |
-| Playspace-Mathematik (Snap-Turn, Recenter, Sitzend) | DONE | `gquest_playspace.h` host-getestet; Recenter/Sitzend noch ohne Aufrufer, Integration hängt an E1 |
+| Playspace-Mathematik (Snap-Turn, Recenter, Sitzend) | DONE | `gquest_playspace.h` host-getestet; erster Aufrufer ist `GquestStepFrame`, auf dem Gerät noch keiner (G2) |
+| Paket 1: Plattform-Interfaces | DONE | `core/platform/` engine-frei, Grenztest `platform`, Gate G1 erfüllt; kein Host-Hookup auf dem Gerät (G2 offen) |
 | Snap-Turn im Overlay (Lua) | DONE | `gquest_playspace.lua` dreht den View-Yaw, damit folgt der gesamte Provider; Controller-Bindung NOT TESTED (keine Aktionnamen ohne Gerät) |
 | Posen-Dekodierung (Snapshot → Position/Winkel) | DONE | direkt host-getestet inkl. 60er-Fake-Source; echtes XR-Input auf Gerät NOT TESTED |
 | Gepinnte Adressen vs. Audit-Datensatz | PARTIALLY IMPLEMENTED | Konstanten, Offsets und Abbildungsverschiebung geprüft; Segmentzugehörigkeit braucht `libclient.so` (NOT TESTED) |
@@ -95,11 +96,11 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Build- und 4 Test-Voraussetzungen + Spiegel-Drift, ohne Traceback; Fallbacks wie in den Läufen |
-| `build.py --tests` | **DONE** | 10 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 4 Werkzeug-Selbsttests + 11 Lua |
-| `build.py --units` | **DONE** | 10 C++ + 4 Werkzeug-Selbsttests in 5 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
+| `build.py --tests` | **DONE** | 11 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 4 Werkzeug-Selbsttests + 11 Lua |
+| `build.py --units` | **DONE** | 11 C++ + 4 Werkzeug-Selbsttests in 5 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
-| C++-Grenztests | **DONE** (10 von 10) | siehe Abschnitt 4 |
+| C++-Grenztests | **DONE** (11 von 11) | siehe Abschnitt 4 |
 | Lua-Harnesses (11) | **DONE** (11 von 11) | lokale Lua-5.4-Toolchain gebaut |
 | C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle |
 | Android-Bridge-Cross-Compile | **DONE** | `aarch64-linux-android29`, `-Wall -Wextra -Werror`, keine Warnung |
@@ -127,9 +128,9 @@ Ein Befehl, reproduzierbar:
 python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
-Ergebnis: **10 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
+Ergebnis: **11 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
 Auswertungs-, Erfassungs-, Manifest- und Adress-Selbsttest sowie 11 Lua-Harnesses
-bestanden**, Exit-Code 0 — 36 Prüfungen.
+bestanden**, Exit-Code 0 — 37 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -147,6 +148,7 @@ C++-Grenztests:
 - `PASS ArcVR retirement: 63 owned files backed up, unrelated addon retained, repeated launch, backup collision and symlink guard`
 - `PASS device model classification: 3S beats 3, case/whitespace/near-miss guards, codename fallback, nulls and stable ids`
 - `PASS playspace lua: snap turn steps both ways by 30 degrees with pitch and roll kept, custom step honoured, heading wrapped across both seams, invalid directions, steps, types and a missing player refused without touching the view`
+- `PASS platform interfaces: frame delta clamped and refuses backwards or non-finite samples, log levels ordered, asset paths refused exactly where the content installer refuses them, oversized and missing reads leave the buffer untouched, haptics bounded, and a frame step that publishes head and hands through the playspace or nothing at all`
 - `PASS playspace: yaw wrapped into (-180,180], snap turn steps and wraps, invalid directions and steps refused, smooth turn clamped per frame, recentre puts the head on the axis facing forward at unchanged height for every heading, seated/standing offset applied and removed`
 - `PASS pose snapshot: metre-to-inch mapping with Y/Z swap, yaw/pitch axes, non-finite and out-of-window quaternions refused without a half-written result, 60 fake frames with 58 valid`
 - `PASS readable memory: inside/at-edge accepted, PROT_NONE, spans across a mapping boundary, null and a wrapping length refused, zero length reports the address itself`
@@ -333,7 +335,7 @@ Konkret als erstes Paket:
 4. Ein Fake-Host, der 60 Frames Posen liefert, ohne OpenXR, Android oder Engine.
 
 Warum nicht „Build fertig“: Phase 3 ist bis auf die optionale Zusammenführung der
-Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (36 Prüfungen grün),
+Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (37 Prüfungen grün),
 damit ist der nächste sinnvolle Schritt der Core-Schnitt.
 
 **Stand:** Paket 2 (PoseSnapshot + `isfinite`/Norm-Gates) und Paket 4 (Fake-Source mit 60
@@ -353,8 +355,15 @@ von selbst, ohne zweite Kopie der Mathematik. Aufrufbar über `GquestPlayspace.S
 oder die Konsolenbefehle `gquest_snap_ccw` / `gquest_snap_cw`. Recenter und Sitzend sind
 **nicht** gespiegelt: dort hängt die Bedeutung davon ab, wie die Engine die Kamera treibt,
 und eine Vermutung würde jede Pose still verschieben. Beide bleiben nativ und warten auf E1.
-Was am Snap-Turn fehlt, ist die **Controller-Bindung** (Aktionsname ohne Gerät nicht prüfbar). Paket 1 (`IPlatformHost`, `IVRBackend`, `IAssetSource`,
-`IClock`, `ILog`) wartet weiterhin auf E1.
+Was am Snap-Turn fehlt, ist die **Controller-Bindung** (Aktionsname ohne Gerät nicht prüfbar).
+
+**Paket 1 ist umgesetzt** (`core/platform/`): `IPlatformHost`, `IVRBackend`, `IAssetSource`,
+`IClock`, `ILog` als engine-freie Header, dazu `GquestStepFrame` als erster Aufrufer von
+`GquestPlayspace::Apply`. Damit ist der Playspace nicht mehr unbenutzt — aber noch nicht auf
+dem Gerät: diesen Host liefert G2. **Gate G1 ist erfüllt**, und zwar prüfbar: der Grenztest
+übersetzt ausschließlich mit Standard-Headern und den Core-Headern (keine Engine), und alle
+vier beteiligten Header laufen unter `-Wall -Wextra -Werror`. Nächster Schritt ist **G2**, der
+Fake-Host, der 60 Frames, Playspace und Content-Install ohne OpenXR/Android durchtreibt.
 
 ---
 
@@ -406,7 +415,7 @@ Playspace und Content-Install laufen schon ohne Engine grün.
 **Gates, bevor ein zweiter echter Host beginnt:**
 - **G1** Der Core baut und testet ohne Engine-Header (heute erfüllt für die Bridge-Header).
 - **G2** Ein Fake-Host treibt 60 Frames, Playspace und Content-Install ohne OpenXR/Android.
-- **G3** Das Overlay bleibt auf GDroid unverändert grün (Regression der 36 Prüfungen).
+- **G3** Das Overlay bleibt auf GDroid unverändert grün (Regression der 37 Prüfungen).
 - **G4** Erst dann ein OpenXR-Host, der nur Kopf, Hände und ein Testobjekt zeigt.
 
 **Abbruchkriterien:** Das Overlay bricht ≥2× pro GDroid-Release, oder das Interface lässt

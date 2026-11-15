@@ -79,6 +79,7 @@ BRIDGE_MIRRORS: list[str] = [
     "gquest_device_profile.h",
     "gquest_readable_memory.h",
     "gquest_native_finger_profiles.h",
+    "gquest_playspace.h",
     "gquest_pose_snapshot.h",
     "gquest_native_fingers.h",
     "gquest_retired_content.h",
@@ -88,8 +89,8 @@ BRIDGE_MIRRORS: list[str] = [
 
 # Boundary tests that only need a host C++ compiler and the headers.
 HOST_CPP_TESTS = ["native_fingers", "vr_lua", "retired_content", "device_model",
-                  "device_jni", "content_install", "playspace", "pose_snapshot",
-                  "readable_memory",
+                  "device_jni", "content_install", "platform", "playspace",
+                  "pose_snapshot", "readable_memory",
                   "signature_scan"]
 
 # Lua boundary harnesses. They need a Lua 5.4 shared library but no private data;
@@ -428,7 +429,8 @@ def run_cpp_boundary_tests() -> list[str]:
         binary = OUT / f"{name}-test"
         log(f"\n=== {name} ===")
         compile_command = [
-            "c++", "-std=c++17", "-O2", f"-I{bridge}", str(source), "-ldl", "-o", str(binary)
+            "c++", "-std=c++17", "-O2", f"-I{bridge}",
+            f"-I{PROJECT / 'core/platform'}", str(source), "-ldl", "-o", str(binary)
         ]
         if name == "retired_content":
             compile_command = [
