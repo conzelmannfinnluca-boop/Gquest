@@ -76,6 +76,9 @@ assert(files["gquest_vr_profile.txt"]:find("smooth=strong",1,true),"level must b
 click("Handglaettung: Stark (klicken zum Wechseln)")
 assert(not GquestHandSmoothing.Enabled,"off must disable the filter")
 assert(files["gquest_vr_profile.txt"]:find("smooth=off",1,true),"off must be saved")
+-- The weapon mechanics tools live in the weapon catalog (gquest_weapon_catalog.lua), because
+-- the settings panel has no room left: measured content is 898 px of 970 px usable. That
+-- file's own harness clicks them.
 -- The frame sizes itself from the content instead of a fixed 680. Asserted with the
 -- measurement: the section stack needs more than the old fixed height, so the frame grows to
 -- the screen limit, and the usable height (frame minus chrome) is reported for the record.

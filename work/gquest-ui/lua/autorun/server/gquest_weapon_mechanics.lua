@@ -14,8 +14,9 @@
 --
 -- Every transition is validated and logged as GQUEST_MECH so a headset log shows the state
 -- that actually reached the weapon instead of what the code hoped for.
-AddCSLuaFile()
-
+-- Server only, and deliberately not sent to clients: the state machine writes to entities.
+-- The gesture layer keeps its own short class list instead of shipping this file to the
+-- headset.
 GquestMech = GquestMech or {}
 
 local ENABLED_CVAR = "gquest_mech_enabled"

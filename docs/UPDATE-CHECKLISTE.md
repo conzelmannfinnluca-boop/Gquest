@@ -43,7 +43,11 @@ Alternativ im Log: `CONTENT ready=1 installed=… existing=…` (siehe Schritt 5
 
 ## 3. Waffenmechanik greift
 
-Im Spiel eine Pistole aus dem Waffenmenü nehmen, dann in der Konsole:
+Im Spiel eine Pistole aus dem Waffenmenü nehmen. Alles Folgende gibt es auch **ohne Tastatur**:
+VR-Menü → **Waffen** → Knöpfe `Magazin`, `Durchladen`, `Nachladen`, `Sicherung`, `Zustand`,
+`Haende`. Das Panel bleibt dabei offen, damit mehrere Aktionen hintereinander gehen.
+
+Oder in der Konsole:
 
 ```
 gquest_mech_state
@@ -73,7 +77,7 @@ ist der Fall, den ich brauche (mit `class` und `reason`).
 
 ## 4. Hand-Pipeline liefert Posen
 
-Konsole:
+VR-Menü → **Waffen** → Knopf `Haende`, oder in der Konsole:
 
 ```
 gquest_hands_state

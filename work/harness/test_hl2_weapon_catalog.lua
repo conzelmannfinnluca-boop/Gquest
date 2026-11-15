@@ -13,10 +13,16 @@ gui={HideGameUI=function() end}
 concommand={Add=function(k,fn) commands[k]=fn end}
 function RunConsoleCommand(cmd,arg) selected[#selected+1]={cmd,arg} end
 assert(loadfile("work/gquest-ui/lua/autorun/client/gquest_weapon_catalog.lua"))()
+-- The mechanics buttons are not weapon selections and must not be counted as such.
+local mechanics={{"Magazin","gquest_mech_mag"},{"Durchladen","gquest_mech_rack"},
+ {"Nachladen","gquest_mech_reload"},{"Sicherung","gquest_mech_safety"},
+ {"Zustand","gquest_mech_state"},{"Haende","gquest_hands_state"}}
+local isMechanic={}
+for _,entry in ipairs(mechanics) do isMechanic[entry[1]]=true end
 commands.gquest_weapons();assert(GquestWeapons.IsMenuVisible())
 local count=0
 for _,p in ipairs(panels) do
- if p.kind=="DButton" and p.text~="Zurueck zum Spiel" and p.text~="Nachladen / HL2-Magazin auswerfen" then
+ if p.kind=="DButton" and not isMechanic[p.text] and p.text~="Zurueck zum Spiel" and p.text~="Nachladen / HL2-Magazin auswerfen" then
   count=count+1;p.DoClick();local last=selected[#selected]
   assert(last[1]=="gquest_hl2_equip" and string.sub(last[2],1,7)=="weapon_")
  end
@@ -24,4 +30,19 @@ for _,p in ipairs(panels) do
 end
 assert(count==11,"HL2 plus Physgun roster")
 assert(not GquestWeapons.IsMenuVisible(),"selection must close menu")
-print("PASS HL2-only catalog: eleven real weapon selections, no ArcVR control, selection closes tracked menu")
+-- A headset has no keyboard: every mechanics command from docs/UPDATE-CHECKLISTE.md is one
+-- click, and the panel stays open so several actions in a row need no reopened menu.
+commands.gquest_weapons();assert(GquestWeapons.IsMenuVisible())
+for _,entry in ipairs(mechanics) do
+ local found
+ for _,p in ipairs(panels) do
+  if p.kind=="DButton" and p.text==entry[1] then found=p end
+ end
+ assert(found,"missing mechanics button "..entry[1])
+ found.DoClick()
+ local last=selected[#selected]
+ assert(last[1]==entry[2],"button "..entry[1].." must issue "..entry[2]..", got "..tostring(last[1]))
+ assert(GquestWeapons.IsMenuVisible(),"mechanics button "..entry[1].." must keep the panel open")
+end
+print("PASS HL2-only catalog: eleven real weapon selections, no ArcVR control, selection closes "
+ .."tracked menu, and six mechanics buttons that issue their command without closing the panel")

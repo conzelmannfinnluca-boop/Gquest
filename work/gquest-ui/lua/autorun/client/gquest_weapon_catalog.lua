@@ -25,6 +25,30 @@ function GquestWeapons.Open()
     local reload=vgui.Create("DButton",frame);reload:Dock(TOP);reload:SetTall(48)
     reload:SetText("Nachladen / HL2-Magazin auswerfen")
     reload.DoClick=function() frame:Close();gui.HideGameUI();RunConsoleCommand("gquest_reload") end
+    -- Weapon actions a headset cannot type: the mechanics commands, one click each. The rules
+    -- live in the server module; these buttons only issue its commands, and the panel stays
+    -- open so several actions in a row cost one gesture each instead of a reopened menu.
+    local actions={
+        {"Magazin","gquest_mech_mag"},{"Durchladen","gquest_mech_rack"},
+        {"Nachladen","gquest_mech_reload"},{"Sicherung","gquest_mech_safety"},
+        {"Zustand","gquest_mech_state"},{"Haende","gquest_hands_state"},
+    }
+    -- Same width the frame was sized to above, so the three columns line up before the
+    -- panel has been laid out.
+    local actionWidth=math.floor(math.min(660,ScrW()-48)/3)
+    for row=1,2 do
+        local strip=vgui.Create("DPanel",frame);strip:Dock(TOP);strip:SetTall(52)
+        for column=1,3 do
+            local entry=actions[(row-1)*3+column]
+            local control=vgui.Create("DButton",strip)
+            control:Dock(LEFT);control:DockMargin(2,2,2,2)
+            control:SetWide(actionWidth-6);control:SetText(entry[1])
+            control.DoClick=function()
+                RunConsoleCommand(entry[2])
+                print("GQUEST_WEAPON_MENU command="..entry[2])
+            end
+        end
+    end
     local columns=vgui.Create("DPanel",frame);columns:Dock(FILL)
     for _,group in ipairs(groups) do
         local list=vgui.Create("DScrollPanel",columns);list:Dock(FILL)

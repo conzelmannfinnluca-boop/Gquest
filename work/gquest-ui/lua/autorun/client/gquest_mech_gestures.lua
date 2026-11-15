@@ -21,6 +21,20 @@ local reach = CreateClientConVar("gquest_mech_reach", "6", true, false,
 local travel = CreateClientConVar("gquest_mech_travel", "4", true, false,
     "How far (units) the support hand must travel backwards to rack the weapon")
 
+-- The rules live in the server module, which is deliberately not sent to clients. The
+-- client only needs to know which weapons have mechanics, so the class list is repeated here
+-- rather than shipping the whole state machine to the headset.
+local MECHANICS = {
+    weapon_pistol = true, weapon_smg1 = true, weapon_ar2 = true, weapon_357 = true,
+    weapon_shotgun = true, weapon_crossbow = true, weapon_rpg = true,
+}
+
+local function mechanical(class)
+    if type(class) ~= "string" then return false end
+    if string.sub(class, 1, 5) == "hlvr_" then class = string.sub(class, 6) end
+    return MECHANICS[class] == true
+end
+
 local lastRack, lastMag = 0, 0
 local previous, reportedAction = nil, {}
 
@@ -67,8 +81,7 @@ hook.Add("Think", "GquestMechGestures", function()
     local player = LocalPlayer()
     if not IsValid(player) or not player:Alive() then previous = nil return end
     local weapon = player:GetActiveWeapon()
-    if not IsValid(weapon) or not GquestMech or not GquestMech.Profile then previous = nil return end
-    if not GquestMech.Profile(weapon:GetClass()) then previous = nil return end
+    if not IsValid(weapon) or not mechanical(weapon:GetClass()) then previous = nil return end
     if not enabled:GetBool() or not (vr and vr.IsActive and vr.IsActive()) then previous = nil return end
 
     -- Magazine: the engine's own eject action, edge triggered.

@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.526.869 Bytes | `918ec8d0678e863d8358fdcc0a07dbf77726de84501dcfebb153099ef6adf795` |
-| `verification.json` | 2,4 KB | `7f3e97fbbb8129f773385bde547e3faa505182092b24864cbfdfefacc6488b5a` |
+| `Gquest.apk` | 59.526.869 Bytes | `911d3b1d64be73d7956fe7b4cb25c2415586865619c4c7ddcdf945e5d81afc73` |
+| `verification.json` | 2,4 KB | `575b5e8b5c62af7cb8be49b287ddf2f1806d64770fb46faa663c79c155aa34b8` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -40,6 +40,10 @@ Verschluss sperrt, Sicherung blockiert, Trommel/Pumpe/Bolzen mit eigenem Verhalt
 Invariante: Kammer + Magazin ist immer genau der Clip-Wert der Engine.
 - Zwei neue Lua-Harnesses (`test_hand_pipeline.lua`, `test_weapon_mechanics.lua`); die
 Prüfbasis wächst auf 14 Lua-Harnesses und 44 Prüfungen, `--units` bleibt bei 8/8 Gruppen grün.
+- **Waffenwerkzeuge ohne Tastatur:** im Waffen-Panel (VR-Menü → Waffen) sechs Knöpfe für
+`gquest_mech_mag`, `_rack`, `_reload`, `_safety`, `_state` und `gquest_hands_state`. Das Panel
+bleibt offen, damit mehrere Aktionen hintereinander gehen. Das Einstellungs-Panel wächst dafür
+nicht: es bleibt bei gemessenen 898 px Inhalt in 970 px und 0 px Scrollen.
 
 **Unbestätigt (NOT TESTED, braucht das Headset):**
 
