@@ -6,6 +6,9 @@ installiert, kam der **Content** an, greift die **Waffenmechanik**, und liefert 
 
 Voraussetzung: `adb` am PC, Headset per Kabel oder WLAN verbunden (`adb devices` zeigt es).
 
+Nur das Panel und die Mechanik-Zeilen abhaken? Dafür gibt es die kurze Schritt-für-Schritt-
+Anleitung [GERAETETEST-PANEL.md](GERAETETEST-PANEL.md).
+
 ---
 
 ## 1. Version auf dem Gerät
