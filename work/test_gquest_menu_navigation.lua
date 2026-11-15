@@ -66,4 +66,19 @@ click("Fortbewegung: Stehend")
 assert(files["gquest_vr_profile.txt"]:find("stance=seated",1,true),"stance must be saved")
 click("Fortbewegung: Sitzend")
 assert(files["gquest_vr_profile.txt"]:find("stance=stand",1,true),"stance must toggle back")
-print("PASS menu callbacks: root -> alignment -> back -> close -> reopen -> weapons; exact former global-openRoot regression, visibility gate, detection-mismatch adopt button, and playspace step/stance buttons that save and apply")
+-- The frame sizes itself from the content instead of a fixed 680. Asserted with the
+-- measurement: the section stack needs more than the old fixed height, so the frame grows to
+-- the screen limit, and the usable height (frame minus chrome) is reported for the record.
+local frame
+for index=#panels,1,-1 do
+ if panels[index].kind=="DFrame" and panels[index].valid then frame=panels[index];break end
+end
+assert(frame and type(frame.ContentHeight)=="number","content height must be reported")
+assert(frame.ContentHeight>680,"the section stack must exceed the old fixed height, got "..tostring(frame.ContentHeight))
+assert(frame.height==math.min(ScrH()-48,frame.ContentHeight+GquestUI.SETTINGS_CHROME),
+ "frame must size to its content, got "..tostring(frame.height))
+assert(frame.height>680,"frame must grow past the old fixed 680")
+print("GQUEST_UI panel: content="..frame.ContentHeight.."px frame="..frame.height.."px usable="
+ ..(frame.height-GquestUI.SETTINGS_CHROME).."px scroll="
+ ..math.max(0,frame.ContentHeight-(frame.height-GquestUI.SETTINGS_CHROME)).."px")
+print("PASS menu callbacks: root -> alignment -> back -> close -> reopen -> weapons; exact former global-openRoot regression, visibility gate, detection-mismatch adopt button, playspace step/stance buttons that save and apply, and a frame that sizes itself from the reported content height")

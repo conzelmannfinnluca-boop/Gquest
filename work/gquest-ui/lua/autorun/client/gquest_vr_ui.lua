@@ -1,6 +1,12 @@
 -- Gquest's own client UI; native GDroid provides the tracked Derma surface.
 local rootFrame,alignFrame
 local openRoot
+-- Space the frame spends outside the scrolled content: the button row plus the title bar.
+-- The title height is an estimate from DFrame's default skin, not a measurement.
+local SETTINGS_BUTTON_ROW,SETTINGS_TITLE_ALLOWANCE=54,32
+local SETTINGS_CHROME=SETTINGS_BUTTON_ROW+SETTINGS_TITLE_ALLOWANCE
+GquestUI=GquestUI or {}
+GquestUI.SETTINGS_CHROME=SETTINGS_CHROME
 GquestUI=GquestUI or {}
 function GquestUI.IsMenuVisible()
     return (IsValid(rootFrame) and rootFrame:IsVisible()) or (IsValid(alignFrame) and alignFrame:IsVisible()) or false
@@ -121,6 +127,13 @@ local function settingsPanel(parent)
         label:SetSize(580, 24 * lines)
         y = y + 24 * lines + 12
     end
+    -- Help paragraphs wrap, so their reserved height follows their length instead of a guess.
+    -- A fixed height shorter than the wrapped text clips it, which two blocks did: they asked
+    -- for 96 and 80 px while their text needs 120 and 96 at the status line's character budget.
+    local function para(value)
+        local budget = (profiles and profiles.STATUS_LINE_BUDGET) or 60
+        text(value, 24 * math.max(1, math.ceil(#value / budget)))
+    end
     local function combo(title, choices, selected, changed)
         text(title,24)
         local box = panel:Add("DComboBox"); box:SetPos(16,y); box:SetSize(560,42)
@@ -191,7 +204,7 @@ local function settingsPanel(parent)
     end
     if profiles and profileState then
         text("Playspace",28)
-        text("Snap-Turn dreht den Blick in festen Schritten (Konsole: gquest_snap_ccw / gquest_snap_cw). Der Schritt gilt sofort und wird gespeichert. Sitzend wird nur gespeichert: es wirkt erst mit dem Core-Umstieg, weil die Kopfpose noch am Spielerauge haengt.",96)
+        para("Snap-Turn dreht den Blick in Schritten (Konsole: gquest_snap_ccw / gquest_snap_cw), sofort wirksam. Sitzend wird gespeichert, wirkt aber erst mit dem Core-Umstieg.")
         -- Buttons instead of dropdowns: with a controller in a headset a cycling button
         -- is one click, a combo box is a focus change and a list.
         local stepButton=panel:Add("DButton")
@@ -219,18 +232,18 @@ local function settingsPanel(parent)
         y = y + 58
     end
     text("Waffenmodelle",28)
-    text("Prueft im laufenden Spiel, welches Handmodell jede Waffe tatsaechlich benutzt und ob alle Modelle geladen werden. Das Ergebnis steht im Log und in data/gquest/weapon_models.json.",76)
+    para("Prueft im laufenden Spiel, welches Handmodell jede Waffe tatsaechlich benutzt und ob alle Modelle geladen werden. Das Ergebnis steht im Log und in data/gquest/weapon_models.json.")
     local modelCheck=panel:Add("DButton"); modelCheck:SetText("Waffenmodelle pruefen")
     modelCheck:SetPos(16,y); modelCheck:SetSize(560,46)
     modelCheck.DoClick=weaponModelCheck
     y = y + 58
     text("Ausrichtung",28)
-    text("Waffenhaltung pro Modell pruefen und feinjustieren. Die native Quest-Darstellung wird nicht von jeder VRMod-Einstellung beeinflusst.",76)
+    para("Waffenhaltung pro Modell pruefen und feinjustieren. Die native Quest-Darstellung wird nicht von jeder VRMod-Einstellung beeinflusst.")
     local alignButton=panel:Add("DButton"); alignButton:SetText("Waffe ausrichten")
     alignButton:SetPos(16,y); alignButton:SetSize(560,46)
     alignButton.DoClick=openAlign
     y = y + 58
-    text("Leistung liefert ein weicheres Bild. Ausgewogen und Schaerfer kosten mehr GPU-Zeit. Jedes Geraet hat eigene Stufen und merkt sich seine letzte Wahl. Das Bildprofil wird beim naechsten Start angewendet.",80)
+    para("Leistung liefert ein weicheres Bild. Ausgewogen und Schaerfer kosten mehr GPU-Zeit. Jedes Geraet hat eigene Stufen und merkt sich seine letzte Wahl. Das Bildprofil wird beim naechsten Start angewendet.")
     if profiles and profileState then
         local resetLabel = profiles.DEVICES[profileState.device].label
         local reset=panel:Add("DButton"); reset:SetText("Empfohlen fuer "..resetLabel.." wiederherstellen")
@@ -241,12 +254,16 @@ local function settingsPanel(parent)
         end
         y = y + 58
     end
+    -- The frame sizes itself from this instead of a fixed 680, so a section that does not
+    -- fit grows the panel rather than hiding behind a scrollbar nobody scrolls in a headset.
+    panel.ContentHeight = y
     return panel
 end
 openRoot=function(settings)
     closeRoot(); gui.HideGameUI()
     rootFrame=vgui.Create("DFrame")
-    rootFrame:SetTitle("Gquest VR"); rootFrame:SetSize(math.min(680,ScrW()-48),math.min(680,ScrH()-48))
+    local frameWidth=math.min(680,ScrW()-48)
+    rootFrame:SetTitle("Gquest VR"); rootFrame:SetSize(frameWidth,math.min(680,ScrH()-48))
     rootFrame:Center(); rootFrame:SetDeleteOnClose(true); rootFrame:MakePopup()
     rootFrame:SetKeyboardInputEnabled(false)
     rootFrame:SetMouseInputEnabled(true); rootFrame:MoveToFront()
@@ -257,7 +274,7 @@ openRoot=function(settings)
         frame:SetMouseInputEnabled(true); frame:MoveToFront()
         print("GQUEST_UI focus acquired")
     end)
-    local buttons=vgui.Create("DPanel",rootFrame); buttons:Dock(TOP); buttons:SetTall(54)
+    local buttons=vgui.Create("DPanel",rootFrame); buttons:Dock(TOP); buttons:SetTall(SETTINGS_BUTTON_ROW)
     -- Four buttons share the row; the previous fixed 196 px would overflow the
     -- frame width once a fourth control was added.
     local buttonWidth=math.max(140, math.floor(rootFrame:GetWide()/4)-8)
@@ -269,7 +286,14 @@ openRoot=function(settings)
     button("Waffen",function() closeRoot();RunConsoleCommand("gquest_weapons") end)
     button("Zurueck zum Spiel",function() closeRoot(); gui.HideGameUI() end)
     local panel=settingsPanel(rootFrame); panel:Dock(FILL)
-    print("GQUEST_UI opened settings="..tostring(settings==true))
+    -- Total height asked for: content plus the chrome that is not scrolled. Clamped to the
+    -- screen and to a minimum, so a short panel does not become a stamp.
+    rootFrame:SetSize(frameWidth,math.min(ScrH()-48,math.max(420,(panel.ContentHeight or 0)+SETTINGS_CHROME)))
+    -- Kept for the boundary test: without it the only evidence of the size decision would be
+    -- the print below, which a test cannot read.
+    rootFrame.ContentHeight=panel.ContentHeight
+    rootFrame:Center()
+    print("GQUEST_UI opened settings="..tostring(settings==true).." content="..tostring(panel.ContentHeight))
 end
 concommand.Add("gquest_menu",function() openRoot(false) end)
 concommand.Add("gquest_settings",function() openRoot(true) end)
