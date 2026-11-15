@@ -108,6 +108,8 @@ LUA_HARNESSES = [
     "work/test_gquest_menu_navigation.lua",
     "work/harness/test_playspace.lua",
     "work/harness/test_hand_smoothing.lua",
+    "work/harness/test_hand_pipeline.lua",
+    "work/harness/test_weapon_mechanics.lua",
 ]
 
 
@@ -604,7 +606,11 @@ def build() -> None:
         WORK / "harness/test_hl2_weapon_catalog.lua",
         WORK / "harness/test_native_pose_class.lua",
         WORK / "test_reload_client.lua", WORK / "harness/test_hl2_reload_refill.lua",
-        WORK / "test_gquest_menu_navigation.lua")
+        WORK / "test_gquest_menu_navigation.lua",
+        WORK / "harness/test_hand_pipeline.lua",
+        WORK / "harness/test_weapon_mechanics.lua",
+        # Loaded, not executed: the gesture layer needs a live VR session.
+        WORK / "gquest-ui/lua/autorun/client/gquest_mech_gestures.lua")
     cargo("test")
     run("c++", "-std=c++17", "-O2", "-I" + str(PROJECT / "bridge"),
         PROJECT / "tests/native_fingers.cpp", "-ldl", "-o", OUT / "native-fingers-test")

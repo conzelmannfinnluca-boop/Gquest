@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.518.440 Bytes | `518612fe45186e5c0847ace0b5e9b24825a0c465267a5e1b39be6539ab1c08e6` |
-| `verification.json` | 2,2 KB | `7a3d8ebec4bbf9b55973a7aa7274f340562e248f2458b2e804516fd8f4318951` |
+| `Gquest.apk` | 59.526.869 Bytes | `b22c0fc7665716153d640ecc4c290c49043e9bdb4590fb5b2bab4127a7d41530` |
+| `verification.json` | 2,4 KB | `26cdccf2576eb4cad46db662775fe20e606620c5701e44e6ba1aec75e5fb4837` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -24,6 +24,36 @@ Prüfen:
 sha256sum -c SHA256SUMS
 apksigner verify --print-certs Gquest.apk
 ```
+
+## Was in diesem Build neu ist
+
+**Bestätigt (Harness, ohne Headset):**
+
+- **Hand-Pipeline** (`gquest_wrist_hud.lua`): ein Ergebnis pro Frame, damit eine Hand nicht
+doppelt geglättet wird; eine NaN- oder ungültige Probe hält die letzte Pose, statt die Hand
+verschwinden zu lassen; `vel`/`angvel` kommen aus der veröffentlichten Pose; `ResetHand` setzt
+auch den Glättungsfilter zurück, sodass ein Recenter schnappt statt zu gleiten.
+- **H3VR-artige Waffenmechanik** (`gquest_weapon_mechanics.lua`, `gquest_mech_gestures.lua`):
+Patrone im Lager getrennt vom Magazin, Magazin behält seinen Reststand, Einsetzen lädt nicht
+durch, Durchladen befördert die geladene Patrone in die eigene Reserve, leere Kammer klickt,
+Verschluss sperrt, Sicherung blockiert, Trommel/Pumpe/Bolzen mit eigenem Verhalten.
+Invariante: Kammer + Magazin ist immer genau der Clip-Wert der Engine.
+- Zwei neue Lua-Harnesses (`test_hand_pipeline.lua`, `test_weapon_mechanics.lua`); die
+Prüfbasis wächst auf 14 Lua-Harnesses und 44 Prüfungen, `--units` bleibt bei 8/8 Gruppen grün.
+
+**Unbestätigt (NOT TESTED, braucht das Headset):**
+
+- Ob `EntityFireBullets` bei den nativen HLVR-Waffen überhaupt aufgerufen wird. Wenn nicht,
+verhalten sich die Waffen unverändert — die Mechanik blockiert dann nichts.
+- Ob die Support-Hand-Geste „nach hinten ziehen" in der Praxis auslöst; die Standardwerte
+(`gquest_mech_reach 6`, `gquest_mech_travel 4`) sind geschätzt, nicht eingemessen.
+- Ob sich das Durchladen richtig anfühlt.
+
+Details, Bedienung und Grenzen: `docs/H3VR-WAFFENMECHANIK.md`.
+
+Zu H3VR: übernommen wird nur das Bedienkonzept, keine Datei, kein Modell, kein Klang. H3VR ist
+ein kommerzielles Spiel von RUST LTD; die genannten Videos und das Workshop-Addon waren nur
+Zielbeschreibung und sind weder ausgelesen noch enthalten.
 
 ## Herkunft und Rechte — bitte zuerst lesen
 
@@ -49,6 +79,18 @@ Quellen bleiben nutzbar, siehe „Selbst bauen".
 
 **Es kollidiert nicht mit der offiziellen GDroid-App.** Die Basis heißt `com.gmodvr.flat`, dieses
 Paket `com.gmodvr.qvrx` — bewusst umbenannt, damit es daneben installiert werden kann.
+
+**Aber es kollidiert mit einem älteren Gquest-Build**, der mit einem anderen Schlüssel signiert
+wurde (gleicher Paketname, andere Signatur ⇒ `INSTALL_FAILED_UPDATE_INCOMPATIBLE`). In dem Fall
+zuerst die alte Installation entfernen **und die App-Daten behalten**:
+
+```sh
+adb uninstall -k com.gmodvr.qvrx
+adb install Gquest.apk
+```
+
+`-k` ist wichtig: ohne es verschwindet auch `files/user/vr_content/`. SideQuest zeigt bei diesem
+Fall nur „Install failed (unknown)" — der echte Code steht in der `adb install`-Ausgabe.
 
 | | offizielle GDroid 0.1.30 | dieses APK |
 |---|---|---|

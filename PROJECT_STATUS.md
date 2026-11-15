@@ -47,6 +47,8 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Left-Palm-Patch | PARTIALLY IMPLEMENTED | opt-in, nie separat auf Hardware bestätigt |
 | Kopf-/Controller-Tracking | DONE (Quest 3) | Trägerbestätigung |
 | Hände + Fingerdarstellung | PARTIALLY IMPLEMENTED | rechte Hand profiliert; linke Hand Originalpfad |
+| Hand-Pipeline (Haltepose, NaN-Gate, Geschwindigkeit) | PARTIALLY IMPLEMENTED | `gquest_wrist_hud.lua`: ein Ergebnis pro Frame, kaputte Probe hält die letzte Pose statt sie zu veröffentlichen, `vel`/`angvel` aus der veröffentlichten Pose, Reset snappt die Glättung mit. Harness `test_hand_pipeline.lua` grün; auf Gerät NOT TESTED |
+| Manuelle Waffenmechanik (Kammer/Magazin/Sicherung/Verschluss) | PARTIALLY IMPLEMENTED | `gquest_weapon_mechanics.lua` + Gesten: Invariante Clip = Kammer + Magazin, Magazin behält Restmunition, Durchladen befördert in die Reserve, leere Kammer klickt, Verschluss sperrt. Harness grün; ob `EntityFireBullets` bei nativen HLVR-Waffen greift und ob die Geste auslöst: NOT TESTED |
 | VR-Menü | DONE (Quest 3) | Trägerbestätigung |
 | HL2-Pistole | DONE (Quest 3) | vollständige native Zustandsfolge protokolliert |
 | HL2-SMG | PARTIALLY IMPLEMENTED | Zweihand stabil (bestätigt); keine native Übergangssequenz |
@@ -100,12 +102,12 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Build | Status | Grund |
 |---|---|---|
 | `build.py --check` | **DONE** | meldet 9 Build- und 4 Test-Voraussetzungen + Spiegel-Drift, ohne Traceback; Fallbacks wie in den Läufen |
-| `build.py --tests` | **DONE** | 12 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 7 Werkzeug-Selbsttests + 12 Lua |
+| `build.py --tests` | **DONE** | 12 C++ + 9 Rust + ABI-Smoke + Bridge-Cross-Compile + 7 Werkzeug-Selbsttests + 14 Lua |
 | `build.py --units` | **DONE** | 12 C++ + 7 Werkzeug-Selbsttests in 8 Gruppen, ohne NDK/Rust/Lua; Exit 0/1 geprüft |
 | `Gquest-Hybrid/tools/build.py` (Gesamt-APK) | **BLOCKED** | private Abhängigkeiten fehlen (bewusst) |
 | Rust `cargo test` | **DONE** (9 von 9) | Toolchain lokal in `work/toolchains` installiert |
 | C++-Grenztests | **DONE** (12 von 12) | siehe Abschnitt 4 |
-| Lua-Harnesses (12) | **DONE** (12 von 12) | lokale Lua-5.4-Toolchain gebaut |
+| Lua-Harnesses (14) | **DONE** (14 von 14) | lokale Lua-5.4-Toolchain gebaut |
 | C++/Rust-ABI-Smoke | **DONE** | `cargo build --release` + `ffi_smoke.cpp`, 6 Startfälle |
 | Android-Bridge-Cross-Compile | **DONE** | `aarch64-linux-android29`, `-Wall -Wextra -Werror`, keine Warnung |
 | `liblauncheq.so` linken + Overlay-APK | **BLOCKED** | braucht Basis-APK, JDK, Build-Tools |
@@ -136,8 +138,8 @@ python3 Gquest-Hybrid/tools/build.py --tests
 ```
 
 Ergebnis: **12 C++-Grenztests, 9 Rust-Tests, C++/Rust-ABI-Smoke, Android-Bridge-Cross-Compile,
-Auswertungs-, Erfassungs-, Manifest-, Adress- und Frame-Zeit-Selbsttest sowie 12 Lua-Harnesses
-bestanden**, Exit-Code 0 — 42 Prüfungen.
+Auswertungs-, Erfassungs-, Manifest-, Adress- und Frame-Zeit-Selbsttest sowie 14 Lua-Harnesses
+bestanden**, Exit-Code 0 — 44 Prüfungen.
 
 Rust-Tests:
 - Startargumente: Profil-Einstellungen und `+hlvr_isvrplayer` stehen vor `+map`, `-vr` an Index 1
@@ -195,7 +197,24 @@ Handposen-Glättung (`test_hand_smoothing.lua`, `gquest_frame_time.lua` + `gques
 - Menü: Klick auf den Glättungs-Knopf erreicht das Modul sofort, `smooth=strong` / `smooth=off` landen in der Profildatei; ein gespeichertes `mild` gilt schon vor dem Öffnen des Menüs
 - Menü-Geometrie: der Inhalt (898 px) passt in die 970 px, die der 1104 px hohe Referenzschirm nach Rahmen und Rändern lässt, die Rahmenhöhe folgt weiter `min(Bildschirm, Inhalt + Rahmen)`; die frühere Prüfung „höher als 680" ist ersetzt, weil sie bei falschem Grund bestanden hätte
 - Mutationen gegengeprüft: Hold-Guard entfernt ⇒ Assertion scheitert; fester Faktor statt Zeitschritt ⇒ Frame-Rate-Gleichheit scheitert
-- **Nicht geprüft:** die Verdrahtung im Provider gegen echte Vector/Angle-Userdata — nur die Syntax ist geladen, das Verhalten auf dem Gerät ist NOT TESTED
+- **Nicht geprüft:** die Verdrahtung im Provider gegen echte Vector/Angle-Userdata — der Harness setzt eigene Vector/Angle-Ersatztypen ein, das Verhalten auf dem Gerät ist NOT TESTED
+
+Hand-Pipeline (`test_hand_pipeline.lua`, `gquest_wrist_hud.lua`):
+- beide Hände werden veröffentlicht, auch wenn nur eine gültige Probe hat
+- ein zweiter Aufruf im selben Frame liefert dasselbe Ergebnis statt doppelt zu glätten
+- eine NaN-Probe und eine als ungültig markierte Probe halten die letzte Pose; die Hand verschwindet nicht und springt nicht in den Ursprung
+- `vel`/`angvel` werden aus der veröffentlichten Pose berechnet (erste Probe ohne Bewegung, bewegte Hand mit Geschwindigkeit, gehaltene Pose ohne)
+- die gehaltene Pose ist eine Kopie: ein Schreibzugriff des Aufrufers erreicht den gespeicherten Zustand nicht
+- `ResetHand` setzt auch den Glättungsfilter zurück, sodass die nächste Probe schnappt (Vergleich gegen „Glättung aus")
+- Mutationen gegengeprüft: NaN-Gate entfernt ⇒ Assertion scheitert; Haltepose entfernt ⇒ Assertion scheitert
+
+Waffenmechanik (`test_weapon_mechanics.lua`, `gquest_weapon_mechanics.lua`):
+- Aufteilung Clip → Kammer + Magazin ändert die Summe nicht; unbekannte Klasse bekommt keinen Zustand
+- automatischer Zyklus, leere Kammer blockiert (auch bei Pumpe), leerer Lauf sperrt den Verschluss
+- Sicherung blockiert ohne Verbrauch; Durchladen befördert die geladene Patrone in die eigene Reserve
+- abgenommenes Magazin behält Restmunition, Wiedereinsetzen lädt nicht durch, frische Magazine sind durch die Reserve gedeckelt
+- Trommel, Pumpe, Rohr-Nachladen, natives Magazin (nur verknüpftes Magazin, Basisfeld unberührt), Schreib-Rollback, Resync, Abschalt-Gate
+- **Nicht geprüft:** ob `EntityFireBullets` für native HLVR-Waffen überhaupt aufgerufen wird und ob die Support-Hand-Geste auf dem Gerät auslöst — beides NOT TESTED, siehe `docs/H3VR-WAFFENMECHANIK.md`
 
 Gepinnte Adressen (`pinned_addresses.py --test`, Audit-Datensatz + synthetische ELF-Header):
 - relative Offsets der Bridge (`+0x224`, `+0x564`) stimmen mit den Audit-Adressen überein
@@ -212,7 +231,7 @@ Gepinnte Adressen (`pinned_addresses.py --test`, Audit-Datensatz + synthetische 
 - zwei Elemente werden als Fehler erkannt (Android behielte eines davon)
 - unbekannte Geräte-IDs und Nicht-XML werden abgelehnt
 
-Lua-Harnesses (11/11):
+Lua-Harnesses (14/14):
 - Griff-Cache: echte modelllokale Anker, Null-Baseline-Regression, vier Teil-Schreib-Rollbacks, finite/range/schema-Guards
 - Mündung und Einhand-Frames: umgekehrte Retail-Achsen ersetzt, Munition erhalten, sieben Rollback-Grenzen, Crowbar ohne Vordergriff
 - Brechstangen-Richtung: exakter bestätigter Pitch, wiederholtes Deploy idempotent, Schusswaffen isoliert
@@ -358,7 +377,7 @@ Konkret als erstes Paket:
 4. Ein Fake-Host, der 60 Frames Posen liefert, ohne OpenXR, Android oder Engine.
 
 Warum nicht „Build fertig“: Phase 3 ist bis auf die optionale Zusammenführung der
-Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (42 Prüfungen grün),
+Spiegel-Dateien und den Rust-Pfad erledigt. Die Prüfbasis steht jetzt (44 Prüfungen grün),
 damit ist der nächste sinnvolle Schritt der Core-Schnitt.
 
 **Stand:** Paket 2 (PoseSnapshot + `isfinite`/Norm-Gates) und Paket 4 (Fake-Source mit 60
@@ -450,7 +469,7 @@ Playspace und Content-Install laufen schon ohne Engine grün.
 - **G1** Der Core baut und testet ohne Engine-Header — **erfüllt** (`platform`-Test übersetzt ohne Engine).
 - **G2** Ein Fake-Host treibt 60 Frames, Playspace und Content-Install ohne OpenXR/Android —
   **erfüllt** (`core/host_fake/`, `fake_host`-Test).
-- **G3** Das Overlay bleibt auf GDroid unverändert grün (Regression der 42 Prüfungen).
+- **G3** Das Overlay bleibt auf GDroid unverändert grün (Regression der 44 Prüfungen).
 - **G4** Erst dann ein OpenXR-Host, der nur Kopf, Hände und ein Testobjekt zeigt.
 
 **Abbruchkriterien:** Das Overlay bricht ≥2× pro GDroid-Release, oder das Interface lässt

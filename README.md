@@ -9,7 +9,9 @@ Experimentelle Standalone-VR-Anpassung von Garry's Mod auf Basis von GDroid 0.1.
 - Korrigierte Zweihandgriffe für SMG und Schrotflinte.
 - Aktualisierte Mündungspunkte für korrekte Zielrichtung und echten Engine-Schaden.
 - Brechstangenrichtung, Waffenwechsel und echter Nahkampfschaden auf der Quest bestätigt.
-- Manuelles Nachladen als Standard: Magazine an der Hüfte greifen, einsetzen und durchladen. Pistole, SMG, Schrotflinte, AR2, Magnum, Armbrust und RPG vom Träger für manuelles Nachladen und Schießen bestätigt. Für die Pistole sind zusätzlich die tatsächlichen Magazin-/Reserve-/Patronenlagerwerte protokolliert.
+- Manuelles Nachladen als Standard: Magazine an der Hüfte greifen, einsetzen und durchladen.
+- Waffenmechanik mit getrennter Kammer: Magazin behält seine Patronen, Einsetzen lädt nicht durch, Durchladen befördert eine geladene Patrone zurück in die Reserve, eine leere Kammer klickt, der Verschluss bleibt offen, Sicherung blockiert. Übernommen ist nur das Bedienkonzept, keine Inhalte aus H3VR ([Details und Grenzen](docs/H3VR-WAFFENMECHANIK.md)).
+- Hand-Pipeline gehärtet: eine kaputte Trackingprobe hält die letzte Pose, statt die Hand verschwinden zu lassen; Geschwindigkeiten kommen aus der veröffentlichten Pose. Pistole, SMG, Schrotflinte, AR2, Magnum, Armbrust und RPG vom Träger für manuelles Nachladen und Schießen bestätigt. Für die Pistole sind zusätzlich die tatsächlichen Magazin-/Reserve-/Patronenlagerwerte protokolliert.
 
 Die genauen Prüfungen und offenen Punkte stehen in `docs/`. Testbestätigungen gelten für die jeweils dort beschriebene Version.
 
