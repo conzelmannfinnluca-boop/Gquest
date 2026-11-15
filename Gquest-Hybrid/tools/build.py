@@ -107,6 +107,7 @@ LUA_HARNESSES = [
     "work/harness/test_vr_profiles.lua",
     "work/test_gquest_menu_navigation.lua",
     "work/harness/test_playspace.lua",
+    "work/harness/test_hand_smoothing.lua",
 ]
 
 

@@ -1,13 +1,13 @@
 """Per-frame code must not integrate raw frame time.
 
-Finding, 15 November 2026: the weapon and hand paths have no smoothing at all. `FrameTime`
-and `RealFrameTime` appear exactly once in the shipped Lua, in the performance sampler, and
-there clamping the value would falsify the measurement rather than protect it. So there was
-nothing to hand the core's clamped step to.
+History: until 15 November 2026 the weapon and hand paths had no smoothing at all, and
+`FrameTime` appeared exactly once in the shipped Lua - in the performance sampler, where
+clamping would falsify the measurement rather than protect it.
 
-This check keeps it that way: whoever writes the first smoothing in a weapon or hand path
-cannot reach for `FrameTime()` unnoticed. The step has to come from `FrameTimer` in
-`core/platform/gquest_iclock.h`, which holds an unusable sample instead of integrating it.
+Hand smoothing now exists (`gquest_hand_smoothing.lua`) and takes its step from
+`gquest_frame_time.lua`, the Lua counterpart of `FrameTimer`. This check keeps every future
+consumer on that path: raw `FrameTime` is allowed only in the sampler, so a new smoothing site
+cannot silently integrate a stall.
 
 Exit 0 when the policy holds, 1 when it does not, 2 when the tree is missing.
 """

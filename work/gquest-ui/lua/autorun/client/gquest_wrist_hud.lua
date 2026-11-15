@@ -23,6 +23,12 @@ function GquestXR.GetWorldTracking()
     local yaw=math.AngleDifference(player:EyeAngles().y,headAngle.y)
     local rotation=Angle(0,yaw,0)
     local headWorld=player:EyePos()
+    -- One frame step per call, shared by both hands. A second call in the same frame gets
+    -- "not usable" and therefore holds, instead of smoothing the same motion twice.
+    local step,stepUsable=0,false
+    if GquestFrameTime and GquestFrameTime.Step then
+        step,stepUsable=GquestFrameTime.Step(RealTime())
+    end
     local result={hmd={pos=headWorld,ang=player:EyeAngles()}}
     for hand=0,1 do
         local position,angle,valid=vr.GetHandPose(hand)
@@ -33,7 +39,19 @@ function GquestXR.GetWorldTracking()
             delta:Rotate(rotation)
             local worldAngle=Angle(angle.p,angle.y,angle.r)
             worldAngle:RotateAroundAxis(Vector(0,0,1),yaw)
-            result[hand==0 and "pose_lefthand" or "pose_righthand"]={pos=headWorld+delta,ang=worldAngle}
+            local worldPos=headWorld+delta
+            -- The head is never smoothed: a lagging view is nauseating, a lagging hand reads
+            -- as weight. See gquest_hand_smoothing.lua for the three rules.
+            if GquestHandSmoothing and GquestHandSmoothing.Apply then
+                local smoothed=GquestHandSmoothing.Apply(hand,{
+                    pos={x=worldPos.x,y=worldPos.y,z=worldPos.z},
+                    ang={p=worldAngle.p,y=worldAngle.y,r=worldAngle.r}},step,stepUsable)
+                if smoothed then
+                    worldPos=Vector(smoothed.pos.x,smoothed.pos.y,smoothed.pos.z)
+                    worldAngle=Angle(smoothed.ang.p,smoothed.ang.y,smoothed.ang.r)
+                end
+            end
+            result[hand==0 and "pose_lefthand" or "pose_righthand"]={pos=worldPos,ang=worldAngle}
         end
     end
     return result
