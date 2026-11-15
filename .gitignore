@@ -30,3 +30,5 @@ work/android-sdk/
 work/quest-vr-content/
 work/gquest-weapon-models/content/
 work/backups/
+*.apk.part
+*.apk*.part
