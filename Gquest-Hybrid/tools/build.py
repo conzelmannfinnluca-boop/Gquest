@@ -115,10 +115,12 @@ def log(message: str) -> None:
     print(message, flush=True)
 
 
-def run(*args) -> None:
+def run(*args, cwd: Path | None = None) -> None:
+    # Commands that resolve relative paths themselves (the work/ scripts) need the repo root,
+    # cargo needs the crate: Cargo.toml lives in Gquest-Hybrid/, not in its parent.
     command = [str(a) for a in args]
     log("+ " + " ".join(command))
-    subprocess.run(command, cwd=BASE, check=True)
+    subprocess.run(command, cwd=cwd or BASE, check=True)
 
 
 def cargo_binary() -> Path | None:
@@ -136,7 +138,7 @@ def cargo(*args) -> None:
             "cargo not found. Place a Rust toolchain at work/toolchains/cargo or "
             "install rustup. Run build.py --check for the full prerequisite list."
         )
-    run(binary, *args)
+    run(binary, *args, cwd=PROJECT)
 
 
 # A prerequisite whose path may be absent while the code still works, because the runner

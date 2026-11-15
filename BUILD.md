@@ -223,6 +223,18 @@ $CARGO_HOME/bin/rustup target add aarch64-linux-android
 Ein System-`cargo` wird als Fallback genutzt; ohne das Android-Target scheitert aber Schritt 4
 des Ablaufs (`cargo build --target aarch64-linux-android`).
 
+Der Cross-Build braucht zusätzlich einen Linker, den `rustc` nicht selbst findet. `build.py`
+setzt ihn nicht, also vor dem Bauen exportieren:
+
+```sh
+NDK="$PWD/work/android-sdk/ndk/23.2.8568313/toolchains/llvm/prebuilt/linux-x86_64/bin"
+export PATH="$NDK:$PWD/work/toolchains/jdk/bin:$PWD/work/toolchains/cargo/bin:$PATH"
+export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER="$NDK/aarch64-linux-android29-clang"
+export CC_aarch64_linux_android="$NDK/aarch64-linux-android29-clang"
+export AR_aarch64_linux_android="$NDK/llvm-ar"
+export RUSTUP_HOME="$PWD/work/toolchains/rustup" CARGO_HOME="$PWD/work/toolchains/cargo"
+```
+
 **6. Debug-Schlüssel:**
 
 ```sh

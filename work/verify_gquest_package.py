@@ -14,7 +14,11 @@ with ZipFile(apk) as archive:
     prefix="assets/quest_lab_vr_content/"
     records=[line.split("\t",1) for line in archive.read("assets/quest_lab_vr_content.tsv").decode().splitlines() if line]
     metadata_path=root/"work/gquest-weapon-models/manifest.json"
-    metadata=json.loads(metadata_path.read_text()) if metadata_path.exists() else {"files":[]}
+    # Same condition as build_quest_lab.py: the manifest only describes packaged files when
+    # the content folder exists. Counting it unconditionally demands 12 records the packager
+    # was never asked to write.
+    model_root=root/"work/gquest-weapon-models/content"
+    metadata=json.loads(metadata_path.read_text()) if (metadata_path.exists() and model_root.exists()) else {"files":[]}
     arc={"files":[]}
     # Derived, not hardcoded: the content part of the overlay is the mounted VR
     # content, this project's own Lua and the native weapon scripts.

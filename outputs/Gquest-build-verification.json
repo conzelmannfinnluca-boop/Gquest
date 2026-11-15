@@ -1,0 +1,14 @@
+{
+  "sha256": "195f572f259154127ae74c55bd13f7609f60cb4cd471b487cdb6b7c573461791",
+  "content_records": 16,
+  "arcvr_files": 0,
+  "signature": "verified",
+  "zip_crc": "passed",
+  "current_payload_identity": "passed",
+  "installed_on_quest": false,
+  "weapon_model_scripts": 0,
+  "weapon_model_report": "lua/autorun/client/gquest_weapon_models.lua",
+  "weapon_align": "lua/autorun/client/gquest_weapon_align.lua",
+  "wrist_hud": "removed; legacy autorun retains shared tracking provider",
+  "arcvr_status": "removed from package; old mounted files retired at startup"
+}
