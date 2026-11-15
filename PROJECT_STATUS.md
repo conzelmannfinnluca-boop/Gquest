@@ -115,7 +115,10 @@ Fehlende, bewusst nicht versionierte Voraussetzungen: `outputs/GDroid-0.1.30.apk
 `work/gdroid-0.1.30-native/`, `work/android-sdk/`, `work/toolchains/`,
 `work/quest-vr-content/`, `work/quest-vr-content-manifest.json`, Debug-Keystore,
 Spielinhalte. Der frühere `rtk proxy`-Wrapper ist entfernt; `build.py --check` listet
-diese Dateien jetzt einzeln mit Zweck und Beschaffungsweg auf.
+diese Dateien jetzt einzeln mit Zweck und Beschaffungsweg auf. Die Schritt-für-Schritt-
+Einrichtung auf einem frischen Rechner (Digest-Prüfung, native libs flach entpacken, JDK,
+SDK/NDK, Rust-Target, Keystore, Content-Manifest mit `bytes`/`sha256`) steht in
+`BUILD.md`, Abschnitt „Einrichtung auf einem frischen Rechner“.
 
 ---
 
@@ -223,8 +226,8 @@ Lua-Harnesses (11/11):
 - Menü-Navigation: Root → Ausrichtung → Zurück → Schließen → Wiederöffnen → Waffen; Snap-Turn-Knopf dreht die Schrittweite weiter und erreicht das Turn-Modul sofort, Sitzend-Knopf schaltet um, beides wird gespeichert; Rahmenhöhe folgt dem gemeldeten Inhalt statt festen 680 px
 - Playspace: Snap-Turn 30° in beide Richtungen, Pitch/Roll bleiben, eigener Schritt, Wrap über beide Nahtstellen (−200 → +160), ungültige Richtungen/Schritte/Typen und fehlender Spieler abgelehnt, View dabei unverändert
 
-Zusätzlich geprüft: `--check` meldet alle 9 fehlenden Voraussetzungen mit Zweck und
-Beschaffungsweg; ohne `liblua5.4` meldet der Test-Modus `SKIPPED` statt `FAIL`.
+Zusätzlich geprüft: `--check` meldet die fehlenden Voraussetzungen mit Pfad, Zweck und
+Beschaffungsweg (9 Einträge in der Liste, 8 offen, solange `cargo` aus dem `PATH` greift); ohne `liblua5.4` meldet der Test-Modus `SKIPPED` statt `FAIL`.
 
 **Nicht ausgeführt:** Linken von `liblauncheq.so`, Overlay-APK, APK-Verifikation, jeder
 Hardware-Test, jede Frametime-Messung auf einem Headset. Diese Liste ist absichtlich vollständig — nichts

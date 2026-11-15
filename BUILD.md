@@ -95,8 +95,8 @@ Für den Android-Cross-Build wird zusätzlich das Target `aarch64-linux-android`
 
 ### Lua 5.4 bereitstellen
 
-Für die 8 Harnesses wird nur die Interpreter-Bibliothek gebraucht, nicht die
-game-eigene `liblua_shared.so`. Reihenfolge der Suche: `$GQUEST_LUA_LIB`, dann
+Für die Harnesses wird nur die Interpreter-Bibliothek gebraucht, nicht die game-eigene
+`liblua_shared.so`. Reihenfolge der Suche: `$GQUEST_LUA_LIB`, dann
 `work/toolchains/lua/lib/liblua5.4.so.0`, dann das System.
 
 ```sh
@@ -136,11 +136,146 @@ Setzt voraus:
 Diese Dateien sind bewusst **nicht** Bestandteil des Repositories: Fremd-APK, SDKs,
 Spielinhalte, Signaturschlüssel. `.gitignore` schließt ihre Endungen aus.
 
+### Einrichtung auf einem frischen Rechner
+
+Reihenfolge zählt: `sdkmanager` ist ein Java-Programm, also muss das JDK vor dem SDK da
+sein. Alle Pfade sind relativ zum Repository-Wurzelverzeichnis (eine Ebene über
+`Gquest-Hybrid/`), weil `build.py` sie so auflöst. Ziel der Einrichtung ist
+`python3 Gquest-Hybrid/tools/build.py --check` mit **Exit-Code 0**.
+
+**1. Basis-APK** (nicht aus Quellen baubar, Upstream veröffentlicht nur Binärdateien):
+
+```sh
+mkdir -p outputs
+# Release 0.1.30 von github.com/tinsarfal/GDroid nach outputs/GDroid-0.1.30.apk
+sha256sum outputs/GDroid-0.1.30.apk
+# muss 28bcce6d656f324b883fa638ceae2893cfa875e423f28a7fbc2329c5cdd5d13c sein
+```
+
+Stimmt der Digest nicht, bricht `verify_gdroid_base.py` ab — jede andere Fassung hat
+andere Offsets und der gepatchte VR-Init landet im Nichts.
+
+**2. Native Bibliotheken flach entpacken** (34 `.so`, `-j` damit keine `lib/`-Ebenen
+entstehen):
+
+```sh
+mkdir -p work/gdroid-0.1.30-native
+unzip -o -j outputs/GDroid-0.1.30.apk 'lib/arm64-v8a/*.so' -d work/gdroid-0.1.30-native
+ls work/gdroid-0.1.30-native | wc -l   # 34
+```
+
+Die Dateinamen müssen zu `native_sha256` in `work/gdroid-0.1.30-build-pin.json` passen;
+genau diese Liste prüft der Basis-Test gegen die im Paket liegenden Bibliotheken.
+
+**3. JDK 17** nach `work/toolchains/jdk` (erwartet wird `work/toolchains/jdk/bin/java`):
+
+```sh
+mkdir -p work/toolchains && cd work/toolchains
+curl -L -o jdk.tar.gz "https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jdk/hotspot/normal/eclipse"
+tar xzf jdk.tar.gz && mv jdk-17* jdk && rm jdk.tar.gz
+cd ../.. && work/toolchains/jdk/bin/java -version
+```
+
+**4. Android SDK: build-tools 34.0.0 und NDK 23.2.8568313** nach `work/android-sdk`:
+
+```sh
+cd work
+# Build-Nummer in der URL ggf. auf die aktuelle aus developer.android.com/studio tauschen
+curl -LO https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+unzip -q commandlinetools-linux-11076708_latest.zip -d cmdline-tools-tmp
+mkdir -p android-sdk-cmdline/cmdline-tools
+mv cmdline-tools-tmp/cmdline-tools android-sdk-cmdline/cmdline-tools/latest
+SDKM=android-sdk-cmdline/cmdline-tools/latest/bin/sdkmanager
+yes | $SDKM --sdk_root="$PWD/android-sdk" --licenses > /dev/null
+$SDKM --sdk_root="$PWD/android-sdk" 'build-tools;34.0.0' 'ndk;23.2.8568313'
+cd ..
+ls work/android-sdk/build-tools/34.0.0/zipalign \
+   work/android-sdk/build-tools/34.0.0/lib/apksigner.jar \
+   work/android-sdk/ndk/23.2.8568313/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android29-clang++
+```
+
+Die NDK-Version ist gepinnt: `build.py` linkt mit genau diesem Pfad, ein anderes NDK wird
+nicht gefunden. `sdkmanager` braucht das JDK aus Schritt 3 im `PATH`:
+`export PATH="$PWD/work/toolchains/jdk/bin:$PATH"`.
+
+**5. Rust mit Android-Target:**
+
+```sh
+export RUSTUP_HOME="$PWD/work/toolchains/rustup" CARGO_HOME="$PWD/work/toolchains/cargo"
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+  | sh -s -- -y --profile minimal --default-toolchain stable --no-modify-path
+$CARGO_HOME/bin/rustup target add aarch64-linux-android
+```
+
+Ein System-`cargo` wird als Fallback genutzt; ohne das Android-Target scheitert aber Schritt 4
+des Ablaufs (`cargo build --target aarch64-linux-android`).
+
+**6. Debug-Schlüssel:**
+
+```sh
+mkdir -p ~/.android
+work/toolchains/jdk/bin/keytool -genkeypair -keystore ~/.android/debug.keystore \
+  -alias androiddebugkey -storepass android -keypass android \
+  -keyalg RSA -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+```
+
+`build.py` signiert mit `--ks-pass pass:android --key-pass pass:android`; ein Schlüssel mit
+anderem Passwort bricht die Signierung ab.
+
+**7. Privater VR-Content** — `work/quest-vr-content/` (Dateibaum) und
+`work/quest-vr-content-manifest.json`:
+
+```json
+{
+  "files": [
+    {
+      "path": "maps/d1_trainstation_01.bsp",
+      "bytes": 12345678,
+      "sha256": "<64 Hexzeichen>"
+    }
+  ]
+}
+```
+
+`path` ist relativ zu `work/quest-vr-content/`, ohne führenden `/`, ohne `..`, ohne Tabs
+oder Zeilenumbrüche. **`bytes` und `sha256` werden beim Bauen gegen die echte Datei geprüft**
+und müssen stimmen, sonst bricht `build_quest_lab.py` ab. Erzeugen lässt sich beides mit:
+
+```sh
+python3 - <<'PY'
+import hashlib, json
+from pathlib import Path
+root = Path("work/quest-vr-content")
+files = []
+for f in sorted(p for p in root.rglob("*") if p.is_file()):
+    data = f.read_bytes()
+    files.append({"path": f.relative_to(root).as_posix(), "bytes": len(data),
+                  "sha256": hashlib.sha256(data).hexdigest()})
+Path("work/quest-vr-content-manifest.json").write_text(json.dumps({"files": files}, indent=2) + "\n")
+print(len(files), "Dateien")
+PY
+```
+
+Nach Schritt 7 muss `--check` sauber sein; erst dann lohnt der volle Build:
+
+```sh
+python3 Gquest-Hybrid/tools/build.py --check && echo "alle Voraussetzungen vorhanden"
+```
+
+Meldet er weiterhin etwas, nennt er Pfad, Zweck und Beschaffungsweg — dieselbe Liste, die
+oben abgearbeitet wird. `--check` prüft zusätzlich, dass `work/` und `Gquest-Hybrid/bridge/`
+byte-identisch sind; weichen sie ab, ist die getestete nicht mehr die ausgelieferte Fassung.
+
+**8. Eigenes Lua** muss nicht eingerichtet werden: `work/gquest-ui/` liegt im Repository und
+wird beim Paketieren mitgenommen. Der optionale Konverter für Waffenmodell-Metadaten
+(`work/prepare_weapon_model_overrides.py`) braucht zusätzlich `GQUEST_GAME_DIR`.
+
 ### Ablauf
 
 1. Basis-APK gegen Pin prüfen (`verify_gdroid_base.py`): Digest, 34 native Bibliotheken,
-   vier Signaturblöcke, Finger-Blend-Aufruf, VR-Init-Patch.
-2. Zehn Lua-Harnesses (Lua 5.4, siehe oben).
+   vier Signaturblöcke, Finger-Blend-Aufruf, VR-Init-Patch. Das läuft **vor** allem anderen,
+   damit ein falscher Basispaket-Stand nicht erst nach Minuten Cross-Build auffällt.
+2. Zwölf Lua-Harnesses (Lua 5.4, siehe oben), darunter der Menü-Harness.
 3. `cargo test`, vier C++-Grenztests, `cargo build --release`, C++/Rust-ABI-Smoke.
 4. Cross-Build `liblauncheq.so` gegen NDK und `liblauncher.so` des Basispakets.
 5. Overlay-APK bauen (`build_quest_lab.py`), `zipalign`, signieren, verifizieren.
