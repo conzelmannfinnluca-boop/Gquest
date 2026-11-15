@@ -14,15 +14,15 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest-Rust-GDroid.apk` | 59.518.440 Bytes | `bff34dee9c5fed4fb1c0b4b3848da400b17c9be0ab55762b1c6ed053bdfde2b6` |
-| `verification.json` | 2,2 KB | `b68557c5a34282f759674fff0692770e6fee85c414f7cf35e1187afd0cc0f554` |
+| `Gquest.apk` | 59.518.440 Bytes | `0fa5d288c7020f16519ef33a266580a26ce0a55d40835f1771529196ac29d7a7` |
+| `verification.json` | 2,2 KB | `b2488cefba8a84828402d684e33ebc6033d4b26108739bb47050115bd3ae54bc` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
 
 ```sh
 sha256sum -c SHA256SUMS
-apksigner verify --print-certs Gquest-Rust-GDroid.apk
+apksigner verify --print-certs Gquest.apk
 ```
 
 ## Herkunft und Rechte — bitte zuerst lesen
@@ -61,7 +61,7 @@ Paket `com.gmodvr.qvrx` — bewusst umbenannt, damit es daneben installiert werd
 
 Daraus folgt für die Installation:
 
-- **Frische Installation:** `adb install Gquest-Rust-GDroid.apk` — oder Datei im Dateimanager
+- **Frische Installation:** `adb install Gquest.apk` — oder Datei im Dateimanager
   öffnen. Beide Apps können gleichzeitig installiert sein.
 - **`-r` über die offizielle GDroid-App ist nicht nötig und nicht möglich**, weil es ein anderes
   Paket ist.
@@ -141,7 +141,7 @@ python3 Gquest-Hybrid/tools/build.py                    # volles APK
 ```
 
 Die Reihenfolge und die nötigen Umgebungsvariablen für den Rust-Cross-Build stehen in
-`BUILD.md`. Ergebnis: `Gquest-Hybrid/dist/Gquest-Rust-GDroid.apk` plus `verification.json`.
+`BUILD.md`. Ergebnis: `Gquest-Hybrid/dist/Gquest.apk` plus `verification.json`.
 Mit eigenem Schlüssel signiert installiert das auch über eine bestehende eigene Installation.
 
 Lizenz des eigenen Codes: MIT (`LICENSE`). Fremdanteile: `THIRD_PARTY_NOTICES.md`.

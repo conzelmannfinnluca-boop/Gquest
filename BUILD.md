@@ -307,7 +307,7 @@ wird beim Paketieren mitgenommen. Der optionale Konverter für Waffenmodell-Meta
 6. Payload-Identität: nur `AndroidManifest.xml`, `classes.dex` und
    `lib/arm64-v8a/libclient.so` dürfen sich gegenüber der Basis ändern.
 
-Ergebnis: `Gquest-Hybrid/dist/Gquest-Rust-GDroid.apk` + `verification.json`.
+Ergebnis: `Gquest-Hybrid/dist/Gquest.apk` + `verification.json`.
 
 ## Hilfsskripte
 

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import zipfile
 PROJECT = Path(__file__).resolve().parents[1]
-output = PROJECT.parent / 'outputs/Gquest-Rust-GDroid-Source.zip'
+output = PROJECT.parent / 'outputs/Gquest-Source.zip'
 files = sorted(p for p in PROJECT.rglob('*') if p.is_file() and not p.is_symlink()
                and not {'target', 'dist', '__pycache__', '.git'}.intersection(p.relative_to(PROJECT).parts))
 manifest = {str(p.relative_to(PROJECT)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}

@@ -648,7 +648,7 @@ def build() -> None:
         # must come from official 0.1.30, never a mixture with the previous base.
         for n in content(before) - set(changed):
             assert before.read(n) == after.read(n), n
-    shutil.copy2(apk, OUT / "Gquest-Rust-GDroid.apk")
+    shutil.copy2(apk, OUT / "Gquest.apk")
     report = dict(
         version="0.1.30-gquest", upstream_version="0.1.30", package="com.gmodvr.qvrx",
         rust_role="VR profiles and owned launcher arguments", engine="existing GDroid",
