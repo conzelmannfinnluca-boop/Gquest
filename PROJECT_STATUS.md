@@ -73,7 +73,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Performance-Messung auf Quest 3 | NOT TESTED | Instrumentierung fertig, Hardware-Lauf steht aus |
 | Geräteprofile Quest 3 / 3S | DONE | eigene Stufensätze, vom Runtime akzeptiert, im Menü wählbar |
 | Playspace im Menü | DONE | Schrittweite 15/30/45/90 gespeichert und sofort angewendet; Sitzend/Stehend gespeichert, Wirkung NOT TESTED (wartet auf E1) |
-| Einstellungs-Panel-Höhe | PARTIALLY IMPLEMENTED | Rahmen wächst mit dem Inhalt bis zur Bildschirmhöhe; gemessen 1296 px Inhalt bei 970 px nutzbar, also **326 px Scrollen** offen. Seitenteilung nötig, um ganz ohne Scrollen auszukommen |
+| Einstellungs-Panel-Höhe | DONE | Zwei Spalten (Bildprofil + Komfort links, Waffenwerkzeuge rechts), jede mit eigenem Cursor; Textbudget folgt der Spaltenbreite. Gemessen 898 px Inhalt bei 970 px nutzbar auf dem Referenzschirm, **0 px Scrollen**. Kleinerer Schirm scrollt weiterhin, deshalb bleibt das Scroll-Panel |
 | Geräteprofile auf Quest 3S | NOT TESTED | Stufen definiert, aber kein Lauf auf 3S-Hardware |
 | Geräteerkennung (Klassifizierung) | DONE | `android.os.Build.MODEL`/`.DEVICE` → Geräte-ID, C++-Test hier ausgeführt |
 | Erkennungs-Statuszeile + Umstellen-Knopf | DONE | drei Zustände, Textbudget und Knopf getestet; Derma-Rendering ungeprüft |
@@ -190,6 +190,7 @@ Handposen-Glättung (`test_hand_smoothing.lua`, `gquest_frame_time.lua` + `gques
 - Hände haben getrennten Zustand; Reset lässt den nächsten Sample snappen; `Enabled=false` reicht durch; kaputte Eingabe gibt `nil` statt zu werfen
 - Stufen: `off` reicht durch, `strong` (60 ms) läuft bei gleichem Schritt weniger weit als `mild` (30 ms), unbekannter Name wird abgelehnt und lässt die Einstellung stehen
 - Menü: Klick auf den Glättungs-Knopf erreicht das Modul sofort, `smooth=strong` / `smooth=off` landen in der Profildatei; ein gespeichertes `mild` gilt schon vor dem Öffnen des Menüs
+- Menü-Geometrie: der Inhalt (898 px) passt in die 970 px, die der 1104 px hohe Referenzschirm nach Rahmen und Rändern lässt, die Rahmenhöhe folgt weiter `min(Bildschirm, Inhalt + Rahmen)`; die frühere Prüfung „höher als 680" ist ersetzt, weil sie bei falschem Grund bestanden hätte
 - Mutationen gegengeprüft: Hold-Guard entfernt ⇒ Assertion scheitert; fester Faktor statt Zeitschritt ⇒ Frame-Rate-Gleichheit scheitert
 - **Nicht geprüft:** die Verdrahtung im Provider gegen echte Vector/Angle-Userdata — nur die Syntax ist geladen, das Verhalten auf dem Gerät ist NOT TESTED
 

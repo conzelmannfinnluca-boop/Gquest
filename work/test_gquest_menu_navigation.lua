@@ -84,7 +84,13 @@ for index=#panels,1,-1 do
  if panels[index].kind=="DFrame" and panels[index].valid then frame=panels[index];break end
 end
 assert(frame and type(frame.ContentHeight)=="number","content height must be reported")
-assert(frame.ContentHeight>680,"the section stack must exceed the old fixed height, got "..tostring(frame.ContentHeight))
+-- The pane is two columns now, so the old "taller than the fixed 680" check would pass for
+-- the wrong reason even if a section had fallen off the screen. What matters is that the
+-- content fits the reference screen without scrolling: 1104 - 48 - chrome.
+local usableOnReferenceScreen = ScrH()-48-GquestUI.SETTINGS_CHROME
+assert(frame.ContentHeight<=usableOnReferenceScreen,
+    "content must fit the reference screen, got "..tostring(frame.ContentHeight)
+    .." against "..tostring(usableOnReferenceScreen))
 assert(frame.height==math.min(ScrH()-48,frame.ContentHeight+GquestUI.SETTINGS_CHROME),
  "frame must size to its content, got "..tostring(frame.height))
 assert(frame.height>680,"frame must grow past the old fixed 680")

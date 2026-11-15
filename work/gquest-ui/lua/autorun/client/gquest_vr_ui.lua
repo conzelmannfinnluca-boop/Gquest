@@ -114,43 +114,63 @@ local function openAlign()
 end
 local function settingsPanel(parent)
     local panel = vgui.Create("DScrollPanel", parent)
-    local y = 12
+    -- Two columns. As one stack the pane grew to 1296 px against 970 px of usable screen,
+    -- which left 326 px behind a scrollbar nobody drags in a headset. Bildprofil and comfort
+    -- keys share the left column, the weapon tools the right one; each column keeps its own
+    -- cursor and the pane reports the taller of the two.
+    local columnWidth = 280
+    local columnX = { 16, math.min(680, ScrW() - 48) - 24 - columnWidth }
+    local column = 1
+    local y = { 12, 12 }
+    -- Wrapped text needs a budget that follows the column width, otherwise a paragraph reserves
+    -- one line for text that now takes three and the rest is clipped.
+    local function charBudget()
+        local base = (profiles and profiles.STATUS_LINE_BUDGET) or 60
+        return math.max(18, math.floor(base * columnWidth / 580))
+    end
     local function text(value, height, tint)
         local label = panel:Add("DLabel")
         label:SetText(value); label:SetFont("DermaDefaultBold"); label:SetWrap(true)
-        label:SetTextColor(tint or Color(235,235,235)); label:SetPos(16,y); label:SetSize(580,height)
-        y = y + height + 12
+        label:SetTextColor(tint or Color(235,235,235))
+        label:SetPos(columnX[column], y[column]); label:SetSize(columnWidth, height)
+        y[column] = y[column] + height + 12
     end
     -- Like text(), but the reserved height follows the string length, so a long device
     -- name wraps into a second row instead of being cut off at the label edge.
     local function statusLine(value, tint)
-        local budget = (profiles and profiles.STATUS_LINE_BUDGET) or 60
-        local lines = math.max(1, math.ceil(#value / budget))
+        local lines = math.max(1, math.ceil(#value / charBudget()))
         local label = panel:Add("DLabel")
         label:SetText(value); label:SetFont("DermaDefaultBold"); label:SetWrap(true)
         label:SetAutoStretchVertical(true)
-        label:SetTextColor(tint or Color(235,235,235)); label:SetPos(16,y)
-        label:SetSize(580, 24 * lines)
-        y = y + 24 * lines + 12
+        label:SetTextColor(tint or Color(235,235,235)); label:SetPos(columnX[column], y[column])
+        label:SetSize(columnWidth, 24 * lines)
+        y[column] = y[column] + 24 * lines + 12
     end
     -- Help paragraphs wrap, so their reserved height follows their length instead of a guess.
-    -- A fixed height shorter than the wrapped text clips it, which two blocks did: they asked
-    -- for 96 and 80 px while their text needs 120 and 96 at the status line's character budget.
+    -- A fixed height shorter than the wrapped text clips it.
     local function para(value)
-        local budget = (profiles and profiles.STATUS_LINE_BUDGET) or 60
-        text(value, 24 * math.max(1, math.ceil(#value / budget)))
+        text(value, 24 * math.max(1, math.ceil(#value / charBudget())))
     end
     local function combo(title, choices, selected, changed)
-        text(title,24)
-        local box = panel:Add("DComboBox"); box:SetPos(16,y); box:SetSize(560,42)
+        -- The title wraps at the column width too, so a long one gets two rows.
+        para(title)
+        local box = panel:Add("DComboBox")
+        box:SetPos(columnX[column], y[column]); box:SetSize(columnWidth,42)
         box:SetSortItems(false)
         for _, entry in ipairs(choices) do box:AddChoice(entry[1],entry[2],entry[2]==selected) end
         box.OnSelect = function(_,_,_,data) changed(data) end
-        y = y + 58
+        y[column] = y[column] + 58
     end
-    text("VR-Einstellungen",32)
+    local function button(size)
+        local b = panel:Add("DButton")
+        b:SetPos(columnX[column], y[column]); b:SetSize(columnWidth, size or 46)
+        y[column] = y[column] + (size or 46) + 12
+        return b
+    end
+    para("VR-Einstellungen")
     if not (profiles and profileState) then
-        text("Profilmodul gquest_vr_profiles.lua fehlt; nur die Bildprofile sind gesperrt. Die uebrigen Funktionen bleiben nutzbar.",60)
+        para("Profilmodul gquest_vr_profiles.lua fehlt; nur die Bildprofile sind gesperrt. " ..
+             "Die uebrigen Funktionen bleiben nutzbar.")
     else
         local device = profiles.DEVICES[profileState.device]
         local deviceChoices = {}
@@ -168,8 +188,8 @@ local function settingsPanel(parent)
             -- current combo callback has returned.
             timer.Simple(0, function() openRoot(true) end)
         end)
-        -- Show what the bridge detected, so a device mismatch is visible here instead
-        -- of only showing up as unexpected performance in the headset.
+        -- Show what the bridge detected, so a device mismatch is visible here
+        -- instead of only showing up as unexpected performance in the headset.
         local detected = profiles.Detected()
         local statusText, severity = profiles.DetectionLabel(profileState, detected)
         local severityColors = {
@@ -178,9 +198,8 @@ local function settingsPanel(parent)
         statusLine(statusText, severityColors[severity])
         if severity == "mismatch" and detected then
             local detectedDevice = profiles.DEVICES[detected]
-            local adopt = panel:Add("DButton")
+            local adopt = button()
             adopt:SetText("Auf "..detectedDevice.label.." umstellen (Empfehlung)")
-            adopt:SetPos(16,y); adopt:SetSize(560,46)
             adopt.DoClick = function()
                 if not profiles.AdoptDetected(profileState, detected) then return end
                 saveProfile(); applyProfile()
@@ -190,7 +209,6 @@ local function settingsPanel(parent)
                     .." Hz. Bildprofil gilt nach Neustart.", NOTIFY_GENERIC, 5)
                 timer.Simple(0, function() openRoot(true) end)
             end
-            y = y + 58
         end
         local tierChoices = {}
         for index, tier in ipairs(device.tiers) do
@@ -209,74 +227,67 @@ local function settingsPanel(parent)
         end)
     end
     if profiles and profileState then
-        text("Playspace",28)
+        para("Playspace")
         para("Snap-Turn dreht den Blick in Schritten (Konsole: gquest_snap_ccw / gquest_snap_cw), sofort wirksam. Sitzend wird gespeichert, wirkt aber erst mit dem Core-Umstieg.")
         -- Buttons instead of dropdowns: with a controller in a headset a cycling button
         -- is one click, a combo box is a focus change and a list.
-        local stepButton=panel:Add("DButton")
+        local stepButton=button()
         local function stepText()
             return string.format("Snap-Turn: %d Grad (klicken zum Wechseln)",profileState.snapStep)
         end
-        stepButton:SetText(stepText()); stepButton:SetPos(16,y); stepButton:SetSize(560,46)
+        stepButton:SetText(stepText())
         stepButton.DoClick=function()
             profiles.CycleSnapStep(profileState); saveProfile(); applyComfort()
             stepButton:SetText(stepText())
             notification.AddLegacy("Snap-Turn "..profileState.snapStep.." Grad",NOTIFY_GENERIC,3)
         end
-        y = y + 58
-        local stanceButton=panel:Add("DButton")
+        local stanceButton=button()
         local function stanceText()
             return "Fortbewegung: "..(profileState.stance=="seated" and "Sitzend" or "Stehend")
         end
-        stanceButton:SetText(stanceText()); stanceButton:SetPos(16,y); stanceButton:SetSize(560,46)
+        stanceButton:SetText(stanceText())
         stanceButton.DoClick=function()
             profiles.ToggleStance(profileState); saveProfile()
             stanceButton:SetText(stanceText())
             notification.AddLegacy(profileState.stance=="seated"
                 and "Sitzend gespeichert (wirkt mit dem Core-Umstieg)" or "Stehend gespeichert",NOTIFY_GENERIC,4)
         end
-        y = y + 58
         local SMOOTHING_LABELS={ off="Aus", mild="Mild", strong="Stark" }
         local function smoothingText()
             return "Handglaettung: "..(SMOOTHING_LABELS[profileState.smoothing] or profileState.smoothing)
                 .." (klicken zum Wechseln)"
         end
-        local smoothingButton=panel:Add("DButton")
-        smoothingButton:SetText(smoothingText()); smoothingButton:SetPos(16,y); smoothingButton:SetSize(560,46)
+        local smoothingButton=button()
+        smoothingButton:SetText(smoothingText())
         smoothingButton.DoClick=function()
             profiles.CycleSmoothing(profileState); saveProfile(); applyComfort()
             smoothingButton:SetText(smoothingText())
             notification.AddLegacy("Handglaettung: "
                 ..(SMOOTHING_LABELS[profileState.smoothing] or profileState.smoothing),NOTIFY_GENERIC,3)
         end
-        y = y + 58
     end
-    text("Waffenmodelle",28)
+    -- Right column: the weapon tools, independent of the profile keys on the left.
+    column = 2
+    para("Waffenmodelle")
     para("Prueft im laufenden Spiel, welches Handmodell jede Waffe tatsaechlich benutzt und ob alle Modelle geladen werden. Das Ergebnis steht im Log und in data/gquest/weapon_models.json.")
-    local modelCheck=panel:Add("DButton"); modelCheck:SetText("Waffenmodelle pruefen")
-    modelCheck:SetPos(16,y); modelCheck:SetSize(560,46)
+    local modelCheck=button(); modelCheck:SetText("Waffenmodelle pruefen")
     modelCheck.DoClick=weaponModelCheck
-    y = y + 58
-    text("Ausrichtung",28)
+    para("Ausrichtung")
     para("Waffenhaltung pro Modell pruefen und feinjustieren. Die native Quest-Darstellung wird nicht von jeder VRMod-Einstellung beeinflusst.")
-    local alignButton=panel:Add("DButton"); alignButton:SetText("Waffe ausrichten")
-    alignButton:SetPos(16,y); alignButton:SetSize(560,46)
+    local alignButton=button(); alignButton:SetText("Waffe ausrichten")
     alignButton.DoClick=openAlign
-    y = y + 58
     para("Leistung liefert ein weicheres Bild. Ausgewogen und Schaerfer kosten mehr GPU-Zeit. Jedes Geraet hat eigene Stufen und merkt sich seine letzte Wahl. Das Bildprofil wird beim naechsten Start angewendet.")
     if profiles and profileState then
         local resetLabel = profiles.DEVICES[profileState.device].label
-        local reset=panel:Add("DButton"); reset:SetText("Empfohlen fuer "..resetLabel.." wiederherstellen")
-        reset:SetPos(16,y); reset:SetSize(560,46)
+        local reset=button(); reset:SetText("Empfohlen fuer "..resetLabel.." wiederherstellen")
         reset.DoClick=function()
             profiles.Recommend(profileState); saveProfile(); applyProfile()
             notification.AddLegacy("Empfohlen fuer "..resetLabel.." gespeichert. Bildprofil gilt nach Neustart.",NOTIFY_GENERIC,4)
         end
-        y = y + 58
     end
     -- The frame sizes itself from this instead of a fixed 680, so a section that does not
     -- fit grows the panel rather than hiding behind a scrollbar nobody scrolls in a headset.
-    panel.ContentHeight = y
+    panel.ContentHeight = math.max(y[1], y[2])
     return panel
 end
 openRoot=function(settings)
