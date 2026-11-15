@@ -48,7 +48,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Kopf-/Controller-Tracking | DONE (Quest 3) | Trägerbestätigung |
 | Hände + Fingerdarstellung | PARTIALLY IMPLEMENTED | rechte Hand profiliert; linke Hand Originalpfad |
 | Hand-Pipeline (Haltepose, NaN-Gate, Geschwindigkeit) | PARTIALLY IMPLEMENTED | `gquest_wrist_hud.lua`: ein Ergebnis pro Frame, kaputte Probe hält die letzte Pose statt sie zu veröffentlichen, `vel`/`angvel` aus der veröffentlichten Pose, Reset snappt die Glättung mit. Harness `test_hand_pipeline.lua` grün; auf Gerät NOT TESTED |
-| Manuelle Waffenmechanik (Kammer/Magazin/Sicherung/Verschluss) | PARTIALLY IMPLEMENTED | `gquest_weapon_mechanics.lua` + Gesten: Invariante Clip = Kammer + Magazin, Magazin behält Restmunition, Durchladen befördert in die Reserve, leere Kammer klickt, Verschluss sperrt. Harness grün; ob `EntityFireBullets` bei nativen HLVR-Waffen greift und ob die Geste auslöst: NOT TESTED |
+| Manuelle Waffenmechanik (Kammer/Magazin/Sicherung/Verschluss) | PARTIALLY IMPLEMENTED | `gquest_weapon_mechanics.lua` + Gesten: Invariante Clip = Kammer + Magazin, Magazin behält Restmunition, Durchladen befördert in die Reserve, leere Kammer klickt, Verschluss sperrt. Harness grün; ob `EntityFireBullets` bei nativen HLVR-Waffen greift und ob die Geste auslöst: NOT TESTED. Kammer/Magazin/Sicherung werden im Waffen-Panel live angezeigt (Net `GquestMechState`, Abfrage `gquest_mech_poll` ohne Log-Zeile); Darstellung auf Gerät NOT TESTED |
 | VR-Menü | DONE (Quest 3) | Trägerbestätigung |
 | HL2-Pistole | DONE (Quest 3) | vollständige native Zustandsfolge protokolliert |
 | HL2-SMG | PARTIALLY IMPLEMENTED | Zweihand stabil (bestätigt); keine native Übergangssequenz |

@@ -45,7 +45,10 @@ Alternativ im Log: `CONTENT ready=1 installed=… existing=…` (siehe Schritt 5
 
 Im Spiel eine Pistole aus dem Waffenmenü nehmen. Alles Folgende gibt es auch **ohne Tastatur**:
 VR-Menü → **Waffen** → Knöpfe `Magazin`, `Durchladen`, `Nachladen`, `Sicherung`, `Zustand`,
-`Haende`. Das Panel bleibt dabei offen, damit mehrere Aktionen hintereinander gehen.
+`Haende`. Das Panel bleibt dabei offen, damit mehrere Aktionen hintereinander gehen, und zeigt
+über den Knöpfen live `Waffe: … - Kammer 1, Magazin 17/18, Sicherung aus, Verschluss zu`.
+Bewegt sich diese Zeile nicht, kommt der Zustand nicht am Client an (Net-Nachricht
+`GquestMechState`), dann bitte melden.
 
 Oder in der Konsole:
 

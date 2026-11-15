@@ -17,6 +17,16 @@ function GetConVar(name) return convars[name] end
 AddCSLuaFile = function() end
 function IsValid(value) return type(value) == "table" end
 player = {GetAll = function() return {current} end}
+-- The state travels to the panel over one net message; the poll behind it must stay silent in
+-- the log, because that log is what the hardware evaluator reads.
+util = {AddNetworkString = function(name) sent.networkName = name end}
+sent = {}
+net = {Start = function(name) sent.name = name end,
+       WriteString = function(text) sent.text = text end,
+       Send = function(target) sent.player = target end}
+local printed = {}
+local realPrint = print
+print = function(text) printed[#printed + 1] = tostring(text) end
 
 dofile("work/gquest-ui/lua/autorun/server/gquest_weapon_mechanics.lua")
 
@@ -204,7 +214,27 @@ player_ = fakePlayer(weapon, 0)
 assert(hooks.EntityFireBullets(player_, {}) == nil, "a disabled module must not block shots")
 convars.gquest_mech_enabled.value = "1"
 
-print("PASS weapon mechanics: chamber split, auto cycle, empty-chamber click, slide lock, safety, "
+-- The weapon panel gets the same numbers over the wire, and a poll may not add a log line.
+player_ = fakePlayer(clipWeapon("weapon_pistol", 12, 18), 0)
+commands.gquest_mech_poll(player_)  -- first poll may initialise the state and log that once
+local before = #printed
+commands.gquest_mech_poll(player_)
+assert(sent.networkName == "GquestMechState", "the state channel must be registered")
+assert(sent.name == "GquestMechState", "the poll must send the state message")
+assert(sent.player == player_, "the poll must answer only the player who asked")
+assert(string.find(sent.text, "class=weapon_pistol", 1, true), "payload must name the weapon")
+assert(string.find(sent.text, "chamber=1", 1, true), "payload must carry the chamber")
+assert(string.find(sent.text, "mag=11", 1, true), "payload must carry the magazine")
+assert(#printed == before, "a poll must not write a log line")
+commands.gquest_mech_state(player_)
+assert(sent.name == "GquestMechState" and string.find(sent.text, "capacity=18", 1, true),
+    "the state command must also feed the panel")
+local unarmed = {IsPlayer = function() return true end, Alive = function() return true end,
+    GetActiveWeapon = function() return nil end}
+commands.gquest_mech_poll(unarmed)
+assert(sent.text == "none" and sent.player == unarmed, "an unarmed player must get an empty state")
+
+realPrint("PASS weapon mechanics: chamber split, auto cycle, empty-chamber click, slide lock, safety, "
     .. "live-round ejection to reserve, retaining magazine, reserve cap, no free chambering, "
     .. "revolver cylinder, pump action, tube reload, native magazine write, write rollback, "
-    .. "resync and disabled gate")
+    .. "resync, disabled gate and a silent state poll for the weapon panel")

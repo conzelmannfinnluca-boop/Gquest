@@ -70,7 +70,8 @@ bisher. Der Fehlerfall ist „Retail-Verhalten", nicht „Waffe tot".
 | Durchladen | Support-Hand nahe der Waffe nach hinten ziehen, oder `gquest_mech_rack` |
 | Nachladen in einem Schritt | `gquest_mech_reload` |
 | Sicherung | `gquest_mech_safety` |
-| Zustand ansehen | `gquest_mech_state` |
+| Zustand ansehen | `gquest_mech_state` (Log + Anzeige im Waffen-Panel) |
+| Zustand nur für die Anzeige abfragen | `gquest_mech_poll` — schreibt keine Log-Zeile |
 | Modell verwerfen und neu aus der Engine lesen | `gquest_mech_reset` |
 
 Convars: `gquest_mech_enabled` (Standard 1), `gquest_mech_gestures` (Standard 1),

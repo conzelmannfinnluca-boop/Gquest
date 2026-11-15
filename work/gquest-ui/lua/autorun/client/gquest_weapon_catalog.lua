@@ -1,5 +1,38 @@
 -- One tracked Derma surface; selecting a weapon closes it before firing resumes.
 local frame
+
+-- The mechanics state lives on the server, so the panel asks for it and draws the reply. The
+-- poll prints nothing on the server: the log belongs to the hardware evaluator, not to a label.
+GQUEST_MECH_LIVE = GQUEST_MECH_LIVE or "none"
+local liveLabel
+
+local function liveText(payload)
+    if type(payload) ~= "string" or payload == "" or payload == "none" then
+        return "Waffe: keine mit Mechanik in der Hand"
+    end
+    local field = {}
+    for key, value in string.gmatch(payload, "(%a+)=([^ ]+)") do field[key] = value end
+    if not field.chamber then return "Waffe: keine Mechanik-Daten" end
+    local safety = field.safety == "true" and "Sicherung an" or "Sicherung aus"
+    local slide = field.slide == "true" and "Verschluss offen" or "Verschluss zu"
+    local magazine = field.inserted == "false" and ", Magazin draussen" or ""
+    -- One line, always starting with "Waffe:", so the label stays recognisable and the panel
+    -- can find it again after an update.
+    return string.format("Waffe: %s - Kammer %s, Magazin %s/%s, %s, %s%s",
+        field.class or "unbekannt", field.chamber, field.mag, field.capacity or "?",
+        safety, slide, magazine)
+end
+
+local function renderLive()
+    if IsValid(liveLabel) then liveLabel:SetText(liveText(GQUEST_MECH_LIVE)) end
+end
+
+if net and net.Receive then
+    net.Receive("GquestMechState", function()
+        GQUEST_MECH_LIVE = net.ReadString() or "none"
+        renderLive()
+    end)
+end
 local groups={
     {"Half-Life 2", "gquest_hl2_equip",{
         {"Pistole", "weapon_pistol"},{".357 Revolver", "weapon_357"},
@@ -25,6 +58,15 @@ function GquestWeapons.Open()
     local reload=vgui.Create("DButton",frame);reload:Dock(TOP);reload:SetTall(48)
     reload:SetText("Nachladen / HL2-Magazin auswerfen")
     reload.DoClick=function() frame:Close();gui.HideGameUI();RunConsoleCommand("gquest_reload") end
+    -- Live chamber and magazine, from the server's own numbers.
+    local live=vgui.Create("DLabel",frame);live:Dock(TOP);live:SetTall(30)
+    live:SetFont("DermaDefaultBold")
+    liveLabel=live;renderLive()
+    RunConsoleCommand("gquest_mech_poll")
+    timer.Create("GquestMechPoll",0.5,0,function()
+        if not IsValid(frame) or not frame:IsVisible() then timer.Remove("GquestMechPoll") return end
+        RunConsoleCommand("gquest_mech_poll")
+    end)
     -- Weapon actions a headset cannot type: the mechanics commands, one click each. The rules
     -- live in the server module; these buttons only issue its commands, and the panel stays
     -- open so several actions in a row cost one gesture each instead of a reopened menu.

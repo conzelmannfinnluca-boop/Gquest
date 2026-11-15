@@ -12,6 +12,12 @@ vgui={Create=function(kind,parent) local p=setmetatable({kind=kind,parent=parent
 gui={HideGameUI=function() end}
 concommand={Add=function(k,fn) commands[k]=fn end}
 function RunConsoleCommand(cmd,arg) selected[#selected+1]={cmd,arg} end
+-- The live state comes over the wire and is polled on a timer.
+local receivers,nextPayload,timers={},"none",{}
+net={Receive=function(name,fn) receivers[name]=fn end,
+     ReadString=function() return nextPayload end}
+timer={Create=function(name,rate,reps,fn) timers[name]=fn end,
+       Remove=function(name) timers[name]=nil end}
 assert(loadfile("work/gquest-ui/lua/autorun/client/gquest_weapon_catalog.lua"))()
 -- The mechanics buttons are not weapon selections and must not be counted as such.
 local mechanics={{"Magazin","gquest_mech_mag"},{"Durchladen","gquest_mech_rack"},
@@ -44,5 +50,42 @@ for _,entry in ipairs(mechanics) do
  assert(last[1]==entry[2],"button "..entry[1].." must issue "..entry[2]..", got "..tostring(last[1]))
  assert(GquestWeapons.IsMenuVisible(),"mechanics button "..entry[1].." must keep the panel open")
 end
+-- The panel shows the server's chamber and magazine numbers instead of only logging them.
+assert(receivers.GquestMechState,"the catalog must listen for the state message")
+local function issued(name)
+ for i=#selected,1,-1 do if selected[i][1]==name then return true end end
+ return false
+end
+assert(issued("gquest_mech_poll"),"opening the panel must ask for the state once")
+local function live()
+ for i=#panels,1,-1 do
+  local p=panels[i]
+  if p.kind=="DLabel" and type(p.text)=="string" and string.sub(p.text,1,6)=="Waffe:" then return p end
+ end
+end
+assert(live(),"the panel must carry a state line")
+nextPayload="class=weapon_pistol kind=magazine chamber=1 mag=17 capacity=18 safety=false slide=false inserted=true"
+receivers.GquestMechState()
+assert(live().text:find("Kammer 1",1,true),"state line must show the chamber, got "..tostring(live().text))
+assert(live().text:find("Magazin 17/18",1,true),"state line must show magazine and capacity")
+assert(live().text:find("Sicherung aus",1,true),"state line must show the safety")
+nextPayload="class=weapon_pistol kind=magazine chamber=0 mag=0 capacity=18 safety=true slide=true inserted=false"
+receivers.GquestMechState()
+assert(live().text:find("Sicherung an",1,true) and live().text:find("Verschluss offen",1,true)
+ and live().text:find("Magazin draussen",1,true),"state line must follow the second state, got "..tostring(live().text))
+nextPayload="none"
+receivers.GquestMechState()
+assert(live().text:find("keine mit Mechanik",1,true),"no weapon must be named as such")
+assert(timers.GquestMechPoll,"a poll timer must run while the panel is open")
+timers.GquestMechPoll()
+assert(timers.GquestMechPoll,"the poll must keep running while the panel is open")
+for i=#panels,1,-1 do
+ local p=panels[i]
+ if p.kind=="DButton" and p.text=="Zurueck zum Spiel" then p.DoClick() break end
+end
+assert(not GquestWeapons.IsMenuVisible(),"closing the panel must close it")
+timers.GquestMechPoll()
+assert(timers.GquestMechPoll==nil,"the poll must stop with the panel")
 print("PASS HL2-only catalog: eleven real weapon selections, no ArcVR control, selection closes "
- .."tracked menu, and six mechanics buttons that issue their command without closing the panel")
+ .."tracked menu, six mechanics buttons that issue their command without closing the panel, "
+ .."and a live chamber/magazine line fed by the server state")

@@ -37,6 +37,9 @@ local PROFILES = {
     weapon_rpg = {kind = "single", capacity = 1, action = "none", chambered = true, safety = true},
 }
 
+local STATES_NET = "GquestMechState"
+util.AddNetworkString(STATES_NET)
+
 local states = setmetatable({}, {__mode = "k"})
 
 local function finite(value)
@@ -428,15 +431,49 @@ local function commandWeapon(player)
     return weapon, profile, player, reserveType(weapon)
 end
 
+--- The state lives on the server; the weapon panel runs on the client. One flat line is enough
+--- to draw it, and it is the same numbers the log shows.
+local function statePayload(weapon, profile, state)
+    return string.format("class=%s kind=%s chamber=%d mag=%d capacity=%d safety=%s slide=%s inserted=%s",
+        weapon:GetClass(), profile.kind, state.chamber, state.magazine, state.binding.capacity,
+        tostring(state.safety), tostring(state.slideLocked), tostring(state.magazineInserted))
+end
+
+local function pushState(player, text)
+    if not IsValid(player) or not net or not net.Start then return end
+    net.Start(STATES_NET)
+    net.WriteString(text)
+    net.Send(player)
+end
+
+--- Read-only reply for the panel's poll: sends the state, writes no log line. A poll every
+--- half second must not fill the log the evaluator reads.
+concommand.Add("gquest_mech_poll", function(player)
+    local weapon, profile = commandWeapon(player)
+    if not weapon then pushState(player, "none") return end
+    local state = stateFor(weapon, profile)
+    if not state then pushState(player, "none") return end
+    pushState(player, statePayload(weapon, profile, state))
+end)
+
 concommand.Add("gquest_mech_state", function(player)
     local weapon, profile = commandWeapon(player)
-    if not weapon then print("GQUEST_MECH state: no supported weapon") return end
+    if not weapon then
+        print("GQUEST_MECH state: no supported weapon")
+        pushState(player, "none")
+        return
+    end
     local state = stateFor(weapon, profile)
-    if not state then print("GQUEST_MECH state: unreadable engine state") return end
+    if not state then
+        print("GQUEST_MECH state: unreadable engine state")
+        pushState(player, "none")
+        return
+    end
     print(string.format("GQUEST_MECH STATE class=%s kind=%s action=%s capacity=%d chamber=%d mag=%d safety=%s slide=%s inserted=%s stored=%d engine=%s",
         weapon:GetClass(), profile.kind, profile.action, state.binding.capacity, state.chamber,
         state.magazine, tostring(state.safety), tostring(state.slideLocked),
         tostring(state.magazineInserted), state.stored, state.binding.describe()))
+    pushState(player, statePayload(weapon, profile, state))
 end)
 
 concommand.Add("gquest_mech_rack", function(player)

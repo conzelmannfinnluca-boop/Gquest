@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.526.869 Bytes | `911d3b1d64be73d7956fe7b4cb25c2415586865619c4c7ddcdf945e5d81afc73` |
-| `verification.json` | 2,4 KB | `575b5e8b5c62af7cb8be49b287ddf2f1806d64770fb46faa663c79c155aa34b8` |
+| `Gquest.apk` | 59.530.965 Bytes | `b65e05e73e20d821565c16236bb312b832b19394ad7f72c61897a88d8ede7607` |
+| `verification.json` | 2,4 KB | `c6a4338eb6021da2736629ba1fbc0500f99f251977ec0f6c6fe26ad85a3c6508` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -44,6 +44,10 @@ Prüfbasis wächst auf 14 Lua-Harnesses und 44 Prüfungen, `--units` bleibt bei 
 `gquest_mech_mag`, `_rack`, `_reload`, `_safety`, `_state` und `gquest_hands_state`. Das Panel
 bleibt offen, damit mehrere Aktionen hintereinander gehen. Das Einstellungs-Panel wächst dafür
 nicht: es bleibt bei gemessenen 898 px Inhalt in 970 px und 0 px Scrollen.
+- **Kammer und Magazin sichtbar:** dieselbe Zeile im Panel zeigt live `Kammer 1, Magazin
+17/18, Sicherung aus, Verschluss zu`. Die Zahlen kommen als Net-Nachricht vom Server, der sie
+besitzt; die Abfrage dahinter (`gquest_mech_poll`) schreibt bewusst **keine** Log-Zeile, damit
+die Anzeige den Hardware-Log nicht flutet.
 
 **Unbestätigt (NOT TESTED, braucht das Headset):**
 
