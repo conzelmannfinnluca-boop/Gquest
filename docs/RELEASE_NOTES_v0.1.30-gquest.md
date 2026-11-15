@@ -150,6 +150,10 @@ Daraus folgt für die Installation:
 
 Voraussetzungen: Quest 3/3S oder ein anderes arm64-Gerät, Android 8+ (minSdk 26).
 
+Der Lua-Stand des Releases wurde Zeile für Zeile gegen den aktuellen geprüft (sechs Dateien
+byteweise identisch, fünf reine Obermengen, keine verlorene Hand- oder UI-Logik) —
+[VERGLEICH-RELEASE-LUA.md](VERGLEICH-RELEASE-LUA.md).
+
 **Enthält jetzt den Content.** 18 Lua-Dateien des Overlays plus 358 Content-Dateien
 (218 Modelle, 128 Materialien, 12 Waffenscripts) — zusammen 283.456.755 Bytes. Der Content
 stammt aus dem eigenen Release `test-von-Gqeust` dieses Projekts und wurde byteweise
