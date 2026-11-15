@@ -14,8 +14,8 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 59.526.869 Bytes | `b22c0fc7665716153d640ecc4c290c49043e9bdb4590fb5b2bab4127a7d41530` |
-| `verification.json` | 2,4 KB | `26cdccf2576eb4cad46db662775fe20e606620c5701e44e6ba1aec75e5fb4837` |
+| `Gquest.apk` | 59.526.869 Bytes | `918ec8d0678e863d8358fdcc0a07dbf77726de84501dcfebb153099ef6adf795` |
+| `verification.json` | 2,4 KB | `7f3e97fbbb8129f773385bde547e3faa505182092b24864cbfdfefacc6488b5a` |
 | `SHA256SUMS` | Prüfsummenliste | — |
 
 Prüfen:
@@ -80,9 +80,19 @@ Quellen bleiben nutzbar, siehe „Selbst bauen".
 **Es kollidiert nicht mit der offiziellen GDroid-App.** Die Basis heißt `com.gmodvr.flat`, dieses
 Paket `com.gmodvr.qvrx` — bewusst umbenannt, damit es daneben installiert werden kann.
 
-**Aber es kollidiert mit einem älteren Gquest-Build**, der mit einem anderen Schlüssel signiert
-wurde (gleicher Paketname, andere Signatur ⇒ `INSTALL_FAILED_UPDATE_INCOMPATIBLE`). In dem Fall
-zuerst die alte Installation entfernen **und die App-Daten behalten**:
+**Ein Update über einen älteren Gquest-Build** ist ein normales Upgrade: dieses Paket hat
+versionCode 75, der Vorgänger 74, gleicher Schlüssel `CN=Android Debug`. Es genügt
+
+```sh
+adb install Gquest.apk
+```
+
+ohne `-r`, und in der App-Info steht als Version `0.1.30-gquest.2` — daran ist der Build auf dem
+Gerät erkennbar. (SideQuest schickt ohnehin `-r`.)
+
+**Nur wenn der alte Build mit einem anderen Schlüssel signiert wurde**, bricht es mit
+`INSTALL_FAILED_UPDATE_INCOMPATIBLE` ab. In dem Fall zuerst die alte Installation entfernen
+**und die App-Daten behalten**:
 
 ```sh
 adb uninstall -k com.gmodvr.qvrx
@@ -95,7 +105,7 @@ Fall nur „Install failed (unknown)" — der echte Code steht in der `adb insta
 | | offizielle GDroid 0.1.30 | dieses APK |
 |---|---|---|
 | Paket | `com.gmodvr.flat` | `com.gmodvr.qvrx` |
-| versionCode / versionName | 74 / 0.1.30 | 74 / 0.1.30 |
+| versionCode / versionName | 74 / 0.1.30 | **75 / 0.1.30-gquest.2** |
 | minSdk / targetSdk | 26 / 35 | 26 / 35 |
 | ABI | `arm64-v8a` | `arm64-v8a` |
 | native Bibliotheken | 34 | 35 (plus `liblauncheq.so`) |

@@ -94,6 +94,7 @@ Legende: **DONE** · **IN DEVELOPMENT** · **PARTIALLY IMPLEMENTED** · **BLOCKE
 | Gepinnte Adressen vs. Audit-Datensatz | PARTIALLY IMPLEMENTED | Konstanten, Offsets und Abbildungsverschiebung geprüft; Segmentzugehörigkeit braucht `libclient.so` (NOT TESTED) |
 | VR-Content-Installation (Manifest-Prüfung) | PARTIALLY IMPLEMENTED | Manifest-Regeln + Verzeichnisanlage host-getestet; `AAsset`-Pfad und Schreiben auf dem Gerät NOT TESTED |
 | Widerspruch MODEL ↔ supportedDevices | DONE | Warnzeile im Log, reine Diagnose ohne Einfluss auf das Profil; auf Gerät NOT TESTED |
+| Eigene Paketversion | DONE | `build_quest_lab.py` setzt versionCode 75 / versionName `0.1.30-gquest.2` (Basis bleibt 74); `aapt2 dump badging` liest beide im Build zurück, eine feste Erwartung in `build.py` scheitert bei Abweichung. Damit ist ein Update ohne `-r` möglich und das Gerät zeigt den Build in der App-Info |
 | Lizenz + Herkunftsnachweis | DONE | `LICENSE` (MIT), `THIRD_PARTY_NOTICES.md`, zlib-Volltext in `third_party/` |
 
 ---

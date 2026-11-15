@@ -9,6 +9,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'Gquest-Hybrid' / '
 import overlay_manifest as om
 
 U32 = lambda b, o: S.unpack_from('<I', b, o)[0]
+# This package is our own, so it gets its own version instead of keeping the base's 74:
+# an update over an older Gquest install is then a normal upgrade (no -r needed) and the
+# headset's app info shows which build is actually running. The base stays pinned.
+VERSION_CODE = 75
+VERSION_NAME = '0.1.30-gquest.2'
 NS = 'http://schemas.android.com/apk/res/android'
 source = Path('outputs/GDroid-0.1.30.apk')
 out = Path('work/GMod-Quest-Lab-unsigned.apk')
@@ -60,6 +65,15 @@ with zipfile.ZipFile(source) as z:
                 dtype, value = b[p+15], U32(b, p+16)
                 if aname == 'name' and dtype == 3: identity = strings[value]
                 replacement = None
+                if name == 'manifest' and aname == 'versionCode':
+                    S.pack_into('<I', b, p+8, 0xffffffff)
+                    b[p+15] = 0x10          # TYPE_INT_DEC, value lives in the data field
+                    S.pack_into('<I', b, p+16, VERSION_CODE)
+                if name == 'manifest' and aname == 'versionName':
+                    version_name = idx(VERSION_NAME)
+                    S.pack_into('<I', b, p+8, version_name)
+                    b[p+15] = 3             # TYPE_STRING
+                    S.pack_into('<I', b, p+16, version_name)
                 if name == 'manifest' and aname == 'package': replacement = 'com.gmodvr.qvrx'
                 if aname == 'authorities' and dtype == 3:
                     replacement = strings[value].replace('com.gmodvr.flat', 'com.gmodvr.qvrx')
@@ -128,9 +142,15 @@ with zipfile.ZipFile(source) as z:
     for b in chunks:
         if S.unpack_from('<H', b)[0] == 0x180:
             resourceids = [U32(b,p) for p in range(8,len(b),4)]
-            debugidx = idx('debuggable')
-            resourceids += [0] * max(0, debugidx + 1 - len(resourceids))
-            resourceids[debugidx] = 0x0101000f
+            # Attributes are looked up by resource id, not by name: a newly introduced or
+            # rewritten attribute without a mapping is parsed by tools but ignored by
+            # PackageManager. debuggable, versionCode and versionName are all written here.
+            for attribute, resource in (('debuggable', 0x0101000f),
+                                        ('versionCode', 0x0101021b),
+                                        ('versionName', 0x0101021c)):
+                attribute_index = idx(attribute)
+                resourceids += [0] * max(0, attribute_index + 1 - len(resourceids))
+                resourceids[attribute_index] = resource
             b = S.pack('<HHI',0x180,8,8+4*len(resourceids)) + b''.join(S.pack('<I',v) for v in resourceids)
         mapped.append(b)
     # Android's resource lookup requires attributes ordered by their resource

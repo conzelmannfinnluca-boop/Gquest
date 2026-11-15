@@ -41,6 +41,11 @@ KEYSTORE = Path.home() / ".android/debug.keystore"
 BASE_APK = BASE / "outputs/GDroid-0.1.30.apk"
 BASE_APK_SHA256 = "28bcce6d656f324b883fa638ceae2893cfa875e423f28a7fbc2329c5cdd5d13c"
 
+# The version this build must produce, kept here as its own expectation instead of being read
+# back out of the packaging script: a bump that silently fails has to break the build.
+EXPECTED_VERSION_CODE = 75
+EXPECTED_VERSION_NAME = "0.1.30-gquest.2"
+
 # Everything the full build touches but that must never be committed.
 # (path, purpose, how to obtain)
 PREREQUISITES: list[tuple[Path, str, str]] = [
@@ -646,6 +651,15 @@ def build() -> None:
     run(sys.executable, WORK / "verify_gquest_package.py")
 
     apk = WORK / "Gquest.apk"
+    # Read the version back with a tool that shares no code with the manifest editor. The base
+    # package is pinned, so the version is ours to set and has to be exactly the one declared.
+    badging = subprocess.run([str(TOOLS / "aapt2"), "dump", "badging", str(apk)],
+                             capture_output=True, text=True, check=True).stdout
+    first_line = badging.splitlines()[0]
+    assert "package: name='com.gmodvr.qvrx'" in first_line, first_line
+    assert f"versionCode='{EXPECTED_VERSION_CODE}'" in first_line, first_line
+    assert f"versionName='{EXPECTED_VERSION_NAME}'" in first_line, first_line
+    log("aapt2: " + first_line)
     baseline = BASE / "outputs/GDroid-0.1.30.apk"
     with zipfile.ZipFile(baseline) as before, zipfile.ZipFile(apk) as after:
         def content(z):
@@ -669,7 +683,9 @@ def build() -> None:
             assert before.read(n) == after.read(n), n
     shutil.copy2(apk, OUT / "Gquest.apk")
     report = dict(
-        version="0.1.30-gquest", upstream_version="0.1.30", package="com.gmodvr.qvrx",
+        version="0.1.30-gquest", version_code=EXPECTED_VERSION_CODE,
+        version_name=EXPECTED_VERSION_NAME, upstream_version="0.1.30",
+        package="com.gmodvr.qvrx",
         rust_role="VR profiles and owned launcher arguments", engine="existing GDroid",
         renderer="existing libvrxr; no Hotham session",
         apk_sha256=hashlib.sha256(apk.read_bytes()).hexdigest(),
