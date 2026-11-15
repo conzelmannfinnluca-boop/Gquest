@@ -6,6 +6,9 @@ installiert, kam der **Content** an, greift die **Waffenmechanik**, und liefert 
 
 Voraussetzung: `adb` am PC, Headset per Kabel oder WLAN verbunden (`adb devices` zeigt es).
 
+Welche der drei APK-Varianten (Slim 133 MB, geteilte Vollversion, ein Teil) du nimmst und wie
+du sie prüfst: [DOWNLOAD.md](DOWNLOAD.md).
+
 Nur das Panel und die Mechanik-Zeilen abhaken? Dafür gibt es die kurze Schritt-für-Schritt-
 Anleitung [GERAETETEST-PANEL.md](GERAETETEST-PANEL.md).
 

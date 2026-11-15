@@ -14,12 +14,16 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` | 283.456.755 Bytes | `c43b44a2d9ef54cdbb9a4354e9449e07ca4976d3cc3fd2ba010bb6223b90cc60` |
-| `verification.json` | 31.4 KB | `f098acebfb50b75a19b350a25f0e9055f0802c00632a75552fb9b21e3d6a5925` |
+| `Gquest.apk` (voll) | 283.456.755 Bytes | `5148f8bfeead6249bc2a235a64d5ba228539e4d63ca0f12cb14b1b43267619f5` |
+| `verification.json` | 31.4 KB | `2fe77aeabaa9797f01f2c1be6477388b614a0c85cefad6afbfb9b328b9b62511` |
 | `SHA256SUMS` | Prüfsummenliste | — |
+| `Gquest-0.1.30-gquest.2-slim.apk` | 139.464.174 Bytes | `70abe8fd14918cd73bbb7985588b9604c2dd8c68a8cc6c031d299ee2846a4c37` |
+| `…apk00.part` + `…apk01.part` | 209.715.200 + 73.741.555 Bytes | siehe `docs/DOWNLOAD.md` |
 
 Dieselbe Datei liegt zusätzlich mit Versionsnummer im Namen: `Gquest-0.1.30-gquest.2.apk`
-(byteweise identisch, gleiche Prüfsumme).
+(byteweise identisch, gleiche Prüfsumme). Freebuff bricht Downloads über 256 MB ab, deshalb
+gibt es zusätzlich eine **Slim-Variante (133 MB)** und eine **geteilte Vollversion** —
+[docs/DOWNLOAD.md](DOWNLOAD.md).
 
 Prüfen:
 
