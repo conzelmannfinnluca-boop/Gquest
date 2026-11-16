@@ -14,10 +14,10 @@ Ausgeliefert werden drei Dateien: das APK, `verification.json` (Digest und Paylo
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest.apk` (voll) | 283.456.755 Bytes | `5148f8bfeead6249bc2a235a64d5ba228539e4d63ca0f12cb14b1b43267619f5` |
-| `verification.json` | 31.4 KB | `2fe77aeabaa9797f01f2c1be6477388b614a0c85cefad6afbfb9b328b9b62511` |
+| `Gquest.apk` (voll) | 283.456.755 Bytes | `86580e22865b65c7de7880838653f7d614b96b27d98ea9056b968aab00676750` |
+| `verification.json` | 31.4 KB | `b4406e004df1e30ddd35678b1adc3acbd80d7fa59b7429817d82ee466212a95e` |
 | `SHA256SUMS` | Prüfsummenliste | — |
-| `Gquest-0.1.30-gquest.2-slim.apk` | 139.464.174 Bytes | `70abe8fd14918cd73bbb7985588b9604c2dd8c68a8cc6c031d299ee2846a4c37` |
+| `Gquest-0.1.30-gquest.2-slim.apk` | 139.464.174 Bytes | `2f78c94a7f32f96d85571b3a30161f630519fa4641913a663d94e80ec434fb67` |
 | `…apk00.part` + `…apk01.part` | 209.715.200 + 73.741.555 Bytes | siehe `docs/DOWNLOAD.md` |
 
 Dieselbe Datei liegt zusätzlich mit Versionsnummer im Namen: `Gquest-0.1.30-gquest.2.apk`

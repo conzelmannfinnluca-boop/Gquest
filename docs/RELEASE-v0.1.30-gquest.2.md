@@ -5,8 +5,8 @@ VR-Overlay auf GDroid 0.1.30 für Quest 3 / Quest 3S. Dieses Paket enthält **de
 
 | Datei | Größe | SHA256 |
 |---|---|---|
-| `Gquest-0.1.30-gquest.2-slim.apk` (ohne die 14 großen 4K-Waffentexturen) | 139.464.174 Bytes | `70abe8fd14918cd73bbb7985588b9604c2dd8c68a8cc6c031d299ee2846a4c37` |
-| `Gquest.apk` (vollständig) | 283.456.755 Bytes | `5148f8bfeead6249bc2a235a64d5ba228539e4d63ca0f12cb14b1b43267619f5` |
+| `Gquest-0.1.30-gquest.2-slim.apk` (ohne die 14 großen 4K-Waffentexturen) | 139.464.174 Bytes | `2f78c94a7f32f96d85571b3a30161f630519fa4641913a663d94e80ec434fb67` |
+| `Gquest.apk` (vollständig) | 283.456.755 Bytes | `86580e22865b65c7de7880838653f7d614b96b27d98ea9056b968aab00676750` |
 
 Die vollständige Datei gibt es zusätzlich zweigeteilt (`…apk00.part` 209.715.200 Bytes +
 `…apk01.part` 73.741.555 Bytes) für Kanäle mit 256-MB-Grenze: herunterladen, mit

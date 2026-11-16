@@ -15,21 +15,22 @@ Version immer gleich: `versionCode 75`, `versionName 0.1.30-gquest.2`.
 ## Prüfsummen
 
 ```
-5148f8bfeead6249bc2a235a64d5ba228539e4d63ca0f12cb14b1b43267619f5  Gquest.apk (voll)
-5148f8bfeead6249bc2a235a64d5ba228539e4d63ca0f12cb14b1b43267619f5  Gquest-0.1.30-gquest.2.apk (voll, gleiche Datei)
-70abe8fd14918cd73bbb7985588b9604c2dd8c68a8cc6c031d299ee2846a4c37  Gquest-0.1.30-gquest.2-slim.apk
-c0a3364837f9487aa12834e4486cf100145bd528c8e734c639627b2488a2eada  Gquest-0.1.30-gquest.2.apk00.part
-27784fdb6e3809d75d821a1403ebdf2acc08d990f20a47ad04d73192986ded39  Gquest-slim.apk00.part
-a40867d1dc000bd294ebbf503cc2886552dc5130c9b43510035aef1e994f8f53  Gquest-slim.apk01.part
-d2082d21cc9307cfb03511d72cb8f4bb5171559dae991e191648f9f91e5fe097  Gquest-0.1.30-gquest.2.apk01.part
+86580e22865b65c7de7880838653f7d614b96b27d98ea9056b968aab00676750  Gquest.apk (voll)
+86580e22865b65c7de7880838653f7d614b96b27d98ea9056b968aab00676750  Gquest-0.1.30-gquest.2.apk (voll, gleiche Datei)
+5b7855a21f3acf575416e28015de9dd90066eb092854365b113f21d39d340828  Gquest-0.1.30-gquest.2.apk00.part
+1b6dcbdf83fad1ba1c8ca6ff4c9bd0c35484fc4c40fa4222a77e141da96a3e66  Gquest-0.1.30-gquest.2.apk01.part
+2f78c94a7f32f96d85571b3a30161f630519fa4641913a663d94e80ec434fb67  Gquest-0.1.30-gquest.2-slim.apk
+69708165e66684972fadde0c1130009bb003c09ce514ff4ba8090023212efe84  Gquest-slim.apk00.part
+dfe036d2ad60f07579acb7cd04bbab603ca448e0f7a41ec7cf902e4c3bdb56c9  Gquest-slim.apk01.part
 ```
+
 
 Prüfen mit `sha256sum <datei>` (Linux/macOS) oder `certutil -hashfile <datei> SHA256` (Windows).
 
 ## Slim auch in zwei Teilen (falls selbst 133 MB nicht durchgehen)
 
 `Gquest-slim.apk00.part` (73.400.320 Bytes) + `Gquest-slim.apk01.part` (66.063.854 Bytes),
-zusammenfügen wie unten, Ergebnis muss SHA256 `70abe8fd…4a4c37` haben.
+zusammenfügen wie unten, Ergebnis muss SHA256 `2f78c94a…4a4c37` haben.
 
 ## Slim direkt installieren
 
@@ -48,7 +49,7 @@ Linux / macOS:
 
 ```sh
 cat Gquest-0.1.30-gquest.2.apk00.part Gquest-0.1.30-gquest.2.apk01.part > Gquest.apk
-sha256sum Gquest.apk    # muss 5148f8bf…67619f5 ergeben
+sha256sum Gquest.apk    # muss 86580e22…67619f5 ergeben
 adb install -r Gquest.apk
 ```
 
